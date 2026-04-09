@@ -33,7 +33,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid password length", http.StatusBadRequest)
 		return
 	}
-	if err := utils.ValidateAllowedCharacters(req.Password, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;':\",./<>?"); err != nil {
+	if err := utils.ValidatePasswordCharacters(req.Password); err != nil {
 		http.Error(w, "Invalid password characters", http.StatusBadRequest)
 		return
 	}

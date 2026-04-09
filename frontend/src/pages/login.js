@@ -33,8 +33,6 @@ export default function Login() {
                 onChange={(e) => setEmail(e.target.value)}
                 minLength={3} maxLength={30} required
             />
-
-            {/* Password: Для режима 'v' нужно экранировать все спецсимволы: ( ) [ ] { } | / - */}
             <input
                 type="password"
                 placeholder="Password"

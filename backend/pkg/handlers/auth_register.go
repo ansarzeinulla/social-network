@@ -26,7 +26,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Email must be 3-30 characters", http.StatusBadRequest)
 		return
 	}
-	if err := utils.ValidateAllowedCharacters(req.Password, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;':\",./<>?"); err != nil {
+	if err := utils.ValidatePasswordCharacters(req.Password); err != nil {
 		http.Error(w, "Invalid password characters", http.StatusBadRequest)
 		return
 	}
@@ -34,7 +34,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Password must be 6-50 characters", http.StatusBadRequest)
 		return
 	}
-	if err := utils.ValidateAllowedCharacters(req.FirstName, "abcdefghijklmnopqrstuvwxyz -_ABCDEFGHIJKLMNOPQRSTUVWXYZ"); err != nil {
+	if err := utils.ValidateNameCharacters(req.FirstName); err != nil {
 		http.Error(w, "Invalid first name characters", http.StatusBadRequest)
 		return
 	}
@@ -42,7 +42,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "First name must be 2-50 characters", http.StatusBadRequest)
 		return
 	}
-	if err := utils.ValidateAllowedCharacters(req.LastName, "abcdefghijklmnopqrstuvwxyz -_ABCDEFGHIJKLMNOPQRSTUVWXYZ"); err != nil {
+	if err := utils.ValidateNameCharacters(req.LastName); err != nil {
 		http.Error(w, "Invalid last name characters", http.StatusBadRequest)
 		return
 	}

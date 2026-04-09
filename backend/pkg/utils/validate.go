@@ -45,3 +45,14 @@ func ValidateAllowedCharacters(value string, allowed string) error {
 	}
 	return nil
 }
+
+func ValidateNameCharacters(name string) error {
+	allowed := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ -_"
+	return ValidateAllowedCharacters(name, allowed)
+}
+
+func ValidatePasswordCharacters(password string) error {
+	allowed := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;':\",./<>?"
+	return ValidateAllowedCharacters(password, allowed)
+}
+

@@ -29,24 +29,18 @@ export default function Register() {
         <form onSubmit={handleRegister}>
             <h1>Регистрация</h1>
             {error && <div id="error-label" style={{ color: "red", marginBottom: "1rem" }}>{error}</div>}
-
-            {/* Email: Экранируем минусы (\\-) и точку перед доменом (\\.) */}
             <input
                 type="email"
                 placeholder="Email"
                 onChange={(e) => setEmail(e.target.value)}
                 minLength={3} maxLength={30} required
             />
-
-            {/* Password: Для режима 'v' нужно экранировать все спецсимволы: ( ) [ ] { } | / - */}
             <input
                 type="password"
                 placeholder="Password"
                 onChange={(e) => setPassword(e.target.value)}
                 minLength={6} maxLength={50} required
             />
-
-            {/* First & Last Name: Обязательно экранируем минус (\\-), иначе ' -_' читается браузером как гигантский диапазон от пробела до подчеркивания, пропуская кучу мусорных символов */}
             <input
                 type="text"
                 placeholder="First Name"
@@ -59,7 +53,6 @@ export default function Register() {
                 onChange={(e) => setLastName(e.target.value)}
                 minLength={2} maxLength={50} required
             />
-
             <input
                 type="date"
                 onChange={(e) => setDateOfBirth(e.target.value)}
