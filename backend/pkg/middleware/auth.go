@@ -1,19 +1,29 @@
 package middleware
 
-import "net/http"
+import (
+	"context"
+	"net/http"
+	"social-network/pkg/db/sqlite"
+)
+
+type contextKey string
+const UserIDKey contextKey = "userID"
 
 func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		_, err := r.Cookie("session_token")
+		cookie, err := r.Cookie("session_token")
 		if err != nil {
-			http.Error(w, "Ты не авторизован", http.StatusUnauthorized)
+			http.Error(w, "Unauthorized: No session", http.StatusUnauthorized)
 			return
 		}
 
-		// ТУТ БУДЕТ SQL ЗАПРОС: проверяем, есть ли cookie.Value в таблице sessions
-		// SELECT user_id FROM sessions WHERE token = cookie.Value
+		userID, err := sqlite.GetUserIDByToken(cookie.Value)
+		if err != nil || userID == 0 {
+			http.Error(w, "Unauthorized: Invalid session", http.StatusUnauthorized)
+			return
+		}
 
-		// Если всё ок — пускаем дальше к хандлеру (например, к ProfileHandler)
-		next.ServeHTTP(w, r)
+		ctx := context.WithValue(r.Context(), UserIDKey, userID)
+		next.ServeHTTP(w, r.WithContext(ctx))
 	}
 }

@@ -3,39 +3,52 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
+	"social-network/pkg/db/sqlite"
 	"github.com/gofrs/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	var req RegisterRequest
-	json.NewDecoder(r.Body).Decode(&req)
-
-	// ТУТ БУДЕТ SQL ЗАПРОС: достаем хэш пароля по email
-	// SELECT password FROM users WHERE email = req.Email
-	// Допустим, мы достали:
-	hashFromDB := []byte("$2a$14$...")
-
-	// Сравниваем пароли
-	err := bcrypt.CompareHashAndPassword(hashFromDB, []byte(req.Password))
-	if err != nil {
-		http.Error(w, "Неверный пароль", http.StatusUnauthorized)
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
 		return
 	}
 
-	// Генерируем уникальный токен сессии
+	user, err := sqlite.GetUserByEmail(req.Email)
+	if err != nil {
+		http.Error(w, "Database error", http.StatusInternalServerError)
+		return
+	}
+
+	if user == nil {
+		http.Error(w, "User not found", http.StatusUnauthorized)
+		return
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
+		http.Error(w, "Invalid password", http.StatusUnauthorized)
+		return
+	}
+
 	sessionToken, _ := uuid.NewV4()
+	tokenStr := sessionToken.String()
 
-	// ТУТ БУДЕТ SQL ЗАПРОС: сохраняем токен в БД
-	// INSERT INTO sessions (token, user_id) VALUES (sessionToken.String(), user.ID)
+	err = sqlite.CreateSession(tokenStr, user.ID, 24*time.Hour)
+	if err != nil {
+		http.Error(w, "Failed to create session", http.StatusInternalServerError)
+		return
+	}
 
-	// ОТДАЕМ COOKIE БРАУЗЕРУ
 	http.SetCookie(w, &http.Cookie{
 		Name:     "session_token",
-		Value:    sessionToken.String(),
-		HttpOnly: true, // Фронтенд (JS) не сможет украсть куку, только браузер её видит
+		Value:    tokenStr,
+		HttpOnly: true,
 		Path:     "/",
+		MaxAge:   86400, // 24h
+		SameSite: http.SameSiteLaxMode,
 	})
 
 	json.NewEncoder(w).Encode(map[string]string{"message": "Logged in!"})
