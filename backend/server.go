@@ -25,6 +25,7 @@ func main() {
 	mux.HandleFunc("/api/logout", handlers.LogoutHandler)
 
 	mux.HandleFunc("/api/profile", middleware.AuthMiddleware(handlers.ProfileHandler))
+	mux.HandleFunc("/api/posts", middleware.AuthMiddleware(handlers.GetPostsHandler))
 
 	fmt.Println("Server running on :8080")
 	http.ListenAndServe(":8080", middleware.CORSMiddleware(mux))
