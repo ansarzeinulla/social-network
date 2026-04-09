@@ -18,7 +18,7 @@ export default function Register() {
             body: JSON.stringify({ email, password, first_name: firstName, last_name: lastName, date_of_birth: dateOfBirth }),
         });
         if (res.ok) {
-            router.push("/profile/me");
+            router.push("/");
         } else {
             const errMsg = await res.text();
             setError(errMsg || "Ошибка регистрации");

@@ -16,7 +16,7 @@ export default function Login() {
         });
 
         if (res.ok) {
-            router.push("/profile/me");
+            router.push("/");
         } else {
             const errMsg = await res.text();
             setError(errMsg || "Неверный логин или пароль");
