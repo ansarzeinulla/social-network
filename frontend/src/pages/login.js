@@ -5,30 +5,42 @@ import { fetchApi } from "../services/api";
 export default function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
     const router = useRouter();
 
     const handleLogin = async (e) => {
         e.preventDefault();
-
-        // Бэкенд проверит пароль и САМ установит Cookie в браузере
         const res = await fetchApi("/login", {
             method: "POST",
             body: JSON.stringify({ email, password }),
         });
 
         if (res.ok) {
-            alert("Успешный вход!");
-            router.push("/profile/me"); // Перекидываем на закрытую страницу
+            router.push("/profile/me");
         } else {
-            alert("Неверный логин или пароль");
+            const errMsg = await res.text();
+            setError(errMsg || "Неверный логин или пароль");
         }
     };
 
     return (
         <form onSubmit={handleLogin}>
             <h1>Вход</h1>
-            <input type="email" onChange={(e) => setEmail(e.target.value)} />
-            <input type="password" onChange={(e) => setPassword(e.target.value)} />
+            {error && <div id="error-label" style={{ color: "red", marginBottom: "1rem" }}>{error}</div>}
+            <input
+                type="email"
+                placeholder="Email"
+                onChange={(e) => setEmail(e.target.value)}
+                minLength={3} maxLength={30} required
+            />
+
+            {/* Password: Для режима 'v' нужно экранировать все спецсимволы: ( ) [ ] { } | / - */}
+            <input
+                type="password"
+                placeholder="Password"
+                onChange={(e) => setPassword(e.target.value)}
+                minLength={6} maxLength={50} required
+            />
             <button type="submit">🔑 Войти</button>
         </form>
     );

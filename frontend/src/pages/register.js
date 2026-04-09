@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useRouter } from "next/router";
 import { fetchApi } from "../services/api";
 
 export default function Register() {
@@ -7,6 +8,8 @@ export default function Register() {
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
     const [dateOfBirth, setDateOfBirth] = useState("");
+    const [error, setError] = useState("");
+    const router = useRouter();
 
     const handleRegister = async (e) => {
         e.preventDefault();
@@ -15,20 +18,55 @@ export default function Register() {
             body: JSON.stringify({ email, password, firstName, lastName, dateOfBirth }),
         });
         if (res.ok) {
-            alert("Регистрация успешна!");
+            router.push("/profile/me");
         } else {
-            alert("Ошибка регистрации");
+            const errMsg = await res.text();
+            setError(errMsg || "Ошибка регистрации");
         }
     };
 
     return (
         <form onSubmit={handleRegister}>
             <h1>Регистрация</h1>
-            <input type="email" onChange={(e) => setEmail(e.target.value)} />
-            <input type="password" onChange={(e) => setPassword(e.target.value)} />
-            <input type="text" onChange={(e) => setFirstName(e.target.value)} />
-            <input type="text" onChange={(e) => setLastName(e.target.value)} />
-            <input type="date" onChange={(e) => setDateOfBirth(e.target.value)} />
+            {error && <div id="error-label" style={{ color: "red", marginBottom: "1rem" }}>{error}</div>}
+
+            {/* Email: Экранируем минусы (\\-) и точку перед доменом (\\.) */}
+            <input
+                type="email"
+                placeholder="Email"
+                onChange={(e) => setEmail(e.target.value)}
+                minLength={3} maxLength={30} required
+            />
+
+            {/* Password: Для режима 'v' нужно экранировать все спецсимволы: ( ) [ ] { } | / - */}
+            <input
+                type="password"
+                placeholder="Password"
+                onChange={(e) => setPassword(e.target.value)}
+                minLength={6} maxLength={50} required
+            />
+
+            {/* First & Last Name: Обязательно экранируем минус (\\-), иначе ' -_' читается браузером как гигантский диапазон от пробела до подчеркивания, пропуская кучу мусорных символов */}
+            <input
+                type="text"
+                placeholder="First Name"
+                onChange={(e) => setFirstName(e.target.value)}
+                minLength={2} maxLength={50} required
+            />
+            <input
+                type="text"
+                placeholder="Last Name"
+                onChange={(e) => setLastName(e.target.value)}
+                minLength={2} maxLength={50} required
+            />
+
+            <input
+                type="date"
+                onChange={(e) => setDateOfBirth(e.target.value)}
+                required
+                max={new Date("2020-01-01").toISOString().split('T')[0]}
+                min={new Date("1950-01-01").toISOString().split('T')[0]}
+            />
             <button type="submit">📝 Создать аккаунт</button>
         </form>
     );
