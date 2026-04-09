@@ -6,14 +6,35 @@ import (
 	"time"
 
 	"social-network/pkg/db/sqlite"
+	"social-network/pkg/models"
+	"social-network/pkg/utils"
+
 	"github.com/gofrs/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
-	var req RegisterRequest
+	var req models.UserShort
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
+	}
+
+	if err := utils.ValidateEmail(req.Email); err != nil {
+		http.Error(w, "Invalid email format", http.StatusBadRequest)
+		return
+	}
+	if err := utils.ValidateLength(req.Email, 3, 30); err != nil {
+		http.Error(w, "Email must be 3-30 characters", http.StatusBadRequest)
+		return
+	}
+
+	if err := utils.ValidateLength(req.Password, 6, 50); err != nil {
+		http.Error(w, "Invalid password length", http.StatusBadRequest)
+		return
+	}
+	if err := utils.ValidateAllowedCharacters(req.Password, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;':\",./<>?"); err != nil {
+		http.Error(w, "Invalid password characters", http.StatusBadRequest)
 		return
 	}
 

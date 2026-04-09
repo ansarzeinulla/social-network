@@ -6,22 +6,52 @@ import (
 
 	"social-network/pkg/db/sqlite"
 	"social-network/pkg/models"
+	"social-network/pkg/utils"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
-type RegisterRequest struct {
-	Email       string `json:"email"`
-	Password    string `json:"password"`
-	FirstName   string `json:"first_name"`
-	LastName    string `json:"last_name"`
-	DateOfBirth string `json:"date_of_birth"`
-}
-
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
-	var req RegisterRequest
+	var req models.User
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
+	}
+
+	if err := utils.ValidateEmail(req.Email); err != nil {
+		http.Error(w, "Invalid email format", http.StatusBadRequest)
+		return
+	}
+	if err := utils.ValidateLength(req.Email, 3, 30); err != nil {
+		http.Error(w, "Email must be 3-30 characters", http.StatusBadRequest)
+		return
+	}
+	if err := utils.ValidateAllowedCharacters(req.Password, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;':\",./<>?"); err != nil {
+		http.Error(w, "Invalid password characters", http.StatusBadRequest)
+		return
+	}
+	if err := utils.ValidateLength(req.Password, 6, 50); err != nil {
+		http.Error(w, "Password must be 6-50 characters", http.StatusBadRequest)
+		return
+	}
+	if err := utils.ValidateAllowedCharacters(req.FirstName, "abcdefghijklmnopqrstuvwxyz -_ABCDEFGHIJKLMNOPQRSTUVWXYZ"); err != nil {
+		http.Error(w, "Invalid first name characters", http.StatusBadRequest)
+		return
+	}
+	if err := utils.ValidateLength(req.FirstName, 2, 50); err != nil {
+		http.Error(w, "First name must be 2-50 characters", http.StatusBadRequest)
+		return
+	}
+	if err := utils.ValidateAllowedCharacters(req.LastName, "abcdefghijklmnopqrstuvwxyz -_ABCDEFGHIJKLMNOPQRSTUVWXYZ"); err != nil {
+		http.Error(w, "Invalid last name characters", http.StatusBadRequest)
+		return
+	}
+	if err := utils.ValidateLength(req.LastName, 2, 50); err != nil {
+		http.Error(w, "Last name must be 2-50 characters", http.StatusBadRequest)
+		return
+	}
+	if err := utils.ValidateDate(req.DateOfBirth); err != nil {
+		http.Error(w, "Invalid date format", http.StatusBadRequest)
 		return
 	}
 
@@ -31,15 +61,9 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user := models.User{
-		Email:       req.Email,
-		Password:    string(hashedPassword),
-		FirstName:   req.FirstName,
-		LastName:    req.LastName,
-		DateOfBirth: req.DateOfBirth,
-	}
+	req.Password = string(hashedPassword)
 
-	_, err = sqlite.CreateUser(user)
+	_, err = sqlite.CreateUser(req)
 	if err != nil {
 		http.Error(w, "User already exists or database error", http.StatusConflict)
 		return
