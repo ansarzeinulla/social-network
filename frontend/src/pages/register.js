@@ -15,7 +15,7 @@ export default function Register() {
         e.preventDefault();
         const res = await fetchApi("/register", {
             method: "POST",
-            body: JSON.stringify({ email, password, firstName, lastName, dateOfBirth }),
+            body: JSON.stringify({ email, password, first_name: firstName, last_name: lastName, date_of_birth: dateOfBirth }),
         });
         if (res.ok) {
             router.push("/profile/me");

@@ -56,6 +56,9 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	sessionToken, _ := uuid.NewV4()
 	tokenStr := sessionToken.String()
 
+	// Override existing sessions for this user
+	sqlite.DeleteSessionByUserID(user.ID)
+	
 	err = sqlite.CreateSession(tokenStr, user.ID, 24*time.Hour)
 	if err != nil {
 		http.Error(w, "Failed to create session", http.StatusInternalServerError)

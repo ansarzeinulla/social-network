@@ -2,6 +2,7 @@ package utils
 
 import (
 	"errors"
+	"fmt"
 	"net/mail"
 	"strings"
 	"time"
@@ -24,14 +25,15 @@ func ValidateLength(value string, min, max int) error {
 }
 
 func ValidateDate(dateStr string) error {
-	_, err := time.Parse("2006-01-02", dateStr)
+	fmt.Println(dateStr)
+	t, err := time.Parse("2006-01-02", dateStr)
 	if err != nil {
-		return errors.New("invalid date format (use YYYY-MM-DD)")
+		return errors.New("invalid date format (use DD.MM.YYYY)")
 	}
-	if dateStr < time.Now().Format("1950-01-01") {
+	if t.Before(time.Date(1950, 1, 1, 0, 0, 0, 0, time.UTC)) {
 		return errors.New("Too old to use!")
 	}
-	if dateStr > time.Now().Format("2020-01-01") {
+	if t.After(time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC)) {
 		return errors.New("Too young to use!")
 	}
 	return nil
@@ -55,4 +57,3 @@ func ValidatePasswordCharacters(password string) error {
 	allowed := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;':\",./<>?"
 	return ValidateAllowedCharacters(password, allowed)
 }
-

@@ -46,6 +46,12 @@ func DeleteSession(token string) error {
 	return err
 }
 
+func DeleteSessionByUserID(userID int64) error {
+	query := `DELETE FROM sessions WHERE user_id = ?`
+	_, err := DB.Exec(query, userID)
+	return err
+}
+
 func CleanUpSessions() {
 	ticker := time.NewTicker(1 * time.Hour)
 	go func() {
