@@ -3,28 +3,15 @@ package sqlite
 import (
 	"database/sql"
 	"errors"
-	"time"
+	"social-network/pkg/models"
 )
 
-type User struct {
-	ID          int64
-	Email       string
-	Password    string
-	FirstName   string
-	LastName    string
-	DateOfBirth string
-	Avatar      sql.NullString
-	Nickname    sql.NullString
-	AboutMe     sql.NullString
-	CreatedAt   time.Time
-}
-
-func CreateUser(user User) (int64, error) {
+func CreateUser(user models.User) (int64, error) {
 	query := `
-		INSERT INTO users (email, password, first_name, last_name, date_of_birth, avatar, nickname, about_me)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+		INSERT INTO users (email, password, first_name, last_name, date_of_birth)
+		VALUES (?, ?, ?, ?, ?)`
 
-	result, err := DB.Exec(query, user.Email, user.Password, user.FirstName, user.LastName, user.DateOfBirth, user.Avatar, user.Nickname, user.AboutMe)
+	result, err := DB.Exec(query, user.Email, user.Password, user.FirstName, user.LastName, user.DateOfBirth)
 	if err != nil {
 		return 0, err
 	}
@@ -32,14 +19,14 @@ func CreateUser(user User) (int64, error) {
 	return result.LastInsertId()
 }
 
-func GetUserByEmail(email string) (*User, error) {
-	var user User
+func GetUserByEmail(email string) (*models.User, error) {
+	var user models.User
 	query := `
-		SELECT id, email, password, first_name, last_name, date_of_birth, avatar, nickname, about_me, created_at
+		SELECT id, email, password, first_name, last_name, date_of_birth, created_at
 		FROM users WHERE email = ?`
 
 	row := DB.QueryRow(query, email)
-	err := row.Scan(&user.ID, &user.Email, &user.Password, &user.FirstName, &user.LastName, &user.DateOfBirth, &user.Avatar, &user.Nickname, &user.AboutMe, &user.CreatedAt)
+	err := row.Scan(&user.ID, &user.Email, &user.Password, &user.FirstName, &user.LastName, &user.DateOfBirth, &user.CreatedAt)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
@@ -50,14 +37,14 @@ func GetUserByEmail(email string) (*User, error) {
 	return &user, nil
 }
 
-func GetUserByID(id int64) (*User, error) {
-	var user User
+func GetUserByID(id int64) (*models.User, error) {
+	var user models.User
 	query := `
-		SELECT id, email, password, first_name, last_name, date_of_birth, avatar, nickname, about_me, created_at
+		SELECT id, email, password, first_name, last_name, date_of_birth, created_at
 		FROM users WHERE id = ?`
 
 	row := DB.QueryRow(query, id)
-	err := row.Scan(&user.ID, &user.Email, &user.Password, &user.FirstName, &user.LastName, &user.DateOfBirth, &user.Avatar, &user.Nickname, &user.AboutMe, &user.CreatedAt)
+	err := row.Scan(&user.ID, &user.Email, &user.Password, &user.FirstName, &user.LastName, &user.DateOfBirth, &user.CreatedAt)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil

@@ -5,13 +5,17 @@ import (
 	"net/http"
 
 	"social-network/pkg/db/sqlite"
+	"social-network/pkg/models"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
 type RegisterRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email       string `json:"email"`
+	Password    string `json:"password"`
+	FirstName   string `json:"first_name"`
+	LastName    string `json:"last_name"`
+	DateOfBirth string `json:"date_of_birth"`
 }
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
@@ -27,9 +31,12 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user := sqlite.User{
-		Email:    req.Email,
-		Password: string(hashedPassword),
+	user := models.User{
+		Email:       req.Email,
+		Password:    string(hashedPassword),
+		FirstName:   req.FirstName,
+		LastName:    req.LastName,
+		DateOfBirth: req.DateOfBirth,
 	}
 
 	_, err = sqlite.CreateUser(user)
