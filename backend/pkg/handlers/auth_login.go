@@ -28,7 +28,6 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Email must be 3-30 characters", http.StatusBadRequest)
 		return
 	}
-
 	if err := utils.ValidateLength(req.Password, 6, 50); err != nil {
 		http.Error(w, "Invalid password length", http.StatusBadRequest)
 		return

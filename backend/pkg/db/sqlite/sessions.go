@@ -33,7 +33,7 @@ func GetUserIDByToken(token string) (int64, error) {
 	}
 
 	if time.Now().After(expiresAt) {
-		DeleteSession(token) // Clean up expired session
+		DeleteSession(token)
 		return 0, nil
 	}
 
