@@ -17,6 +17,6 @@ type Post struct {
 }
 
 type PostFeedResponse struct {
-	Posts      []Post `json:"posts"`
-	TotalCount int    `json:"totalCount"`
+	Posts     []Post `json:"posts"`
+	PageCount int    `json:"page_count"`
 }

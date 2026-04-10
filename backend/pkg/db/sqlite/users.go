@@ -54,3 +54,27 @@ func GetUserByID(id int64) (*models.User, error) {
 
 	return &user, nil
 }
+
+func GetFollowersOfUser(userID int64) ([]models.User, error) {
+	query := `
+		SELECT u.id, u.first_name, u.last_name
+		FROM users u
+		JOIN followers f ON u.id = f.follower_id
+		WHERE f.followee_id = ? AND f.status = 'accepted'`
+
+	rows, err := DB.Query(query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var followers []models.User
+	for rows.Next() {
+		var u models.User
+		if err := rows.Scan(&u.ID, &u.FirstName, &u.LastName); err != nil {
+			return nil, err
+		}
+		followers = append(followers, u)
+	}
+	return followers, nil
+}

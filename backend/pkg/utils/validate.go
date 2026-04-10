@@ -2,7 +2,6 @@ package utils
 
 import (
 	"errors"
-	"fmt"
 	"net/mail"
 	"strings"
 	"time"
@@ -25,7 +24,6 @@ func ValidateLength(value string, min, max int) error {
 }
 
 func ValidateDate(dateStr string) error {
-	fmt.Println(dateStr)
 	t, err := time.Parse("2006-01-02", dateStr)
 	if err != nil {
 		return errors.New("invalid date format (use DD.MM.YYYY)")

@@ -26,6 +26,10 @@ func main() {
 
 	mux.HandleFunc("/api/profile", middleware.AuthMiddleware(handlers.ProfileHandler))
 	mux.HandleFunc("/api/posts", middleware.AuthMiddleware(handlers.GetPostsHandler))
+	mux.HandleFunc("/api/posts/create", middleware.AuthMiddleware(handlers.CreatePostHandler))
+
+	// Static files (images)
+	mux.Handle("/uploads/", http.StripPrefix("/uploads/", http.FileServer(http.Dir("./uploads"))))
 
 	fmt.Println("Server running on :8080")
 	http.ListenAndServe(":8080", middleware.CORSMiddleware(mux))
