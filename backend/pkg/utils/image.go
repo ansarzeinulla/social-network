@@ -57,3 +57,18 @@ func ProcessImageUpload(r *http.Request, formKey string, uploadDir string) (stri
 	urlPrefix := "/" + filepath.Base(uploadDir) + "/"
 	return urlPrefix + newFileName, nil
 }
+
+// DeleteImage removes an image from the filesystem given its relative URL path.
+func DeleteImage(urlPath string, baseDir string) error {
+	if urlPath == "" {
+		return nil
+	}
+	// Convert URL path (/uploads/filename.ext) to filesystem path (baseDir/filename.ext)
+	fileName := filepath.Base(urlPath)
+	filePath := filepath.Join(baseDir, fileName)
+	
+	if _, err := os.Stat(filePath); err == nil {
+		return os.Remove(filePath)
+	}
+	return nil
+}

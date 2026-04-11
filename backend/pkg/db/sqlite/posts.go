@@ -2,6 +2,7 @@ package sqlite
 
 import (
 	"database/sql"
+	"errors"
 	"math"
 	"social-network/pkg/models"
 	"strings"
@@ -157,4 +158,83 @@ func CreatePost(userID int64, title, content, imageUrl, privacy string, viewers 
 	}
 
 	return postID, nil
+}
+
+func GetPostByID(id int64) (*models.Post, error) {
+	var p models.Post
+	var imageUrl sql.NullString
+	query := `
+		SELECT p.id, p.user_id, p.title, p.content, p.image_url, p.privacy, p.created_at, u.first_name, u.last_name
+		FROM posts p
+		JOIN users u ON p.user_id = u.id
+		WHERE p.id = ?`
+
+	err := DB.QueryRow(query, id).Scan(&p.ID, &p.UserID, &p.Title, &p.Content, &imageUrl, &p.Privacy, &p.CreatedAt, &p.FirstName, &p.LastName)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	if imageUrl.Valid {
+		p.ImageURL = imageUrl.String
+	}
+	return &p, nil
+}
+
+func GetPostViewers(postID int64) ([]int64, error) {
+	query := `SELECT user_id FROM post_viewers WHERE post_id = ?`
+	rows, err := DB.Query(query, postID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var viewers []int64
+	for rows.Next() {
+		var vID int64
+		if err := rows.Scan(&vID); err != nil {
+			return nil, err
+		}
+		viewers = append(viewers, vID)
+	}
+	return viewers, nil
+}
+
+func UpdatePost(postID int64, title, content, imageUrl, privacy string, viewers []int64) error {
+	tx, err := DB.Begin()
+	if err != nil {
+		return err
+	}
+
+	query := `UPDATE posts SET title = ?, content = ?, image_url = ?, privacy = ? WHERE id = ?`
+	_, err = tx.Exec(query, title, content, imageUrl, privacy, postID)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// Always clear viewers, then re-add if needed
+	_, err = tx.Exec(`DELETE FROM post_viewers WHERE post_id = ?`, postID)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if privacy == "private" {
+		for _, vID := range viewers {
+			_, err = tx.Exec(`INSERT INTO post_viewers (post_id, user_id) VALUES (?, ?)`, postID, vID)
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
+		}
+	}
+
+	return tx.Commit()
+}
+
+func DeletePost(id int64) error {
+	_, err := DB.Exec(`DELETE FROM posts WHERE id = ?`, id)
+	return err
 }

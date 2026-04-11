@@ -27,7 +27,10 @@ func main() {
 	mux.HandleFunc("/api/profile", middleware.AuthMiddleware(handlers.ProfileHandler))
 	mux.HandleFunc("/api/followers", middleware.AuthMiddleware(handlers.FollowersHandler))
 	mux.HandleFunc("/api/posts", middleware.AuthMiddleware(handlers.GetPostsHandler))
+	mux.HandleFunc("/api/post", middleware.AuthMiddleware(handlers.GetPostHandler))
 	mux.HandleFunc("/api/posts/create", middleware.AuthMiddleware(handlers.CreatePostHandler))
+	mux.HandleFunc("/api/posts/update", middleware.AuthMiddleware(handlers.UpdatePostHandler))
+	mux.HandleFunc("/api/posts/delete", middleware.AuthMiddleware(handlers.DeletePostHandler))
 
 	// Static files (images)
 	mux.Handle("/uploads/", http.StripPrefix("/uploads/", http.FileServer(http.Dir("./uploads"))))

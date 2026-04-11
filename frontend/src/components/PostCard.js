@@ -1,16 +1,24 @@
+import { useRouter } from 'next/router';
+
 export default function PostCard({ post }) {
+  const router = useRouter();
+
   return (
-    <div className="post-card fade-in">
+    <div className="post-card fade-in" onClick={() => router.push(`/post/${post.id}`)}>
       <div className="post-header">
         <div className="user-info">
-          <span className="user-name">{post.first_name} {post.last_name}</span>
-          <span className="post-date">{new Date(post.created_at).toLocaleDateString()}</span>
-          <h3 className="post-title">{post.title}</h3>
+          <div className="user-avatar">{post.first_name[0]}{post.last_name[0]}</div>
+          <div className="user-details">
+            <span className="user-name">{post.first_name} {post.last_name}</span>
+            <span className="post-date">{new Date(post.created_at).toLocaleDateString()}</span>
+          </div>
         </div>
+        <div className="privacy-indicator">{post.privacy.replace('_', ' ')}</div>
       </div>
 
-
-
+      <div className="post-body">
+        <h3 className="post-title">{post.title}</h3>
+      </div>
 
       <style jsx>{`
         .post-card {
@@ -19,17 +27,19 @@ export default function PostCard({ post }) {
           border-radius: 16px;
           padding: 1.5rem;
           margin-bottom: 1.5rem;
-          transition: transform 0.2s, box-shadow 0.2s;
+          transition: all 0.2s;
+          cursor: pointer;
         }
         .post-card:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+          transform: translateY(-4px);
+          box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+          border-color: var(--primary);
         }
         .post-header {
           display: flex;
           justify-content: space-between;
-          align-items: center;
-          margin-bottom: 1rem;
+          align-items: flex-start;
+          margin-bottom: 1.25rem;
         }
         .user-info {
           display: flex;
@@ -44,8 +54,8 @@ export default function PostCard({ post }) {
           display: flex;
           align-items: center;
           justify-content: center;
-          font-weight: bold;
-          font-size: 0.8rem;
+          font-weight: 800;
+          font-size: 0.9rem;
           color: white;
         }
         .user-details {
@@ -53,31 +63,28 @@ export default function PostCard({ post }) {
           flex-direction: column;
         }
         .user-name {
-          font-weight: 600;
-          font-size: 0.95rem;
+          font-weight: 700;
+          font-size: 1rem;
+          color: var(--text-main);
         }
         .post-date {
           font-size: 0.8rem;
           color: var(--text-muted);
         }
-        .post-title {
-          font-size: 1.25rem;
-          font-weight: 700;
-          margin-bottom: 0.75rem;
-          color: var(--text-main);
-        }
-        .post-content {
+        .privacy-indicator {
+          font-size: 0.7rem;
+          text-transform: uppercase;
+          font-weight: 800;
           color: var(--text-muted);
-          font-size: 0.95rem;
-          margin-bottom: 1rem;
-          white-space: pre-wrap;
-        }
-        .post-image {
-          width: 100%;
+          background: var(--bg-hover);
+          padding: 0.25rem 0.6rem;
           border-radius: 12px;
-          margin-top: 0.5rem;
-          object-fit: cover;
-          max-height: 400px;
+          border: 1px solid var(--border);
+        }
+        .post-title {
+          font-size: 1.4rem;
+          font-weight: 800;
+          color: var(--text-main);
         }
       `}</style>
     </div>

@@ -3,8 +3,8 @@ package models
 import "time"
 
 type Post struct {
-	ID        int       `json:"id"`
-	UserID    int       `json:"user_id"`
+	ID        int64     `json:"id"`
+	UserID    int64     `json:"user_id"`
 	Title     string    `json:"title"`
 	Content   string    `json:"content"`
 	ImageURL  string    `json:"image_url"`
