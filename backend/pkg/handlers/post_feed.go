@@ -3,7 +3,6 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
 
 	"social-network/pkg/db/sqlite"
 	"social-network/pkg/middleware"
@@ -18,24 +17,13 @@ func GetPostsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	pageStr := r.URL.Query().Get("page")
-	page, _ := strconv.Atoi(pageStr)
-	if page < 1 {
-		page = 1
-	}
-
 	title := r.URL.Query().Get("title")
-	if err := utils.ValidateLength(title, 0, 100); err != nil {
-		http.Error(w, "Title filter too long", http.StatusBadRequest)
-		return
-	}
-
 	startDate := r.URL.Query().Get("startDate")
 	endDate := r.URL.Query().Get("endDate")
 	privacy := r.URL.Query().Get("privacy")
-
-	// Validate privacy
-	if privacy != "" && privacy != "public" && privacy != "almost_private" && privacy != "private" {
-		http.Error(w, "Invalid privacy filter", http.StatusBadRequest)
+	page, err := utils.ValidatePostFilters(pageStr, title, startDate, endDate, privacy)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 

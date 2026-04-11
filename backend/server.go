@@ -25,6 +25,7 @@ func main() {
 	mux.HandleFunc("/api/logout", handlers.LogoutHandler)
 
 	mux.HandleFunc("/api/profile", middleware.AuthMiddleware(handlers.ProfileHandler))
+	mux.HandleFunc("/api/followers", middleware.AuthMiddleware(handlers.FollowersHandler))
 	mux.HandleFunc("/api/posts", middleware.AuthMiddleware(handlers.GetPostsHandler))
 	mux.HandleFunc("/api/posts/create", middleware.AuthMiddleware(handlers.CreatePostHandler))
 

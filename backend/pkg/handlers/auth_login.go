@@ -20,20 +20,8 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := utils.ValidateEmail(req.Email); err != nil {
-		http.Error(w, "Invalid email format", http.StatusBadRequest)
-		return
-	}
-	if err := utils.ValidateLength(req.Email, 3, 30); err != nil {
-		http.Error(w, "Email must be 3-30 characters", http.StatusBadRequest)
-		return
-	}
-	if err := utils.ValidateLength(req.Password, 6, 50); err != nil {
-		http.Error(w, "Invalid password length", http.StatusBadRequest)
-		return
-	}
-	if err := utils.ValidatePasswordCharacters(req.Password); err != nil {
-		http.Error(w, "Invalid password characters", http.StatusBadRequest)
+	if err := utils.ValidateLogin(req.Email, req.Password); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -56,9 +44,8 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	sessionToken, _ := uuid.NewV4()
 	tokenStr := sessionToken.String()
 
-	// Override existing sessions for this user
 	sqlite.DeleteSessionByUserID(user.ID)
-	
+
 	err = sqlite.CreateSession(tokenStr, user.ID, 24*time.Hour)
 	if err != nil {
 		http.Error(w, "Failed to create session", http.StatusInternalServerError)

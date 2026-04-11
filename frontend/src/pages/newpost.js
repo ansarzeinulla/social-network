@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import { useRouter } from 'next/router';
 
@@ -11,6 +11,25 @@ export default function NewPost() {
     const [preview, setPreview] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [followers, setFollowers] = useState([]);
+    const [selectedViewers, setSelectedViewers] = useState([]);
+
+    useEffect(() => {
+        const fetchFollowers = async () => {
+            try {
+                const response = await fetch('http://localhost:8080/api/followers', {
+                    credentials: 'include',
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    setFollowers(data || []);
+                }
+            } catch (err) {
+                console.error("Failed to fetch followers:", err);
+            }
+        };
+        fetchFollowers();
+    }, []);
 
 
     const handleImageChange = (e) => {
@@ -28,10 +47,6 @@ export default function NewPost() {
         }
         if (content.trim().length === 0 || content.length > 10000) {
             setError('Content must be between 1 and 10,000 characters.');
-            return false;
-        }
-        if (privacy === 'private' && selectedViewers.length === 0) {
-            setError('Please select at least one follower for a private post.');
             return false;
         }
         return true;
@@ -116,7 +131,22 @@ export default function NewPost() {
 
                         {privacy === 'private' && (
                             <div className="form-group fade-in">
-                                <label>Select Viewers <span className="helper">({selectedViewers.length} selected)</span></label>
+                                <label>Select Viewers 
+                                    <div className="label-actions">
+                                        <span className="helper">({selectedViewers.length} selected)</span>
+                                        {followers.length > 0 && (
+                                            <button type="button" className="text-btn" onClick={() => {
+                                                if (selectedViewers.length === followers.length) {
+                                                    setSelectedViewers([]);
+                                                } else {
+                                                    setSelectedViewers(followers.map(f => f.id));
+                                                }
+                                            }}>
+                                                {selectedViewers.length === followers.length ? 'Deselect All' : 'Select All'}
+                                            </button>
+                                        )}
+                                    </div>
+                                </label>
                                 <div className="viewer-grid">
                                     {followers.length > 0 ? (
                                         followers.map(f => (
@@ -254,6 +284,24 @@ export default function NewPost() {
                     background: var(--primary);
                     color: white;
                     box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.3);
+                }
+                .label-actions {
+                    display: flex;
+                    align-items: center;
+                    gap: 1rem;
+                }
+                .text-btn {
+                    background: transparent;
+                    border: none;
+                    color: var(--primary);
+                    font-size: 0.8rem;
+                    font-weight: 700;
+                    cursor: pointer;
+                    padding: 0;
+                    text-transform: uppercase;
+                }
+                .text-btn:hover {
+                    text-decoration: underline;
                 }
                 .viewer-grid {
                     display: grid;
