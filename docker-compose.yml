@@ -1,10 +1,25 @@
 services:
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - backend
+      - frontend
+    restart: always
+
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    expose:
+      - "8080"
     ports:
-      - "8080:8080"
+      - "8080:8080" # exposed for direct access during dev (curl, tests)
     volumes:
       - ./backend/pkg/db/sqlite:/app/pkg/db/sqlite
       - ./backend/uploads:/app/uploads
@@ -14,10 +29,25 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+    expose:
+      - "3000"
     ports:
-      - "3000:3000"
+      - "3000:3000" # exposed for direct dev access
     depends_on:
       - backend
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8080
+      # When served behind Caddy at http://localhost, the browser uses
+      # same-origin URLs. NEXT_PUBLIC_API_URL is intentionally empty so
+      # api.js generates "/api/...".
+      - NEXT_PUBLIC_API_URL=
+      - NEXT_PUBLIC_USE_MOCK_FOLLOWERS=false
+      - NEXT_PUBLIC_USE_MOCK_PROFILE=false
+      - NEXT_PUBLIC_USE_MOCK_NOTIFICATIONS=false
+      - NEXT_PUBLIC_USE_MOCK_COMMENTS=false
+      - NEXT_PUBLIC_USE_MOCK_CHAT=false
+      - NEXT_PUBLIC_USE_MOCK_GROUPS=false
     restart: always
+
+volumes:
+  caddy_data:
+  caddy_config:

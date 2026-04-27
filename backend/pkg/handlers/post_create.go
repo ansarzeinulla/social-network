@@ -22,12 +22,11 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	title := r.FormValue("title")
 	content := r.FormValue("content")
 	privacy := r.FormValue("privacy")
 	viewers := r.MultipartForm.Value["viewers"]
 
-	if err := utils.ValidateCreatePost(title, content, privacy); err != nil {
+	if err := utils.ValidateCreatePost(content, privacy); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -51,7 +50,7 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Insert into DB via centralized helper
-	_, err = sqlite.CreatePost(userID, title, content, imageUrl, privacy, validViewers)
+	_, err = sqlite.CreatePost(userID, content, imageUrl, privacy, validViewers)
 	if err != nil {
 		http.Error(w, "Failed to create post", http.StatusInternalServerError)
 		return

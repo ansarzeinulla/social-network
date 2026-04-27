@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Navbar from '../../components/Navbar';
+import { fetchApi, assetURL } from '../../services/api';
 
 export default function PostDetails() {
     const router = useRouter();
@@ -15,15 +16,10 @@ export default function PostDetails() {
 
         const fetchData = async () => {
             try {
-                // Fetch me
-                const meRes = await fetch('http://localhost:8080/api/profile', { credentials: 'include' });
-                if (meRes.ok) {
-                    const meData = await meRes.json();
-                    setMe(meData);
-                }
+                const meRes = await fetchApi('/profile');
+                if (meRes.ok) setMe(await meRes.json());
 
-                // Fetch post
-                const res = await fetch(`http://localhost:8080/api/post?id=${id}`, { credentials: 'include' });
+                const res = await fetchApi(`/post?id=${id}`);
                 if (res.ok) {
                     const data = await res.json();
                     setPost(data.post);
@@ -62,11 +58,9 @@ export default function PostDetails() {
                         <div className="privacy-badge">{post.privacy.replace('_', ' ')}</div>
                     </div>
 
-                    <h1 className="post-title">{post.title}</h1>
-                    
                     {post.image_url && (
                         <div className="post-image">
-                            <img src={`http://localhost:8080${post.image_url}`} alt={post.title} />
+                            <img src={assetURL(post.image_url)} alt="" />
                         </div>
                     )}
 

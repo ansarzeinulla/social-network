@@ -17,11 +17,14 @@ func GetPostsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	pageStr := r.URL.Query().Get("page")
-	title := r.URL.Query().Get("title")
+	contentFilter := r.URL.Query().Get("content")
+	if contentFilter == "" {
+		contentFilter = r.URL.Query().Get("title") // backwards-compat: old front sends ?title=
+	}
 	startDate := r.URL.Query().Get("startDate")
 	endDate := r.URL.Query().Get("endDate")
 	privacy := r.URL.Query().Get("privacy")
-	page, err := utils.ValidatePostFilters(pageStr, title, startDate, endDate, privacy)
+	page, err := utils.ValidatePostFilters(pageStr, contentFilter, startDate, endDate, privacy)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -33,7 +36,7 @@ func GetPostsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	posts, pageCount, err := sqlite.GetPostsByUserIDandFilters(userID, title, startDate, endDate, privacy, page, 30)
+	posts, pageCount, err := sqlite.GetPostsByUserIDandFilters(userID, contentFilter, startDate, endDate, privacy, page, 30)
 	if err != nil {
 		http.Error(w, "Database error", http.StatusInternalServerError)
 		return

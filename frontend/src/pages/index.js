@@ -9,7 +9,7 @@ export default function Home() {
   const [posts, setPosts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [title, setTitle] = useState('');
+  const [contentFilter, setContentFilter] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [privacy, setPrivacy] = useState('');
@@ -22,7 +22,7 @@ export default function Home() {
   const fetchPosts = async (page, filters = {}) => {
     setLoading(true);
     try {
-      const t = filters.title !== undefined ? filters.title : title;
+      const t = filters.content !== undefined ? filters.content : contentFilter;
       const sd = filters.startDate !== undefined ? filters.startDate : startDate;
       const ed = filters.endDate !== undefined ? filters.endDate : endDate;
       const p = filters.privacy !== undefined ? filters.privacy : privacy;
@@ -31,7 +31,7 @@ export default function Home() {
         page: page.toString(),
       });
 
-      if (t) queryParams.append('title', t);
+      if (t) queryParams.append('content', t);
       if (sd) queryParams.append('startDate', sd);
       if (ed) queryParams.append('endDate', ed);
       if (p) queryParams.append('privacy', p);
@@ -57,20 +57,20 @@ export default function Home() {
   };
 
   const handleApplyFilters = () => {
-    if (title.length > 100) {
-      return; // Should be blocked by maxLength anyway
+    if (contentFilter.length > 100) {
+      return;
     }
     setCurrentPage(1);
     fetchPosts(1);
   };
 
   const handleResetFilters = () => {
-    setTitle('');
+    setContentFilter('');
     setStartDate('');
     setEndDate('');
     setPrivacy('');
     setCurrentPage(1);
-    fetchPosts(1, { title: '', startDate: '', endDate: '', privacy: '' });
+    fetchPosts(1, { content: '', startDate: '', endDate: '', privacy: '' });
   };
 
   const getPaginationTiles = () => {
@@ -99,13 +99,13 @@ export default function Home() {
         {/* Filter Bar */}
         <div className="filter-bar fade-in">
           <div className="filter-group">
-            <label>Title {title.length > 0 && <span className="char-count">({title.length}/100)</span>}</label>
+            <label>Content {contentFilter.length > 0 && <span className="char-count">({contentFilter.length}/100)</span>}</label>
             <input
               type="text"
-              placeholder="Filter by title..."
-              value={title}
+              placeholder="Filter by post content..."
+              value={contentFilter}
               maxLength={100}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => setContentFilter(e.target.value)}
             />
           </div>
           <div className="filter-group text-center">

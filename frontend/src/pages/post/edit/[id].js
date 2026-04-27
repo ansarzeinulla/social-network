@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../../../components/Navbar';
 import { useRouter } from 'next/router';
+import { fetchApi, assetURL } from '../../../services/api';
 
 export default function EditPost() {
     const router = useRouter();
     const { id } = router.query;
-    const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [privacy, setPrivacy] = useState('public');
     const [image, setImage] = useState(null);
@@ -22,28 +22,21 @@ export default function EditPost() {
 
         const fetchData = async () => {
             try {
-                // Fetch followers
-                const folRes = await fetch('http://localhost:8080/api/followers', { credentials: 'include' });
-                if (folRes.ok) {
-                    const folData = await folRes.json();
-                    setFollowers(folData || []);
-                }
+                const folRes = await fetchApi('/followers');
+                if (folRes.ok) setFollowers((await folRes.json()) || []);
 
-                // Fetch post data
-                const res = await fetch(`http://localhost:8080/api/post?id=${id}`, { credentials: 'include' });
+                const res = await fetchApi(`/post?id=${id}`);
                 if (res.ok) {
                     const data = await res.json();
                     const post = data.post;
-                    
-                    // Auth check
-                    const meRes = await fetch('http://localhost:8080/api/profile', { credentials: 'include' });
+
+                    const meRes = await fetchApi('/profile');
                     const meData = await meRes.json();
                     if (meData.id !== post.user_id) {
                         router.push(`/post/${id}`);
                         return;
                     }
 
-                    setTitle(post.title);
                     setContent(post.content);
                     setPrivacy(post.privacy);
                     setExistingImage(post.image_url);
@@ -70,10 +63,6 @@ export default function EditPost() {
     };
 
     const validateForm = () => {
-        if (title.trim().length === 0 || title.length > 100) {
-            setError('Title must be between 1 and 100 characters.');
-            return false;
-        }
         if (content.trim().length === 0 || content.length > 10000) {
             setError('Content must be between 1 and 10,000 characters.');
             return false;
@@ -89,17 +78,15 @@ export default function EditPost() {
         setSubmitting(true);
         const formData = new FormData();
         formData.append('id', id);
-        formData.append('title', title);
         formData.append('content', content);
         formData.append('privacy', privacy);
         if (image) formData.append('image', image);
         selectedViewers.forEach(vID => formData.append('viewers', vID));
 
         try {
-            const response = await fetch('http://localhost:8080/api/posts/update', {
+            const response = await fetchApi('/posts/update', {
                 method: 'POST',
                 body: formData,
-                credentials: 'include',
             });
 
             if (response.ok) {
@@ -120,9 +107,8 @@ export default function EditPost() {
 
         setSubmitting(true);
         try {
-            const response = await fetch(`http://localhost:8080/api/posts/delete?id=${id}`, {
-                method: 'POST', // or DELETE if you prefer, but I used POST/GET in handlers for ease
-                credentials: 'include',
+            const response = await fetchApi(`/posts/delete?id=${id}`, {
+                method: 'POST',
             });
 
             if (response.ok) {
@@ -155,17 +141,6 @@ export default function EditPost() {
                     {error && <div className="error-msg">{error}</div>}
 
                     <form onSubmit={handleSubmit}>
-                        <div className="form-group">
-                            <label>Title <span className={title.length > 100 ? 'text-danger' : ''}>({title.length}/100)</span></label>
-                            <input
-                                type="text"
-                                value={title}
-                                maxLength={105}
-                                onChange={(e) => setTitle(e.target.value)}
-                                required
-                            />
-                        </div>
-
                         <div className="form-group">
                             <label>Privacy</label>
                             <div className="privacy-selector">
@@ -230,7 +205,7 @@ export default function EditPost() {
                             </div>
                             {(preview || existingImage) && (
                                 <div className="image-preview-container">
-                                    <img src={preview || `http://localhost:8080${existingImage}`} alt="Preview" />
+                                    <img src={preview || assetURL(existingImage)} alt="Preview" />
                                 </div>
                             )}
                         </div>

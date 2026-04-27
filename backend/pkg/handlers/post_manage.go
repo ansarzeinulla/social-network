@@ -70,12 +70,11 @@ func UpdatePostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	title := r.FormValue("title")
 	content := r.FormValue("content")
 	privacy := r.FormValue("privacy")
 	viewers := r.MultipartForm.Value["viewers"]
 
-	if err := utils.ValidateCreatePost(title, content, privacy); err != nil {
+	if err := utils.ValidateCreatePost(content, privacy); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -98,7 +97,7 @@ func UpdatePostHandler(w http.ResponseWriter, r *http.Request) {
 		imageUrl = newImage
 	}
 
-	err = sqlite.UpdatePost(postID, title, content, imageUrl, privacy, validViewers)
+	err = sqlite.UpdatePost(postID, content, imageUrl, privacy, validViewers)
 	if err != nil {
 		http.Error(w, "Failed to update post", http.StatusInternalServerError)
 		return

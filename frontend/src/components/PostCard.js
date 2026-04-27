@@ -1,4 +1,5 @@
 import { useRouter } from 'next/router';
+import { assetURL } from '../services/api';
 
 export default function PostCard({ post }) {
   const router = useRouter();
@@ -17,7 +18,8 @@ export default function PostCard({ post }) {
       </div>
 
       <div className="post-body">
-        <h3 className="post-title">{post.title}</h3>
+        <p className="post-content">{post.content}</p>
+        {post.image_url && <img src={assetURL(post.image_url)} alt="" className="post-image" />}
       </div>
 
       <style jsx>{`
@@ -81,10 +83,19 @@ export default function PostCard({ post }) {
           border-radius: 12px;
           border: 1px solid var(--border);
         }
-        .post-title {
-          font-size: 1.4rem;
-          font-weight: 800;
+        .post-content {
+          font-size: 1rem;
+          line-height: 1.5;
           color: var(--text-main);
+          white-space: pre-wrap;
+          word-break: break-word;
+        }
+        .post-image {
+          margin-top: 1rem;
+          width: 100%;
+          max-height: 400px;
+          object-fit: cover;
+          border-radius: 12px;
         }
       `}</style>
     </div>

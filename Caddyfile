@@ -1,0 +1,33 @@
+{
+	# Global options. auto_https disabled for localhost dev.
+	auto_https off
+}
+
+# Single origin for the whole app.
+# Browser sees only http://localhost:80 — no CORS, cookies "just work",
+# WebSocket "just works".
+:80 {
+	# REST API: /api/* -> Go backend on :8080 (inside docker network "backend")
+	handle_path /api/* {
+		reverse_proxy backend:8080 {
+			rewrite "/api{uri}"
+		}
+	}
+
+	# WebSocket: /ws -> Go backend
+	handle /ws {
+		reverse_proxy backend:8080
+	}
+
+	# Uploaded files served by Go (served at /uploads/* by the backend).
+	handle_path /uploads/* {
+		reverse_proxy backend:8080 {
+			rewrite "/uploads{uri}"
+		}
+	}
+
+	# Everything else -> Next.js dev/prod server
+	handle {
+		reverse_proxy frontend:3000
+	}
+}

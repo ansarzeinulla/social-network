@@ -11,8 +11,19 @@ import (
 	"github.com/gofrs/uuid"
 )
 
-// ProcessImageUpload handles image extraction, validation, and saving.
-// Returns the relative URL path to the saved image, or empty string if no image was uploaded.
+// ProcessImageUpload extracts a file from the multipart form, validates that
+// it is actually an image (by sniffing the content, not just trusting the
+// extension), and saves it under uploadDir with a UUID name.
+//
+// Returns:
+//   - "", nil   when no file was uploaded (form key missing)
+//   - relative URL like "/uploads/<uuid>.jpg" on success
+//   - error when the file is too large, has wrong type, or save failed
+//
+// Why content sniffing matters: a malicious actor can rename `evil.exe` to
+// `evil.jpg`, the extension whitelist would let it through, and on a CDN the
+// browser may execute it. http.DetectContentType inspects the first 512 bytes
+// (the magic bytes) and returns the real MIME type.
 func ProcessImageUpload(r *http.Request, formKey string, uploadDir string) (string, error) {
 	file, header, err := r.FormFile(formKey)
 	if err != nil {
@@ -23,21 +34,50 @@ func ProcessImageUpload(r *http.Request, formKey string, uploadDir string) (stri
 	}
 	defer file.Close()
 
-	// Validate image type
-	ext := strings.ToLower(filepath.Ext(header.Filename))
-	validExts := map[string]bool{".jpg": true, ".jpeg": true, ".png": true, ".gif": true, ".webp": true}
-	if !validExts[ext] {
+	// Size limit (5 MiB). The outer ParseMultipartForm should already cap
+	// total size, but we double-check this individual file.
+	const maxImageSize = 5 << 20
+	if header.Size > maxImageSize {
+		return "", errors.New("image too large (max 5MiB)")
+	}
+
+	// Sniff content type from the first 512 bytes. Then rewind so we can
+	// copy the file from the start.
+	head := make([]byte, 512)
+	n, err := file.Read(head)
+	if err != nil && err != io.EOF {
+		return "", errors.New("could not read uploaded file")
+	}
+	contentType := http.DetectContentType(head[:n])
+
+	allowedMIME := map[string]string{
+		"image/jpeg": ".jpg",
+		"image/png":  ".png",
+		"image/gif":  ".gif",
+		"image/webp": ".webp",
+	}
+	ext, ok := allowedMIME[contentType]
+	if !ok {
 		return "", errors.New("invalid image format. Supported: JPG, PNG, GIF, WEBP")
 	}
 
-	// Ensure upload directory exists
-	if _, err := os.Stat(uploadDir); os.IsNotExist(err) {
-		if err := os.MkdirAll(uploadDir, 0755); err != nil {
-			return "", errors.New("failed to create upload directory")
-		}
+	// Cross-check: make sure the original filename's extension is also one
+	// of the allowed ones (defense in depth — protects against odd CDNs that
+	// dispatch by extension regardless of Content-Type).
+	origExt := strings.ToLower(filepath.Ext(header.Filename))
+	if origExt != "" && origExt != ext &&
+		!(origExt == ".jpeg" && ext == ".jpg") {
+		return "", errors.New("file extension does not match content")
 	}
 
-	// Generate unique name
+	if _, err := file.Seek(0, io.SeekStart); err != nil {
+		return "", errors.New("could not rewind uploaded file")
+	}
+
+	if err := os.MkdirAll(uploadDir, 0755); err != nil {
+		return "", errors.New("failed to create upload directory")
+	}
+
 	id, _ := uuid.NewV4()
 	newFileName := id.String() + ext
 	filePath := filepath.Join(uploadDir, newFileName)
@@ -49,11 +89,10 @@ func ProcessImageUpload(r *http.Request, formKey string, uploadDir string) (stri
 	defer dst.Close()
 
 	if _, err := io.Copy(dst, file); err != nil {
+		os.Remove(filePath)
 		return "", errors.New("failed to save uploaded file")
 	}
 
-	// Return the relative URL path (assuming the directory name is also the URL prefix)
-	// We use the base directory name from the config or parameter
 	urlPrefix := "/" + filepath.Base(uploadDir) + "/"
 	return urlPrefix + newFileName, nil
 }
@@ -63,10 +102,8 @@ func DeleteImage(urlPath string, baseDir string) error {
 	if urlPath == "" {
 		return nil
 	}
-	// Convert URL path (/uploads/filename.ext) to filesystem path (baseDir/filename.ext)
 	fileName := filepath.Base(urlPath)
 	filePath := filepath.Join(baseDir, fileName)
-	
 	if _, err := os.Stat(filePath); err == nil {
 		return os.Remove(filePath)
 	}

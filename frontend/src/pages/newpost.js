@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import { useRouter } from 'next/router';
+import { fetchApi } from '../services/api';
 
 export default function NewPost() {
     const router = useRouter();
-    const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [privacy, setPrivacy] = useState('public');
     const [image, setImage] = useState(null);
@@ -17,9 +17,7 @@ export default function NewPost() {
     useEffect(() => {
         const fetchFollowers = async () => {
             try {
-                const response = await fetch('http://localhost:8080/api/followers', {
-                    credentials: 'include',
-                });
+                const response = await fetchApi('/followers');
                 if (response.ok) {
                     const data = await response.json();
                     setFollowers(data || []);
@@ -41,10 +39,6 @@ export default function NewPost() {
     };
 
     const validateForm = () => {
-        if (title.trim().length === 0 || title.length > 100) {
-            setError('Title must be between 1 and 100 characters.');
-            return false;
-        }
         if (content.trim().length === 0 || content.length > 10000) {
             setError('Content must be between 1 and 10,000 characters.');
             return false;
@@ -60,17 +54,15 @@ export default function NewPost() {
 
         setLoading(true);
         const formData = new FormData();
-        formData.append('title', title);
         formData.append('content', content);
         formData.append('privacy', privacy);
         if (image) formData.append('image', image);
         selectedViewers.forEach(id => formData.append('viewers', id));
 
         try {
-            const response = await fetch('http://localhost:8080/api/posts/create', {
+            const response = await fetchApi('/posts/create', {
                 method: 'POST',
                 body: formData,
-                credentials: 'include',
             });
 
             if (response.status === 401) {
@@ -101,18 +93,6 @@ export default function NewPost() {
                     {error && <div className="error-msg">{error}</div>}
 
                     <form onSubmit={handleSubmit}>
-                        <div className="form-group">
-                            <label>Title <span className={title.length > 100 ? 'text-danger' : ''}>({title.length}/100)</span></label>
-                            <input
-                                type="text"
-                                value={title}
-                                maxLength={105}
-                                onChange={(e) => setTitle(e.target.value)}
-                                placeholder="What's this post about?"
-                                required
-                            />
-                        </div>
-
                         <div className="form-group">
                             <label>Privacy</label>
                             <div className="privacy-selector">

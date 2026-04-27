@@ -116,10 +116,21 @@ func ValidateRegistration(req models.User) error {
 	if err := ValidateBirthDate(req.DateOfBirth); err != nil {
 		return errors.New("Invalid date format")
 	}
+	// Optional fields: only validate if provided.
+	if req.Nickname != "" {
+		if err := ValidateLength(req.Nickname, 1, 50); err != nil {
+			return errors.New("Nickname must be 1-50 characters")
+		}
+	}
+	if req.AboutMe != "" {
+		if err := ValidateLength(req.AboutMe, 1, 500); err != nil {
+			return errors.New("About me must be 1-500 characters")
+		}
+	}
 	return nil
 }
 
-func ValidatePostFilters(pageStr, title, startDate, endDate, privacy string) (int, error) {
+func ValidatePostFilters(pageStr, contentFilter, startDate, endDate, privacy string) (int, error) {
 	page, err := strconv.Atoi(pageStr)
 	if err != nil {
 		return 0, errors.New("Invalid page format")
@@ -127,8 +138,8 @@ func ValidatePostFilters(pageStr, title, startDate, endDate, privacy string) (in
 	if page < 1 {
 		return 0, errors.New("Page must be at least 1")
 	}
-	if err := ValidateLength(title, 0, 100); err != nil {
-		return 0, errors.New("Title filter too long")
+	if err := ValidateLength(contentFilter, 0, 100); err != nil {
+		return 0, errors.New("Content filter too long")
 	}
 	if privacy != "" && privacy != "public" && privacy != "almost_private" && privacy != "private" {
 		return 0, errors.New("Invalid privacy filter")
@@ -146,10 +157,7 @@ func ValidatePostFilters(pageStr, title, startDate, endDate, privacy string) (in
 	return page, nil
 }
 
-func ValidateCreatePost(title, content string, privacy string) error {
-	if err := ValidateLength(title, 1, 100); err != nil {
-		return errors.New("Title must be between 1 and 100 characters")
-	}
+func ValidateCreatePost(content, privacy string) error {
 	if err := ValidateLength(content, 1, 10000); err != nil {
 		return errors.New("Content must be between 1 and 10000 characters")
 	}
