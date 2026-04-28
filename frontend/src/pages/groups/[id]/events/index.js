@@ -5,10 +5,8 @@ export default function GroupEvents() {
     const router = useRouter();
     const { id } = router.query;
     return (
-        <Layout title={`События группы #${id}`} mock>
-            <div className="empty-state">
-                Список событий группы. Будет реализован вместе с группами.
-            </div>
+        <Layout title={`События группы #${id || ""}`}>
+            <div className="empty-state">Список событий группы появится здесь</div>
         </Layout>
     );
 }

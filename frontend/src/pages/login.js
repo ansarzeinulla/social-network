@@ -35,7 +35,8 @@ export default function Login() {
     return (
         <div className="auth-shell">
             <form className="auth-card" onSubmit={handleLogin}>
-                <h1>Добро пожаловать</h1>
+                <div className="brand">Connect</div>
+                <h1>С возвращением</h1>
                 <p className="subtitle">Войдите, чтобы продолжить</p>
 
                 {error && <div className="error">{error}</div>}

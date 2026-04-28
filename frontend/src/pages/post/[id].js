@@ -1,192 +1,196 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import Navbar from '../../components/Navbar';
-import { fetchApi, assetURL } from '../../services/api';
+import Layout from '../../components/Layout';
+import { fetchApi, assetURL, apiJSON } from '../../services/api';
+import { comments as commentsSvc } from '../../services/comments';
+
+const PRIVACY_ICON = { public: "public", almost_private: "group", private: "lock" };
+const PRIVACY_LABEL = { public: "Public", almost_private: "Followers", private: "Private" };
 
 export default function PostDetails() {
     const router = useRouter();
     const { id } = router.query;
     const [post, setPost] = useState(null);
     const [me, setMe] = useState(null);
+    const [comments, setComments] = useState([]);
+    const [newComment, setNewComment] = useState("");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
+    const loadComments = async () => {
+        if (!id) return;
+        try {
+            const list = await commentsSvc.list(id);
+            setComments(list || []);
+        } catch (_) {}
+    };
+
     useEffect(() => {
         if (!id) return;
-
-        const fetchData = async () => {
+        (async () => {
             try {
                 const meRes = await fetchApi('/profile');
                 if (meRes.ok) setMe(await meRes.json());
-
-                const res = await fetchApi(`/post?id=${id}`);
-                if (res.ok) {
-                    const data = await res.json();
-                    setPost(data.post);
-                } else {
-                    setError('Post not found');
-                }
-            } catch (err) {
-                setError('Failed to fetch post');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchData();
+                const r = await fetchApi(`/post?id=${id}`);
+                if (r.ok) setPost((await r.json()).post);
+                else setError('Post not found');
+                await loadComments();
+            } catch (_) { setError('Failed to fetch post'); }
+            finally { setLoading(false); }
+        })();
     }, [id]);
 
-    if (loading) return <div className="loading">Loading...</div>;
-    if (error) return <div className="error">{error}</div>;
-    if (!post) return <div className="not-found">Post not found</div>;
+    const submitComment = async (e) => {
+        e.preventDefault();
+        const text = newComment.trim();
+        if (!text) return;
+        try {
+            await commentsSvc.add(id, text);
+            setNewComment("");
+            await loadComments();
+        } catch (_) {}
+    };
+
+    if (loading) return <Layout><div className="empty-state">Loading…</div></Layout>;
+    if (error) return <Layout><div className="empty-state">{error}</div></Layout>;
+    if (!post) return <Layout><div className="empty-state">Post not found</div></Layout>;
 
     const isAuthor = me && me.id === post.user_id;
 
     return (
-        <div className="layout">
-            <Navbar />
-            <main className="container">
-                <div className="post-full fade-in">
-                    <div className="post-header">
-                        <div className="author-info">
-                            <div className="avatar">{post.first_name[0]}{post.last_name[0]}</div>
-                            <div className="meta">
-                                <span className="name">{post.first_name} {post.last_name}</span>
-                                <span className="date">{new Date(post.created_at).toLocaleString()}</span>
-                            </div>
+        <Layout>
+            <article className="card post">
+                <div className="post-header">
+                    <div className="avatar">{(post.first_name || "?").slice(0, 1).toUpperCase()}</div>
+                    <div className="author-info">
+                        <div className="author-name">{post.first_name} {post.last_name}</div>
+                        <div className="author-meta">
+                            <span>{new Date(post.created_at).toLocaleString()}</span>
+                            <span>·</span>
+                            <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
+                                {PRIVACY_ICON[post.privacy] || "public"}
+                            </span>
+                            <span>{PRIVACY_LABEL[post.privacy]}</span>
                         </div>
-                        <div className="privacy-badge">{post.privacy.replace('_', ' ')}</div>
                     </div>
-
-                    {post.image_url && (
-                        <div className="post-image">
-                            <img src={assetURL(post.image_url)} alt="" />
-                        </div>
-                    )}
-
-                    <div className="post-content">
-                        {post.content.split('\n').map((line, i) => (
-                            <p key={i}>{line}</p>
-                        ))}
-                    </div>
-
                     {isAuthor && (
-                        <div className="post-actions">
-                            <button className="edit-btn" onClick={() => router.push(`/post/edit/${id}`)}>
-                                ✏️ Edit Post
-                            </button>
-                        </div>
+                        <button className="btn btn-ghost" onClick={() => router.push(`/post/edit/${id}`)}>
+                            <span className="material-symbols-outlined" style={{ fontSize: 18 }}>edit</span>
+                            Edit
+                        </button>
                     )}
                 </div>
-            </main>
+
+                <div className="post-content">{post.content}</div>
+
+                {post.image_url && (
+                    <img className="post-image" src={assetURL(post.image_url)} alt="" />
+                )}
+
+                <div className="comments-count">
+                    <span className="material-symbols-outlined" style={{ fontSize: 18 }}>chat_bubble</span>
+                    {comments.length} комментариев
+                </div>
+            </article>
+
+            <div className="card composer">
+                <form onSubmit={submitComment}>
+                    <input
+                        type="text"
+                        placeholder="Написать комментарий…"
+                        value={newComment}
+                        onChange={(e) => setNewComment(e.target.value)}
+                    />
+                </form>
+            </div>
+
+            {comments.map((c) => (
+                <div key={c.id} className="card comment">
+                    <div className="avatar" style={{ width: 36, height: 36 }}>
+                        {(c.first_name || "?").slice(0, 1).toUpperCase()}
+                    </div>
+                    <div className="comment-body">
+                        <div className="comment-author">
+                            {c.first_name} {c.last_name}
+                            <span className="comment-time">{new Date(c.created_at).toLocaleString()}</span>
+                        </div>
+                        <div className="comment-text">{c.content}</div>
+                    </div>
+                </div>
+            ))}
 
             <style jsx>{`
-                .layout {
-                    min-height: 100vh;
-                    background: var(--bg-main);
-                }
-                .post-full {
-                    max-width: 800px;
-                    margin: 3rem auto;
-                    background: var(--card-bg);
-                    border-radius: 24px;
-                    padding: 3rem;
-                    border: 1px solid var(--border);
-                    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-                }
+                .post { padding: 0; overflow: hidden; }
                 .post-header {
                     display: flex;
-                    justify-content: space-between;
                     align-items: center;
-                    margin-bottom: 2rem;
+                    gap: 12px;
+                    padding: 16px 16px 8px;
                 }
-                .author-info {
+                .author-info { flex: 1; }
+                .author-name { font-weight: 700; font-size: 15px; }
+                .author-meta {
+                    color: var(--text-secondary);
+                    font-size: 13px;
                     display: flex;
                     align-items: center;
-                    gap: 1rem;
-                }
-                .avatar {
-                    width: 48px;
-                    height: 48px;
-                    background: var(--primary);
-                    color: white;
-                    border-radius: 50%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-weight: 800;
-                    font-size: 1.2rem;
-                }
-                .meta {
-                    display: flex;
-                    flex-direction: column;
-                }
-                .name {
-                    font-weight: 700;
-                    color: var(--text-main);
-                }
-                .date {
-                    font-size: 0.8rem;
-                    color: var(--text-muted);
-                }
-                .privacy-badge {
-                    background: var(--bg-main);
-                    padding: 0.4rem 0.8rem;
-                    border-radius: 20px;
-                    font-size: 0.75rem;
-                    font-weight: 800;
-                    text-transform: uppercase;
-                    color: var(--text-muted);
-                    border: 1px solid var(--border);
-                }
-                .post-title {
-                    font-size: 2.5rem;
-                    font-weight: 800;
-                    margin-bottom: 2rem;
-                    color: var(--text-main);
-                }
-                .post-image {
-                    margin-bottom: 2rem;
-                    border-radius: 16px;
-                    overflow: hidden;
-                    border: 1px solid var(--border);
-                }
-                .post-image img {
-                    width: 100%;
-                    display: block;
+                    gap: 4px;
+                    margin-top: 2px;
                 }
                 .post-content {
-                    font-size: 1.2rem;
-                    line-height: 1.7;
-                    color: var(--text-main);
-                    margin-bottom: 3rem;
+                    padding: 0 16px 12px;
+                    font-size: 16px;
+                    line-height: 1.5;
+                    white-space: pre-wrap;
+                    word-break: break-word;
                 }
-                .post-actions {
-                    padding-top: 2rem;
-                    border-top: 1px solid var(--border);
+                .post-image { width: 100%; max-height: 500px; object-fit: cover; display: block; }
+                .comments-count {
+                    border-top: 1px solid var(--border-soft);
+                    padding: 12px 16px;
+                    color: var(--text-secondary);
+                    font-size: 13px;
                     display: flex;
-                    justify-content: flex-end;
+                    align-items: center;
+                    gap: 6px;
                 }
-                .edit-btn {
-                    background: var(--primary);
-                    color: white;
+                .composer { padding: 8px 12px; }
+                .composer input {
+                    width: 100%;
+                    background: var(--bg);
                     border: none;
-                    padding: 0.8rem 1.5rem;
-                    border-radius: 12px;
+                    outline: none;
+                    padding: 10px 16px;
+                    border-radius: 999px;
+                    font-size: 14px;
+                }
+                .comment {
+                    display: flex;
+                    align-items: flex-start;
+                    gap: 10px;
+                    padding: 12px 14px;
+                }
+                .comment-body { flex: 1; min-width: 0; }
+                .comment-author {
                     font-weight: 700;
-                    cursor: pointer;
-                    transition: transform 0.2s;
+                    font-size: 13px;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
                 }
-                .edit-btn:hover {
-                    transform: translateY(-2px);
-                    box-shadow: 0 5px 15px rgba(var(--primary-rgb), 0.3);
+                .comment-time {
+                    color: var(--text-muted);
+                    font-size: 11px;
+                    font-weight: 400;
                 }
-                .error, .loading, .not-found {
-                    text-align: center;
-                    padding: 5rem;
-                    font-size: 1.5rem;
+                .comment-text {
+                    font-size: 14px;
+                    margin-top: 2px;
+                    white-space: pre-wrap;
+                    word-break: break-word;
                 }
+                .btn { display: inline-flex; align-items: center; gap: 4px; }
             `}</style>
-        </div>
+        </Layout>
     );
 }

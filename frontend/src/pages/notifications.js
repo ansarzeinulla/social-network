@@ -2,29 +2,19 @@ import { useEffect, useState } from "react";
 import Layout from "../components/Layout";
 import { notifications } from "../services/notifications";
 import { followers } from "../services/followers";
-import { isMocked } from "../services/api";
 
 const ICONS = {
-    follow_request:  "👤",
-    group_invite:    "👥",
-    group_request:   "🛎️",
-    new_event:       "🗓️",
-    // legacy / mock variants
-    group_invitation:"👥",
-    event_reminder:  "🗓️",
-    new_message:     "💬",
-    new_comment:     "💭",
+    follow_request: "person_add",
+    group_invite: "groups",
+    group_request: "group_add",
+    new_event: "event",
 };
 
 const MESSAGES = {
-    follow_request:   "хочет на вас подписаться",
-    group_invite:     "приглашает в группу",
-    group_request:    "просится в вашу группу",
-    new_event:        "создал(а) новое событие",
-    group_invitation: "приглашает в группу",
-    event_reminder:   "напоминает о событии",
-    new_message:      "написал(а) вам сообщение",
-    new_comment:      "прокомментировал(а) ваш пост",
+    follow_request: "хочет на вас подписаться",
+    group_invite: "приглашает в группу",
+    group_request: "просится в вашу группу",
+    new_event: "создал(а) новое событие",
 };
 
 export default function NotificationsPage() {
@@ -48,8 +38,6 @@ export default function NotificationsPage() {
         try {
             const list = await notifications.list();
             setItems((list || []).map(normalize));
-        } catch (e) {
-            console.error(e);
         } finally {
             setLoading(false);
         }
@@ -61,25 +49,16 @@ export default function NotificationsPage() {
         await notifications.markRead(id);
         setItems((prev) => prev.map((n) => (n.id === id ? { ...n, is_read: true } : n)));
     };
-
     const markAllRead = async () => {
         await notifications.markAllRead();
         setItems((prev) => prev.map((n) => ({ ...n, is_read: true })));
     };
-
     const acceptFollow = async (n) => {
-        try {
-            await followers.accept(n.sender_id);
-        } catch (_) {}
-        await notifications.markRead(n.id);
+        try { await followers.accept(n.sender_id); } catch (_) {}
         setItems((prev) => prev.filter((x) => x.id !== n.id));
     };
-
     const declineFollow = async (n) => {
-        try {
-            await followers.decline(n.sender_id);
-        } catch (_) {}
-        await notifications.markRead(n.id);
+        try { await followers.decline(n.sender_id); } catch (_) {}
         setItems((prev) => prev.filter((x) => x.id !== n.id));
     };
 
@@ -88,7 +67,6 @@ export default function NotificationsPage() {
     return (
         <Layout
             title="Уведомления"
-            mock={isMocked("NOTIFICATIONS")}
             action={unread > 0 && (
                 <button className="btn btn-ghost" onClick={markAllRead}>
                     Прочитать все ({unread})
@@ -101,32 +79,54 @@ export default function NotificationsPage() {
                 <div className="empty-state">Нет уведомлений</div>
             ) : (
                 items.map((n) => (
-                    <div key={n.id} className="card card-row" style={{ opacity: n.is_read ? 0.6 : 1 }}>
-                        <div className="avatar">{ICONS[n.type] || "🔔"}</div>
-                        <div style={{ flex: 1 }}>
-                            <div className="card-title">
-                                {n.actor}
-                                {!n.is_read && <span className="badge" style={{ marginLeft: "0.5rem" }}>new</span>}
+                    <div key={n.id} className={`card notif ${n.is_read ? "read" : ""}`}>
+                        <div className="notif-icon">
+                            <span className="material-symbols-outlined">{ICONS[n.type] || "notifications"}</span>
+                        </div>
+                        <div className="notif-body">
+                            <div className="notif-text">
+                                <strong>{n.actor}</strong>
+                                {!n.is_read && <span className="badge" style={{ marginLeft: 8 }}>new</span>}
+                                <div className="notif-msg">{MESSAGES[n.type] || n.type}</div>
                             </div>
-                            <div className="card-meta">
-                                {MESSAGES[n.type] || n.type}
-                                {" · "}
-                                {new Date(n.created_at).toLocaleString()}
-                            </div>
+                            <div className="notif-time">{new Date(n.created_at).toLocaleString()}</div>
                         </div>
                         {n.type === "follow_request" && !n.is_read ? (
-                            <div style={{ display: "flex", gap: "0.5rem" }}>
+                            <div className="notif-actions">
                                 <button className="btn" onClick={() => acceptFollow(n)}>Принять</button>
                                 <button className="btn btn-danger" onClick={() => declineFollow(n)}>Отклонить</button>
                             </div>
                         ) : !n.is_read ? (
-                            <button className="btn btn-ghost" onClick={() => markRead(n.id)}>
-                                Прочитать
-                            </button>
+                            <button className="btn btn-ghost" onClick={() => markRead(n.id)}>Прочитать</button>
                         ) : null}
                     </div>
                 ))
             )}
+
+            <style jsx>{`
+                .notif {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    padding: 12px 16px;
+                }
+                .notif.read { opacity: 0.65; }
+                .notif-icon {
+                    width: 44px;
+                    height: 44px;
+                    border-radius: 50%;
+                    background: rgba(var(--primary-rgb), 0.12);
+                    color: var(--primary);
+                    display: grid;
+                    place-items: center;
+                    flex-shrink: 0;
+                }
+                .notif-body { flex: 1; min-width: 0; }
+                .notif-text { font-size: 14px; }
+                .notif-msg { color: var(--text-secondary); margin-top: 2px; }
+                .notif-time { color: var(--text-muted); font-size: 12px; margin-top: 2px; }
+                .notif-actions { display: flex; gap: 8px; }
+            `}</style>
         </Layout>
     );
 }

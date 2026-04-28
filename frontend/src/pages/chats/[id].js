@@ -2,11 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import Layout from "../../components/Layout";
 import { chat } from "../../services/chat";
-import { apiJSON, isMocked } from "../../services/api";
+import { apiJSON } from "../../services/api";
 import { useWebSocket } from "../../hooks/useWebSocket";
 import { useUser } from "../../hooks/useUser";
 
-// /chats/{peerId} — 1:1 conversation, history via REST, live via WS.
 export default function ThreadPage() {
     const router = useRouter();
     const { id: peerIdStr } = router.query;
@@ -27,8 +26,6 @@ export default function ThreadPage() {
         })();
     }, [peerId]);
 
-    // Poll peer presence every 10s. Cheap; could be replaced with a WS
-    // presence broadcast later.
     useEffect(() => {
         if (!peerId) return;
         let stop = false;
@@ -44,14 +41,12 @@ export default function ThreadPage() {
     }, [peerId]);
 
     const { send, status } = useWebSocket((ev) => {
-        if (ev.type !== "chat.new") return;
+        if (ev.type !== "chat.new" || !user) return;
         const p = ev.payload;
-        // Only accept events relevant to this thread.
-        if (!user) return;
-        const involvesUs =
+        const involves =
             (p.from === user.id && p.to === peerId) ||
             (p.from === peerId && p.to === user.id);
-        if (!involvesUs) return;
+        if (!involves) return;
         setMessages((prev) => [...prev, {
             id: p.id,
             sender_id: p.from,
@@ -61,9 +56,7 @@ export default function ThreadPage() {
         }]);
     });
 
-    useEffect(() => {
-        endRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [messages]);
+    useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
 
     const sendMsg = (e) => {
         e.preventDefault();
@@ -74,14 +67,18 @@ export default function ThreadPage() {
     };
 
     return (
-        <Layout title={`Диалог`} mock={isMocked("CHAT")} action={
-            <span style={{ fontSize: "0.8rem", color: peerOnline ? "var(--accent)" : "var(--text-muted)" }}>
-                {peerOnline ? "● online" : "● offline"}
-                {status !== "open" && " · reconnecting"}
-            </span>
-        }>
-            <div className="card" style={{ display: "flex", flexDirection: "column", height: "60vh" }}>
-                <div style={{ flex: 1, overflowY: "auto", padding: "0.5rem", display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+        <Layout
+            title="Диалог"
+            action={
+                <span className={`presence ${peerOnline ? "online" : ""}`}>
+                    <span className="dot" />
+                    {peerOnline ? "online" : "offline"}
+                    {status !== "open" && " · reconnecting"}
+                </span>
+            }
+        >
+            <div className="card thread-window">
+                <div className="messages">
                     {loading ? (
                         <div className="empty-state">Loading…</div>
                     ) : messages.length === 0 ? (
@@ -90,17 +87,7 @@ export default function ThreadPage() {
                         messages.map((m) => {
                             const isMine = user && m.sender_id === user.id;
                             return (
-                                <div
-                                    key={m.id}
-                                    style={{
-                                        alignSelf: isMine ? "flex-end" : "flex-start",
-                                        background: isMine ? "var(--primary)" : "var(--bg)",
-                                        color: isMine ? "white" : "var(--text-main)",
-                                        padding: "0.5rem 0.85rem",
-                                        borderRadius: "14px",
-                                        maxWidth: "70%",
-                                    }}
-                                >
+                                <div key={m.id} className={`bubble ${isMine ? "mine" : ""}`}>
                                     {m.body}
                                 </div>
                             );
@@ -108,26 +95,87 @@ export default function ThreadPage() {
                     )}
                     <div ref={endRef} />
                 </div>
-                <form onSubmit={sendMsg} style={{ display: "flex", gap: "0.5rem", marginTop: "0.75rem" }}>
+                <form onSubmit={sendMsg} className="composer">
                     <input
                         type="text"
                         value={body}
                         onChange={(e) => setBody(e.target.value)}
                         placeholder="Сообщение…"
-                        style={{
-                            flex: 1,
-                            background: "var(--bg)",
-                            border: "1px solid var(--border)",
-                            color: "var(--text-main)",
-                            padding: "0.7rem 0.9rem",
-                            borderRadius: "10px",
-                        }}
                     />
                     <button type="submit" className="btn" disabled={status !== "open"}>
-                        Отправить
+                        <span className="material-symbols-outlined" style={{ fontSize: 20 }}>send</span>
                     </button>
                 </form>
             </div>
+
+            <style jsx>{`
+                .presence {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                    font-size: 13px;
+                    color: var(--text-secondary);
+                }
+                .dot {
+                    width: 8px; height: 8px;
+                    border-radius: 50%;
+                    background: var(--text-muted);
+                }
+                .presence.online { color: var(--accent); }
+                .presence.online .dot { background: var(--accent); }
+                .thread-window {
+                    display: flex;
+                    flex-direction: column;
+                    height: 65vh;
+                    padding: 0;
+                    overflow: hidden;
+                }
+                .messages {
+                    flex: 1;
+                    overflow-y: auto;
+                    padding: 16px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 6px;
+                }
+                .bubble {
+                    align-self: flex-start;
+                    background: var(--bg);
+                    color: var(--text-main);
+                    padding: 8px 14px;
+                    border-radius: 18px;
+                    max-width: 70%;
+                    font-size: 14px;
+                    word-wrap: break-word;
+                }
+                .bubble.mine {
+                    align-self: flex-end;
+                    background: var(--primary);
+                    color: white;
+                }
+                .composer {
+                    display: flex;
+                    gap: 8px;
+                    padding: 12px 16px;
+                    border-top: 1px solid var(--border-soft);
+                    background: var(--card-bg);
+                }
+                .composer input {
+                    flex: 1;
+                    background: var(--bg);
+                    border: none;
+                    outline: none;
+                    padding: 10px 16px;
+                    border-radius: 999px;
+                    font-size: 14px;
+                }
+                .composer .btn {
+                    width: 44px;
+                    padding: 0;
+                    display: grid;
+                    place-items: center;
+                }
+            `}</style>
         </Layout>
     );
 }

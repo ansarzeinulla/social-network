@@ -21,9 +21,7 @@ export default function GroupChat() {
             try {
                 const list = await chat.groupHistory(groupID);
                 setMessages(list || []);
-            } finally {
-                setLoading(false);
-            }
+            } finally { setLoading(false); }
         })();
     }, [groupID]);
 
@@ -42,9 +40,7 @@ export default function GroupChat() {
         }]);
     });
 
-    useEffect(() => {
-        endRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [messages]);
+    useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
 
     const sendMsg = (e) => {
         e.preventDefault();
@@ -55,16 +51,9 @@ export default function GroupChat() {
     };
 
     return (
-        <Layout
-            title={`Чат группы #${groupID || ""}`}
-            action={
-                <span style={{ fontSize: "0.8rem", color: status === "open" ? "var(--accent)" : "var(--text-muted)" }}>
-                    {status === "open" ? "● connected" : "● connecting"}
-                </span>
-            }
-        >
-            <div className="card" style={{ display: "flex", flexDirection: "column", height: "60vh" }}>
-                <div style={{ flex: 1, overflowY: "auto", padding: "0.5rem", display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+        <Layout title={`Чат группы #${groupID || ""}`}>
+            <div className="card thread-window">
+                <div className="messages">
                     {loading ? (
                         <div className="empty-state">Loading…</div>
                     ) : messages.length === 0 ? (
@@ -75,15 +64,8 @@ export default function GroupChat() {
                             const author = isMine ? "Вы" :
                                 (m.sender_first_name ? `${m.sender_first_name} ${m.sender_last_name}` : `User #${m.sender_id}`);
                             return (
-                                <div key={m.id} style={{
-                                    alignSelf: isMine ? "flex-end" : "flex-start",
-                                    background: isMine ? "var(--primary)" : "var(--bg)",
-                                    color: isMine ? "white" : "var(--text-main)",
-                                    padding: "0.5rem 0.85rem",
-                                    borderRadius: "14px",
-                                    maxWidth: "70%",
-                                }}>
-                                    <div style={{ fontSize: "0.7rem", opacity: 0.7, marginBottom: "0.2rem" }}>{author}</div>
+                                <div key={m.id} className={`bubble ${isMine ? "mine" : ""}`}>
+                                    {!isMine && <div className="bubble-author">{author}</div>}
                                     {m.body}
                                 </div>
                             );
@@ -91,26 +73,74 @@ export default function GroupChat() {
                     )}
                     <div ref={endRef} />
                 </div>
-                <form onSubmit={sendMsg} style={{ display: "flex", gap: "0.5rem", marginTop: "0.75rem" }}>
+                <form onSubmit={sendMsg} className="composer">
                     <input
                         type="text"
                         value={body}
                         onChange={(e) => setBody(e.target.value)}
                         placeholder="Сообщение…"
-                        style={{
-                            flex: 1,
-                            background: "var(--bg)",
-                            border: "1px solid var(--border)",
-                            color: "var(--text-main)",
-                            padding: "0.7rem 0.9rem",
-                            borderRadius: "10px",
-                        }}
                     />
                     <button type="submit" className="btn" disabled={status !== "open"}>
-                        Отправить
+                        <span className="material-symbols-outlined" style={{ fontSize: 20 }}>send</span>
                     </button>
                 </form>
             </div>
+
+            <style jsx>{`
+                .thread-window {
+                    display: flex;
+                    flex-direction: column;
+                    height: 65vh;
+                    padding: 0;
+                    overflow: hidden;
+                }
+                .messages {
+                    flex: 1;
+                    overflow-y: auto;
+                    padding: 16px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 6px;
+                }
+                .bubble {
+                    align-self: flex-start;
+                    background: var(--bg);
+                    color: var(--text-main);
+                    padding: 8px 14px;
+                    border-radius: 18px;
+                    max-width: 70%;
+                    font-size: 14px;
+                    word-wrap: break-word;
+                }
+                .bubble.mine {
+                    align-self: flex-end;
+                    background: var(--primary);
+                    color: white;
+                }
+                .bubble-author {
+                    font-size: 11px;
+                    font-weight: 700;
+                    color: var(--text-secondary);
+                    margin-bottom: 2px;
+                }
+                .composer {
+                    display: flex;
+                    gap: 8px;
+                    padding: 12px 16px;
+                    border-top: 1px solid var(--border-soft);
+                    background: var(--card-bg);
+                }
+                .composer input {
+                    flex: 1;
+                    background: var(--bg);
+                    border: none;
+                    outline: none;
+                    padding: 10px 16px;
+                    border-radius: 999px;
+                    font-size: 14px;
+                }
+                .composer .btn { width: 44px; padding: 0; display: grid; place-items: center; }
+            `}</style>
         </Layout>
     );
 }

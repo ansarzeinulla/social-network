@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useRouter } from "next/router";
 import Layout from "../../components/Layout";
 import { groups } from "../../services/groups";
-import { isMocked } from "../../services/api";
 
 export default function NewGroup() {
     const router = useRouter();
@@ -22,10 +21,10 @@ export default function NewGroup() {
     };
 
     return (
-        <Layout title="Новая группа" mock={isMocked("GROUPS")}>
-            <form onSubmit={submit} className="card" style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                <div className="field">
-                    <label>Название</label>
+        <Layout title="Новая группа">
+            <form onSubmit={submit} className="card form">
+                <label className="field">
+                    <span>Название</span>
                     <input
                         type="text"
                         value={title}
@@ -33,32 +32,51 @@ export default function NewGroup() {
                         required
                         minLength={2}
                         maxLength={50}
-                        style={inputStyle}
                     />
-                </div>
-                <div className="field">
-                    <label>Описание</label>
+                </label>
+                <label className="field">
+                    <span>Описание</span>
                     <textarea
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         rows={4}
                         maxLength={500}
-                        style={{ ...inputStyle, resize: "vertical" }}
                     />
-                </div>
+                </label>
                 <button type="submit" className="btn" disabled={loading}>
                     {loading ? "Создаём…" : "Создать"}
                 </button>
             </form>
+
+            <style jsx>{`
+                .form {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 16px;
+                    padding: 20px;
+                }
+                .field { display: flex; flex-direction: column; gap: 6px; }
+                .field span {
+                    font-size: 13px;
+                    font-weight: 600;
+                    color: var(--text-secondary);
+                }
+                .field input, .field textarea {
+                    background: var(--bg);
+                    border: 1px solid var(--border);
+                    color: var(--text-main);
+                    padding: 10px 14px;
+                    border-radius: var(--radius);
+                    font-size: 14px;
+                    resize: vertical;
+                }
+                .field input:focus, .field textarea:focus {
+                    outline: none;
+                    border-color: var(--primary);
+                    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.18);
+                }
+                .btn { align-self: flex-start; padding: 10px 24px; }
+            `}</style>
         </Layout>
     );
 }
-
-const inputStyle = {
-    background: "var(--bg)",
-    border: "1px solid var(--border)",
-    color: "var(--text-main)",
-    padding: "0.7rem 0.9rem",
-    borderRadius: "10px",
-    width: "100%",
-};

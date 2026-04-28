@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Layout from "../../components/Layout";
 import { chat } from "../../services/chat";
-import { isMocked } from "../../services/api";
 
 export default function ChatsPage() {
     const router = useRouter();
@@ -18,7 +17,7 @@ export default function ChatsPage() {
     }, []);
 
     return (
-        <Layout title="Чаты" mock={isMocked("CHAT")}>
+        <Layout title="Чаты">
             {loading ? (
                 <div className="empty-state">Loading…</div>
             ) : threads.length === 0 ? (
@@ -33,19 +32,40 @@ export default function ChatsPage() {
                     return (
                         <div
                             key={peerId}
-                            className="card card-row"
+                            className="card thread"
                             onClick={() => router.push(`/chats/${peerId}`)}
-                            style={{ cursor: "pointer" }}
                         >
                             <div className="avatar">{name.slice(0, 1).toUpperCase()}</div>
-                            <div style={{ flex: 1 }}>
-                                <div className="card-title">{name}</div>
-                                <div className="card-meta">{last}</div>
+                            <div className="thread-info">
+                                <div className="thread-name">{name}</div>
+                                <div className="thread-last">{last}</div>
                             </div>
                         </div>
                     );
                 })
             )}
+
+            <style jsx>{`
+                .thread {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    padding: 12px 16px;
+                    cursor: pointer;
+                    transition: box-shadow 0.15s;
+                }
+                .thread:hover { box-shadow: var(--shadow); }
+                .thread-info { flex: 1; min-width: 0; }
+                .thread-name { font-weight: 700; font-size: 15px; }
+                .thread-last {
+                    color: var(--text-secondary);
+                    font-size: 13px;
+                    margin-top: 2px;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+            `}</style>
         </Layout>
     );
 }

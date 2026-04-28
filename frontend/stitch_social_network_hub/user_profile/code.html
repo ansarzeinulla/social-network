@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Connect - Alex Johnson Profile</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error-container": "#93000a",
+                    "secondary": "#54606a",
+                    "secondary-fixed-dim": "#bcc8d3",
+                    "primary": "#0058bc",
+                    "background": "#f8f9fe",
+                    "tertiary-fixed-dim": "#6adf4f",
+                    "on-tertiary-fixed": "#022100",
+                    "primary-fixed-dim": "#adc6ff",
+                    "surface-container-high": "#e7e8ec",
+                    "surface-tint": "#005bc0",
+                    "surface-container-low": "#f3f3f8",
+                    "on-background": "#191c1f",
+                    "secondary-fixed": "#d8e4f0",
+                    "surface-container": "#edeef2",
+                    "secondary-container": "#d8e4f0",
+                    "on-primary-container": "#fefcff",
+                    "tertiary-container": "#188700",
+                    "on-error": "#ffffff",
+                    "surface": "#f8f9fe",
+                    "surface-variant": "#e1e2e7",
+                    "primary-fixed": "#d8e2ff",
+                    "surface-dim": "#d9dade",
+                    "error-container": "#ffdad6",
+                    "surface-container-highest": "#e1e2e7",
+                    "tertiary": "#116b00",
+                    "primary-container": "#0070eb",
+                    "on-tertiary": "#ffffff",
+                    "error": "#ba1a1a",
+                    "on-surface-variant": "#414754",
+                    "inverse-surface": "#2e3134",
+                    "on-secondary-fixed-variant": "#3d4852",
+                    "surface-bright": "#f8f9fe",
+                    "on-surface": "#191c1f",
+                    "on-secondary-fixed": "#111d25",
+                    "on-primary-fixed": "#001a41",
+                    "on-primary-fixed-variant": "#004493",
+                    "outline-variant": "#c1c6d6",
+                    "on-primary": "#ffffff",
+                    "surface-container-lowest": "#ffffff",
+                    "outline": "#727785",
+                    "on-secondary-container": "#5a6670",
+                    "tertiary-fixed": "#86fd68",
+                    "on-secondary": "#ffffff",
+                    "inverse-primary": "#adc6ff",
+                    "inverse-on-surface": "#f0f0f5",
+                    "on-tertiary-container": "#f8ffef",
+                    "on-tertiary-fixed-variant": "#0b5300"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "md": "12px",
+                    "sidebar-width": "320px",
+                    "xs": "4px",
+                    "sm": "8px",
+                    "base": "4px",
+                    "xl": "20px",
+                    "container-max": "1200px",
+                    "lg": "16px",
+                    "feed-width": "680px"
+            },
+            "fontFamily": {
+                    "label-sm": ["Plus Jakarta Sans"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "body-lg": ["Plus Jakarta Sans"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "label-md": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "label-md": ["13px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #F0F2F5;
+        }
+    </style>
+</head>
+<body class="bg-[#F0F2F5] font-['Plus_Jakarta_Sans'] antialiased">
+<!-- TopAppBar Shell -->
+<header class="fixed top-0 w-full h-14 flex items-center justify-between px-4 z-50 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-sm">
+<div class="flex items-center gap-2">
+<span class="text-[#1877F2] text-3xl font-black tracking-tighter">Connect</span>
+<div class="ml-4 hidden md:flex items-center bg-[#F0F2F5] rounded-full px-3 py-1.5">
+<span class="material-symbols-outlined text-gray-500 mr-2">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-64" placeholder="Search Connect" type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200 rounded-lg p-2 cursor-pointer active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-gray-700">chat</span>
+</button>
+<button class="hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200 rounded-lg p-2 cursor-pointer active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-gray-700">notifications</span>
+</button>
+<button class="hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200 rounded-lg p-2 cursor-pointer active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-gray-700">apps</span>
+</button>
+<img alt="User profile" class="w-10 h-10 rounded-full border border-gray-200 cursor-pointer" data-alt="Close-up portrait of a friendly man with short brown hair and a light beard, warm studio lighting, professional corporate headshot" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDcbdn1eLsZYnoDoX7HR40bxvTgZPBx75F1kkVfySyKenLeYDo95L3BqR88uoE_5eBVXu62ldOk0AeGpwP3SSyoozCVaVou8NQn65e6FZM8E0h3yRyFWV4SDQFmWw8vho0KbgOc_sWZDu9k3_v6IuRXlkXkS-NJ-VOjR2ZqlPrtp3touaCtnJEeUkJkzrxWUqKqeDPqAT_3m_kjMPr1ovI8RsPJ1j0AY6ch5cCcFr9Wg8VAv71AaZh59yxxC3-Z_Wn7EwVpxHMUl-lo"/>
+</div>
+</header>
+<div class="pt-14 flex justify-center">
+<!-- Main Profile Wrapper -->
+<div class="w-full max-w-[1250px] flex flex-col">
+<!-- Header Section -->
+<div class="bg-white shadow-sm">
+<!-- Cover Photo -->
+<div class="relative h-[250px] md:h-[400px] w-full overflow-hidden rounded-b-xl">
+<img alt="Cover Photo" class="w-full h-full object-cover" data-alt="Wide panoramic landscape of a mountain range at sunset with purple and orange sky reflecting in a calm lake" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCRpeEKCGoZ4-O0YQQfDNr-B19xcwh5flLH4VBcGp0UHqMb6NouvIvTeok1iVD_VEmAAbIegouBIlUq1ddpRgK_SPtyppge8c5MoG5aIcuomFUQ_v7sGmwiMMTBYU-Ubby_RMMslcjEG_edFZdfTz0KJcdh16STCz_j1S7fTQoAXgRv-XwemTh6FH7rDuestvicvTnTn6rZjmtk0UGfc1BJ3z8Sa9fb-3UgL8oUT1z2Or1dp9HU_AovVyAKluKJtn9Ws-n7fZKy8gNv"/>
+<div class="absolute bottom-4 right-4">
+<button class="flex items-center gap-2 bg-white px-4 py-2 rounded-lg font-semibold text-sm shadow-md hover:bg-gray-100 transition-colors">
+<span class="material-symbols-outlined text-xl">photo_camera</span>
+                            Edit Cover Photo
+                        </button>
+</div>
+</div>
+<!-- Profile Info Header -->
+<div class="px-4 md:px-8 pb-1 flex flex-col md:flex-row items-end gap-4 -mt-8 md:-mt-12 relative z-10">
+<div class="relative">
+<img alt="Alex Johnson" class="w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-white shadow-sm" data-alt="Close-up portrait of a friendly man with short brown hair and a light beard, warm studio lighting, professional corporate headshot" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDLLfPX5T0OsF-leGBLNA_ItLF3t-CmP7K_WLe_0pKGB7wv6_c8Y8P4fQ9NuJ9tjvm_UDU3mHHHBqa8bMBoom5_T7C0hh2-U3f1VC5o2EQZ0H1yNae6W64zFS6OzdWh2a7fo5-x4_aKsl_UFtJKjV2hifZwjJtbej1vh1V1hU0SRHMkHNhN1PKaslv83auLVhKGS8icsxd-9ymlTUIauqFfRRmDTYdzsK6rZJrAx2rSPOpWxtCuNzL9aTR1BJyXQu-74_kBsg3k4H8y"/>
+<button class="absolute bottom-2 right-2 bg-gray-200 p-2 rounded-full hover:bg-gray-300 transition-colors">
+<span class="material-symbols-outlined">photo_camera</span>
+</button>
+</div>
+<div class="flex-1 pb-4 text-center md:text-left">
+<h1 class="font-headline-lg text-headline-lg text-on-surface">Alex Johnson</h1>
+<p class="text-secondary font-body-md text-body-md mt-1">Product Designer &amp; Coffee Enthusiast. Building the future of social connection.</p>
+<div class="flex flex-wrap justify-center md:justify-start gap-2 mt-3">
+<div class="flex -space-x-2">
+<img class="w-8 h-8 rounded-full border-2 border-white" data-alt="Portrait of a young woman with a joyful expression" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBLqhBNhaFQ0jgSF2pgk40euQUkMHMDnkUvlDQESpxCFWXsYOfbchm01eet4Ke2C1QcosoHBmSMlUzzD2JXHvFTV0Y7246Ayvow5lDfFE2Hf6P8twEUV4j8r5C2-7rQKbs-i2qYyI8C5YPuSV2srWolNwcChqW3DD649LDUkXIkfD5CkT88HdC_8FrBddzHWbO_XWASncoMoR5NrQm9T-nA5-XTMq3eMOI_ghft_e2bfFfdCq_hy5f6jwyZYYozLshRh2pcAmq4iAzT"/>
+<img class="w-8 h-8 rounded-full border-2 border-white" data-alt="Portrait of a smiling man in a business casual outfit" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAcxq2dP-gu0H6jCXIeAyhpGIv0HkDYiDwza1xhhjA4Q5rdF-dlhyTyQ-4JFqku-zu6Rj90oLF0mAwDdUaXSWOlOn_HoNJ0xl7xG0RCHdPUC6ZjGY3aeTxCspFzhNZTIRI8pQiTVT-2hGekAg0gsm9V4FtMuSQ3BgISJW4PXgUs3HoThitD46bTTJSZgvD9ttZo-FQusKyU30igT5E10Gc7qqCRlWjV9GoMs8T6LiLWtdskOYgQFjPAVQKbne7XFAejj4fjLKR3xUia"/>
+<img class="w-8 h-8 rounded-full border-2 border-white" data-alt="Portrait of a professional woman looking at camera" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCAnvbZB5KUxDNzxUlZKV6MS-u3TOsPt8AbUJNTNVnNuSMjZ8GKsyZxD_RyfDbfv2TDoMCOVTyVPdhlAF_Nf9T8-NdL6mMww1rBXLb6Zp8F9HHeftsnfCgoEs2f_PSRcYRMsSM9KNxK9GgWIg1jJslbwWCS1mV9eEsa6fA7apdhCdOASAERy8TQAPuprVYelxk59RrSBsrGwlbhICalE0Jc-spaPOg0uaSesf7ZkZDsGqn2kp1hwZ8Na8fuxUoN_zlaM1Ow_aB6tc3x"/>
+</div>
+<span class="text-secondary font-label-md text-label-md self-center ml-2">1.2k Friends</span>
+</div>
+</div>
+<div class="flex gap-2 pb-4">
+<button class="bg-[#1877F2] text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 hover:bg-blue-600 transition-colors">
+<span class="material-symbols-outlined">add</span>
+                            Add to Story
+                        </button>
+<button class="bg-gray-200 text-on-surface px-4 py-2 rounded-lg font-semibold flex items-center gap-2 hover:bg-gray-300 transition-colors">
+<span class="material-symbols-outlined">edit</span>
+                            Edit Profile
+                        </button>
+</div>
+</div>
+<!-- Navigation Tabs -->
+<div class="px-4 md:px-8 border-t border-gray-200 mt-4">
+<nav class="flex gap-4">
+<button class="text-[#1877F2] border-b-4 border-[#1877F2] py-4 px-2 font-semibold">Timeline</button>
+<button class="text-gray-500 hover:bg-gray-100 py-4 px-4 font-semibold rounded-lg transition-colors">About</button>
+<button class="text-gray-500 hover:bg-gray-100 py-4 px-4 font-semibold rounded-lg transition-colors">Friends</button>
+<button class="text-gray-500 hover:bg-gray-100 py-4 px-4 font-semibold rounded-lg transition-colors">Photos</button>
+<button class="text-gray-500 hover:bg-gray-100 py-4 px-4 font-semibold rounded-lg transition-colors hidden md:block">Videos</button>
+<button class="text-gray-500 hover:bg-gray-100 py-4 px-4 font-semibold rounded-lg transition-colors hidden md:block">More</button>
+</nav>
+</div>
+</div>
+<!-- Content Area -->
+<div class="flex flex-col lg:flex-row gap-4 p-4 lg:p-6 items-start">
+<!-- Left Column: Intro & Info -->
+<aside class="w-full lg:w-[400px] flex flex-col gap-4 sticky top-20">
+<!-- Intro Card -->
+<section class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-4">Intro</h2>
+<div class="space-y-4">
+<div class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-gray-500">work</span>
+<span class="text-body-md font-body-md">Senior Product Designer at <span class="font-bold">Innovate Studio</span></span>
+</div>
+<div class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-gray-500">school</span>
+<span class="text-body-md font-body-md">Studied Design at <span class="font-bold">Stanford University</span></span>
+</div>
+<div class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-gray-500">home</span>
+<span class="text-body-md font-body-md">Lives in <span class="font-bold">San Francisco, CA</span></span>
+</div>
+<div class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-gray-500">location_on</span>
+<span class="text-body-md font-body-md">From <span class="font-bold">Seattle, WA</span></span>
+</div>
+<div class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-gray-500">favorite</span>
+<span class="text-body-md font-body-md">Single</span>
+</div>
+</div>
+<button class="w-full mt-6 bg-gray-100 hover:bg-gray-200 py-2 rounded-lg font-semibold text-on-surface transition-colors">Edit Details</button>
+</section>
+<!-- Photos Grid -->
+<section class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+<div class="flex justify-between items-center mb-4">
+<h2 class="font-headline-md text-headline-md text-on-surface">Photos</h2>
+<button class="text-[#1877F2] hover:bg-blue-50 px-2 py-1 rounded transition-colors font-semibold">See All Photos</button>
+</div>
+<div class="grid grid-cols-3 gap-1 rounded-lg overflow-hidden">
+<img class="aspect-square object-cover" data-alt="Sunlight streaming through tall forest trees" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQYnu0vPMAxwAhlqyUsgZ5DL5QNzsy177noOI9Wb6kg0_9dB-u2fc5nnd93jJCt9LoVTLdiapC7m1RhLaIcI0bgBAuzZafkdp6ZNTsmm7ILflGz_q9V7FOjC1kTjdH7CFy3uwIpK55chN4FGU6cSGkoZLBAcLPa8xaEKCw_i5hjLLw626icnFsI6U5mmQqF3cex1NKNGMEyd9KTmVwnK-ekLYzHW9QuSAbWpqq2b77QMyS8DgA0zdLh-qW2Btc4NwwnlmQfsPvNqXW"/>
+<img class="aspect-square object-cover" data-alt="Picturesque mountain lake with clear turquoise water and reflections" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCgmHwmJSLQIg6R8n-Yi5_Qbw8_FhIGZaV7FhOYM7D1bJfVZXzab3O2PcerOC5rFjhNnHc5Ju03COlIEw5S5Rqwn_ZkeT48jVe1iePBGDqXCPjVR-Dvr8aVfKQlTbxiAP38LyrrmrV3FFzbWJl38fHyCurzmLRLyCJwUdAD6_pv9YfBhD2Cp0MolCiZVyMV37B5omWSyTXhurykGqz0c0Aa3J6C7C7Qts-hrDYGSl-OXexIPTghMY_DGBQ43ToGQFOsxhLxqn_8ROfL"/>
+<img class="aspect-square object-cover" data-alt="Scenic wooden house on a hill overlooking a green valley" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDCurURtPpYO8Go9-kKjcWeDFEXgT2uwMp9ZMB7dg3qH06eV3IMAkINE4LnBCuBZXN9fmbBeS1o3uIGtRqFc0iQ4fSMzT572gWGT_hsv_mx-vCJhoYvR4e4hZCeoxhAWP34nzdfqVbgA1qL4-vdUQcdsnZHr3pLXpQVWKYiUB6NIISnfXgHCIsJLRAoE2Po7cvIdad0lnYmKcs70v3AH8uFpoJoYnHxudnKcdKbHXkAhaVAAcsOIlwEiiCd-p-xWtN5AWLAMt46nqPb"/>
+<img class="aspect-square object-cover" data-alt="Majestic snowy mountain peaks against a clear blue sky" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA_RB2W75P2hAx9BYogaAqcdVr_GYvjiNC90_3JTQLXRKoMFQkXQgNHIUmcJx1ZpMtXdRn72p-Y2wlcortwvb7EVioDI7POpCXkAsb1av46tokB25t9G8Qkf0btKG7nECcmTjFgxSX-Q2ffJlGpsUaIV4DnlURbSXIbfzus7zlqDhSrKnxylJCsM9nxI-IpAY_-kw3zzhG19bVKZZZL3HYDnFJbHih1BIgdF_PS00E4HiiFX8q1dcSeOUyzTeT8ph7Dm7LT4RfSBsrU"/>
+<img class="aspect-square object-cover" data-alt="Dense green forest seen from above at sunrise" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDyE6cqw8szE07YRduwJjq_DuWik9QL0hQDyPwUGUWDRV6GpBiPBrl1Ci1nT8KdklBz-iwMSw_nL9oyavOwESQMqn3DBkqoPte9SJePaWa3zNDhqgTt8JPD3TKn5q273BI1vNY4fMJ6k887vVdGfj1yLcSgZ4-1IcgNMLidUsFRESHWUBpX4ldXoCGKAMrx7k8WfasMU9XDudFQ-snVZWgavAkQltRHHH5RVWkyeH1ZdhPzpR0SCS4X320XKaqmp-8jcWNxL9WG0Xkt"/>
+<img class="aspect-square object-cover" data-alt="Vibrant blooming wildflowers in a mountain meadow" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-hiH0mdQ4ZeU_Ei7LZz8bTAB5wCL-oWyVznBbbaxqxYt24WU3dZuxv_bUhvUPQCmXbznow2hp-qzqOhnwFthH4oAB3sBNynb1vImho-ob7Wf0CceTBpOTt8lQErub1Bgf8d2caTGy-4hit21mCtlkxivS0oz7Py73I0YyfSlxRBqSWCDQD09_cRYF4aVRykVchWJcvHFx_jTT0gtEeEWJju2pLYvhIXMHQiOyiTO9OW3JTv5869wsRyI1g1qpa0hAAKVJJti0Gy4x"/>
+</div>
+</section>
+</aside>
+<!-- Right Column: Timeline -->
+<main class="flex-1 max-w-[680px] flex flex-col gap-4">
+<!-- Create Post -->
+<div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+<div class="flex gap-2">
+<img class="w-10 h-10 rounded-full" data-alt="Alex Johnson headshot" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBbtM5daK63E_vXYAVVcqX6-qUEnfSskgATwc85WZ1vY9pIh2_8nkWo7qDlb0bWIDBKFuJD3W7KSsmApzK61TSVpOhiGVPreFULRBnXFi-MD3OSbRAmYLVdF6tR50MFkIbpXNwDIZhP4FTio3NRtR1TMKnoOpQR9tC_2gw3FRQkrWPIVDSykQ7zRlixbYDbnudgdh0m6-r9bJpZAoCu3fNMoPbShUi_TI_Wf0M2-j81zjGivyZidADRqoTUHMrm2jVErdT6VlndkDXi"/>
+<button class="flex-1 bg-[#F0F2F5] hover:bg-gray-200 text-left px-4 rounded-full text-gray-500 font-body-md transition-colors">
+                                What's on your mind, Alex?
+                            </button>
+</div>
+<div class="mt-4 pt-4 border-t border-gray-200 flex justify-between">
+<button class="flex-1 flex items-center justify-center gap-2 py-2 hover:bg-gray-100 rounded-lg transition-colors text-on-surface-variant font-semibold">
+<span class="material-symbols-outlined text-red-500">videocam</span>
+                                Live Video
+                            </button>
+<button class="flex-1 flex items-center justify-center gap-2 py-2 hover:bg-gray-100 rounded-lg transition-colors text-on-surface-variant font-semibold">
+<span class="material-symbols-outlined text-green-500">photo_library</span>
+                                Photo/video
+                            </button>
+<button class="flex-1 flex items-center justify-center gap-2 py-2 hover:bg-gray-100 rounded-lg transition-colors text-on-surface-variant font-semibold">
+<span class="material-symbols-outlined text-yellow-500">mood</span>
+                                Feeling/activity
+                            </button>
+</div>
+</div>
+<!-- Post Filter -->
+<div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex justify-between items-center">
+<h2 class="font-headline-md text-headline-md text-on-surface">Posts</h2>
+<div class="flex gap-2">
+<button class="bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg flex items-center gap-1 font-semibold text-sm transition-colors">
+<span class="material-symbols-outlined text-lg">tune</span>
+                                Filters
+                            </button>
+<button class="bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg flex items-center gap-1 font-semibold text-sm transition-colors">
+<span class="material-symbols-outlined text-lg">settings</span>
+                                Manage Posts
+                            </button>
+</div>
+</div>
+<!-- Post Card 1 -->
+<article class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+<div class="p-4 flex items-center gap-3">
+<img class="w-10 h-10 rounded-full" data-alt="Alex Johnson headshot" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCv7Po2T9C81XDQ9JOvHxOUVOfofl0UrisEX3PyDCYG02KjY7PUzgih_n4UzP_76MjTEeNedayuyUU-QQ9k8jlke7TBB9DpH4z0cStMDpywbg417ACAAM9sfaim6degoz1m0EeL_RYJqS4JDOdl2Bk0ntTNTmjCQTSgjA3j3wikDFE2uAlXmKxOm5MZdWL1_mYs8Q9Vh0d76UsyQxDw_Xn6HHXjnVJR9rFKINnglSZi7VtfEr0kRamJ080oBZhjDXHNdEha4toXBV6r"/>
+<div class="flex-1">
+<h3 class="font-bold text-on-surface">Alex Johnson</h3>
+<p class="text-xs text-secondary flex items-center gap-1">
+                                    October 24 at 10:45 AM · <span class="material-symbols-outlined text-[14px]">public</span>
+</p>
+</div>
+<button class="hover:bg-gray-100 p-2 rounded-full transition-colors">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+<div class="px-4 pb-4">
+<p class="text-body-lg font-body-lg text-on-surface">Just finished setting up my new home office space. The lighting in the morning is absolutely perfect for focus sessions! ☕️💻</p>
+</div>
+<img alt="Home Office" class="w-full object-cover max-h-[500px]" data-alt="Modern minimalist home office with a large wooden desk, ergonomic chair, and floor-to-ceiling windows showing city skyline" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDd0CaokjHc57S8cxIjPaPGVj1634Ayz44iyRdUILjVIxxJX4I6RMvIhqWS0pOLKNsBeH9V-iN1r6aJGP9Ncw2Mmx4dCdXVaRayKKQZqGt_rvVIXjeaJx0itOQyheoFVzVCoXA9OSR0QQHCxdGEf7fIq_IVZ856aaf11UZ7XLH1v32esTjaPaK_7IMrxwQaIP--KN9gBXrIxCtwoe-fQsPd4a-LFOLL8s0tKKhourcn4hT4gdh2p5zNEHZDdS-K0xJCYvbjiM9acfEq"/>
+<div class="p-4">
+<div class="flex justify-between items-center text-secondary text-sm mb-3">
+<div class="flex items-center">
+<span class="bg-blue-500 rounded-full p-1 mr-1">
+<span class="material-symbols-outlined text-white text-[12px]" style="font-variation-settings: 'FILL' 1;">thumb_up</span>
+</span>
+<span>84</span>
+</div>
+<div class="flex gap-3">
+<span>12 comments</span>
+<span>3 shares</span>
+</div>
+</div>
+<div class="border-t border-gray-200 pt-1 flex justify-between">
+<button class="flex-1 flex items-center justify-center gap-2 py-2 hover:bg-gray-100 rounded-lg transition-colors text-[#1877F2] font-semibold">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">thumb_up</span>
+                                    Like
+                                </button>
+<button class="flex-1 flex items-center justify-center gap-2 py-2 hover:bg-gray-100 rounded-lg transition-colors text-secondary font-semibold">
+<span class="material-symbols-outlined">chat_bubble</span>
+                                    Comment
+                                </button>
+<button class="flex-1 flex items-center justify-center gap-2 py-2 hover:bg-gray-100 rounded-lg transition-colors text-secondary font-semibold">
+<span class="material-symbols-outlined">share</span>
+                                    Share
+                                </button>
+</div>
+</div>
+</article>
+<!-- Post Card 2 -->
+<article class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden mb-8">
+<div class="p-4 flex items-center gap-3">
+<img class="w-10 h-10 rounded-full" data-alt="Alex Johnson headshot" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDpKFWAdr_BbXB8zF-FLDJ8uj4fg0mbVbUjtFbiJWhFFXMpRWNMXYawXv8k1prpR87U5KICNParpphK5c_HqBRS-DDoo8QP8w7E8YjNKe9Tkrk8MIKJBgoH6B52uL11og8jh13q4idUb9zH38NyQMng3lenTAFasQ2JIV2TqptUAmjugSIMJv4-IpgKCWutrYFCg84GQRwsV-zUVdPKEpaEKPyl8YTkohjgUYsoM1zqVoQMt6X2DA3UG3mnelf_WrC7G4zqpqdoL0OS"/>
+<div class="flex-1">
+<h3 class="font-bold text-on-surface">Alex Johnson</h3>
+<p class="text-xs text-secondary flex items-center gap-1">
+                                    October 22 at 6:15 PM · <span class="material-symbols-outlined text-[14px]">group</span>
+</p>
+</div>
+<button class="hover:bg-gray-100 p-2 rounded-full transition-colors">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+<div class="px-4 pb-4">
+<p class="text-body-lg font-body-lg text-on-surface">Weekend hike was exactly what I needed. Nature has a way of resetting your perspective. 🌲🏔️</p>
+</div>
+<div class="p-4 pt-0">
+<div class="flex justify-between items-center text-secondary text-sm mb-3">
+<div class="flex items-center">
+<span class="bg-red-500 rounded-full p-1 mr-1">
+<span class="material-symbols-outlined text-white text-[12px]" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</span>
+<span>156</span>
+</div>
+<div class="flex gap-3">
+<span>45 comments</span>
+<span>8 shares</span>
+</div>
+</div>
+<div class="border-t border-gray-200 pt-1 flex justify-between">
+<button class="flex-1 flex items-center justify-center gap-2 py-2 hover:bg-gray-100 rounded-lg transition-colors text-secondary font-semibold">
+<span class="material-symbols-outlined">thumb_up</span>
+                                    Like
+                                </button>
+<button class="flex-1 flex items-center justify-center gap-2 py-2 hover:bg-gray-100 rounded-lg transition-colors text-secondary font-semibold">
+<span class="material-symbols-outlined">chat_bubble</span>
+                                    Comment
+                                </button>
+<button class="flex-1 flex items-center justify-center gap-2 py-2 hover:bg-gray-100 rounded-lg transition-colors text-secondary font-semibold">
+<span class="material-symbols-outlined">share</span>
+                                    Share
+                                </button>
+</div>
+</div>
+</article>
+</main>
+</div>
+</div>
+</div>
+</body></html>

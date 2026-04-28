@@ -50,6 +50,7 @@ export default function Register() {
     return (
         <div className="auth-shell">
             <form className="auth-card" onSubmit={submit}>
+                <div className="brand">Connect</div>
                 <h1>Создать аккаунт</h1>
                 <p className="subtitle">Поля со звёздочкой — обязательные</p>
 

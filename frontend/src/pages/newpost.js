@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import Navbar from '../components/Navbar';
 import { useRouter } from 'next/router';
+import Layout from '../components/Layout';
 import { fetchApi } from '../services/api';
 
 export default function NewPost() {
@@ -15,423 +15,221 @@ export default function NewPost() {
     const [selectedViewers, setSelectedViewers] = useState([]);
 
     useEffect(() => {
-        const fetchFollowers = async () => {
+        (async () => {
             try {
-                const response = await fetchApi('/followers');
-                if (response.ok) {
-                    const data = await response.json();
-                    setFollowers(data || []);
-                }
-            } catch (err) {
-                console.error("Failed to fetch followers:", err);
-            }
-        };
-        fetchFollowers();
+                const r = await fetchApi('/followers');
+                if (r.ok) setFollowers((await r.json()) || []);
+            } catch (_) {}
+        })();
     }, []);
 
-
-    const handleImageChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setImage(file);
-            setPreview(URL.createObjectURL(file));
-        }
+    const handleImage = (e) => {
+        const f = e.target.files[0];
+        if (f) { setImage(f); setPreview(URL.createObjectURL(f)); }
     };
 
-    const validateForm = () => {
-        if (content.trim().length === 0 || content.length > 10000) {
-            setError('Content must be between 1 and 10,000 characters.');
-            return false;
-        }
-        return true;
-    };
-
-    const handleSubmit = async (e) => {
+    const submit = async (e) => {
         e.preventDefault();
         setError('');
-
-        if (!validateForm()) return;
-
-        setLoading(true);
-        const formData = new FormData();
-        formData.append('content', content);
-        formData.append('privacy', privacy);
-        if (image) formData.append('image', image);
-        selectedViewers.forEach(id => formData.append('viewers', id));
-
-        try {
-            const response = await fetchApi('/posts/create', {
-                method: 'POST',
-                body: formData,
-            });
-
-            if (response.status === 401) {
-                router.push('/login');
-                return;
-            }
-
-            if (response.ok) {
-                router.push('/');
-            } else {
-                const msg = await response.text();
-                setError(msg || 'Failed to create post');
-            }
-        } catch (err) {
-            setError('Network error. Could not connect to the server.');
-        } finally {
-            setLoading(false);
+        if (content.trim().length === 0 || content.length > 10000) {
+            setError('Контент должен быть от 1 до 10 000 символов');
+            return;
         }
+        setLoading(true);
+        const fd = new FormData();
+        fd.append('content', content);
+        fd.append('privacy', privacy);
+        if (image) fd.append('image', image);
+        selectedViewers.forEach((id) => fd.append('viewers', id));
+        try {
+            const r = await fetchApi('/posts/create', { method: 'POST', body: fd });
+            if (r.status === 401) { router.push('/login'); return; }
+            if (r.ok) router.push('/');
+            else setError((await r.text()) || 'Не удалось создать пост');
+        } catch (err) { setError('Сервер недоступен'); }
+        finally { setLoading(false); }
+    };
+
+    const toggleViewer = (id) => {
+        setSelectedViewers((prev) =>
+            prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+        );
     };
 
     return (
-        <div className="layout">
-            <Navbar />
-            <main className="container">
-                <div className="form-card fade-in">
-                    <h1>Create New Post</h1>
+        <Layout title="Новый пост">
+            <form onSubmit={submit} className="card form">
+                {error && <div className="error">{error}</div>}
 
-                    {error && <div className="error-msg">{error}</div>}
+                <textarea
+                    placeholder="Что у вас нового?"
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    maxLength={10000}
+                    rows={5}
+                    required
+                />
 
-                    <form onSubmit={handleSubmit}>
-                        <div className="form-group">
-                            <label>Privacy</label>
-                            <div className="privacy-selector">
-                                {['public', 'almost_private', 'private'].map((p) => (
+                <div className="privacy-row">
+                    {[
+                        { v: 'public', icon: 'public', label: 'Public' },
+                        { v: 'almost_private', icon: 'group', label: 'Followers' },
+                        { v: 'private', icon: 'lock', label: 'Private' },
+                    ].map(({ v, icon, label }) => (
+                        <button
+                            key={v}
+                            type="button"
+                            className={`privacy-btn ${privacy === v ? 'active' : ''}`}
+                            onClick={() => setPrivacy(v)}
+                        >
+                            <span className="material-symbols-outlined" style={{ fontSize: 18 }}>{icon}</span>
+                            {label}
+                        </button>
+                    ))}
+                </div>
+
+                {privacy === 'private' && (
+                    <div className="viewers">
+                        <div className="viewers-title">
+                            Выберите кто увидит пост ({selectedViewers.length})
+                        </div>
+                        {followers.length === 0 ? (
+                            <div className="empty-state" style={{ padding: 16 }}>Нет подписчиков для приватного поста</div>
+                        ) : (
+                            <div className="viewers-grid">
+                                {followers.map((f) => (
                                     <button
-                                        key={p}
+                                        key={f.id}
                                         type="button"
-                                        className={privacy === p ? 'active' : ''}
-                                        onClick={() => setPrivacy(p)}
+                                        className={`viewer ${selectedViewers.includes(f.id) ? 'selected' : ''}`}
+                                        onClick={() => toggleViewer(f.id)}
                                     >
-                                        {p.replace('_', ' ')}
+                                        <div className="avatar" style={{ width: 32, height: 32, fontSize: 14 }}>
+                                            {(f.first_name || '?').slice(0, 1).toUpperCase()}
+                                        </div>
+                                        <span>{f.first_name} {f.last_name}</span>
                                     </button>
                                 ))}
                             </div>
-                        </div>
-
-                        {privacy === 'private' && (
-                            <div className="form-group fade-in">
-                                <label>Select Viewers 
-                                    <div className="label-actions">
-                                        <span className="helper">({selectedViewers.length} selected)</span>
-                                        {followers.length > 0 && (
-                                            <button type="button" className="text-btn" onClick={() => {
-                                                if (selectedViewers.length === followers.length) {
-                                                    setSelectedViewers([]);
-                                                } else {
-                                                    setSelectedViewers(followers.map(f => f.id));
-                                                }
-                                            }}>
-                                                {selectedViewers.length === followers.length ? 'Deselect All' : 'Select All'}
-                                            </button>
-                                        )}
-                                    </div>
-                                </label>
-                                <div className="viewer-grid">
-                                    {followers.length > 0 ? (
-                                        followers.map(f => (
-                                            <div key={f.id} 
-                                                className={`viewer-card ${selectedViewers.includes(f.id) ? 'selected' : ''}`}
-                                                onClick={() => {
-                                                    if (selectedViewers.includes(f.id)) {
-                                                        setSelectedViewers(selectedViewers.filter(id => id !== f.id));
-                                                    } else {
-                                                        setSelectedViewers([...selectedViewers, f.id]);
-                                                    }
-                                                }}
-                                            >
-                                                <div className="avatar">{f.first_name[0]}{f.last_name[0]}</div>
-                                                <span>{f.first_name} {f.last_name}</span>
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <div className="no-followers">No followers available to share with. Only accepted followers can view private posts.</div>
-                                    )}
-                                </div>
-                            </div>
                         )}
+                    </div>
+                )}
 
-                        <div className="form-group">
-                            <label>Image (Optional)</label>
-                            <div className="file-input-wrapper">
-                                <input type="file" accept="image/*" onChange={handleImageChange} id="image-upload" />
-                                <label htmlFor="image-upload" className="file-label">
-                                    {image ? image.name : 'Choose an image...'}
-                                </label>
-                            </div>
-                            {preview && (
-                                <div className="image-preview-container">
-                                    <img src={preview} alt="Preview" />
-                                    <button type="button" className="remove-img" onClick={() => { setImage(null); setPreview(null); }}>×</button>
-                                </div>
-                            )}
-                        </div>
+                <label className="image-row">
+                    <span className="material-symbols-outlined" style={{ color: 'var(--accent)' }}>photo_library</span>
+                    <span>{image ? image.name : 'Прикрепить изображение'}</span>
+                    <input type="file" accept="image/*" onChange={handleImage} hidden />
+                </label>
+                {preview && (
+                    <div className="preview">
+                        <img src={preview} alt="" />
+                        <button type="button" className="btn btn-danger remove" onClick={() => { setImage(null); setPreview(null); }}>
+                            ×
+                        </button>
+                    </div>
+                )}
 
-                        <div className="form-group">
-                            <label>Content <span className={content.length > 10000 ? 'text-danger' : ''}>({content.length}/10000)</span></label>
-                            <textarea
-                                value={content}
-                                maxLength={10100}
-                                onChange={(e) => setContent(e.target.value)}
-                                placeholder="Express yourself..."
-                                rows="10"
-                                required
-                            />
-                        </div>
-
-                        <div className="actions">
-                            <button type="button" className="cancel-btn" onClick={() => router.back()}>Cancel</button>
-                            <button type="submit" className="submit-btn" disabled={loading}>
-                                {loading ? 'Posting...' : 'Publish Post'}
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </main>
+                <button type="submit" className="btn submit" disabled={loading}>
+                    {loading ? 'Публикуем…' : 'Опубликовать'}
+                </button>
+            </form>
 
             <style jsx>{`
-                .layout {
-                    min-height: 100vh;
-                    background-color: var(--bg-main);
+                .form { display: flex; flex-direction: column; gap: 12px; padding: 20px; }
+                .error {
+                    background: #FFEBEE;
+                    border: 1px solid #FFCDD2;
+                    color: var(--error);
+                    padding: 10px 14px;
+                    border-radius: var(--radius);
+                    font-size: 14px;
                 }
-                .form-card {
-                    max-width: 800px;
-                    margin: 3rem auto;
-                    background: var(--card-bg);
-                    padding: 3rem;
-                    border-radius: 24px;
+                textarea {
+                    width: 100%;
+                    background: var(--bg);
                     border: 1px solid var(--border);
-                    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-                }
-                h1 {
-                    font-size: 2.5rem;
-                    font-weight: 800;
-                    margin-bottom: 2.5rem;
-                    background: linear-gradient(135deg, var(--primary), #6e8efb);
-                    -webkit-background-clip: text;
-                    -webkit-text-fill-color: transparent;
-                }
-                .form-group {
-                    margin-bottom: 2rem;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 0.75rem;
-                }
-                label {
-                    font-size: 0.9rem;
-                    font-weight: 700;
-                    color: var(--text-muted);
-                    text-transform: uppercase;
-                    letter-spacing: 0.05em;
-                    display: flex;
-                    justify-content: space-between;
-                }
-                input[type="text"], textarea {
-                    background: var(--bg-main);
-                    border: 2px solid var(--border);
-                    padding: 1.25rem;
-                    border-radius: 16px;
                     color: var(--text-main);
-                    font-size: 1.1rem;
-                    transition: all 0.3s;
+                    padding: 12px 14px;
+                    border-radius: var(--radius);
+                    font-size: 15px;
+                    resize: vertical;
+                    font-family: inherit;
                 }
-                input[type="text"]:focus, textarea:focus {
+                textarea:focus {
                     outline: none;
                     border-color: var(--primary);
-                    box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0.1);
+                    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.18);
                 }
-                .privacy-selector {
-                    display: flex;
-                    background: var(--bg-main);
-                    padding: 0.5rem;
-                    border-radius: 16px;
-                    gap: 0.5rem;
-                    border: 2px solid var(--border);
-                }
-                .privacy-selector button {
+                .privacy-row { display: flex; gap: 6px; }
+                .privacy-btn {
                     flex: 1;
-                    padding: 0.8rem;
-                    border-radius: 12px;
-                    border: none;
-                    background: transparent;
-                    color: var(--text-muted);
-                    font-weight: 700;
-                    text-transform: capitalize;
-                    cursor: pointer;
-                    transition: all 0.2s;
-                }
-                .privacy-selector button.active {
-                    background: var(--primary);
-                    color: white;
-                    box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.3);
-                }
-                .label-actions {
-                    display: flex;
-                    align-items: center;
-                    gap: 1rem;
-                }
-                .text-btn {
-                    background: transparent;
-                    border: none;
-                    color: var(--primary);
-                    font-size: 0.8rem;
-                    font-weight: 700;
-                    cursor: pointer;
-                    padding: 0;
-                    text-transform: uppercase;
-                }
-                .text-btn:hover {
-                    text-decoration: underline;
-                }
-                .viewer-grid {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-                    gap: 1rem;
-                    background: var(--bg-main);
-                    padding: 1rem;
-                    border-radius: 16px;
-                    max-height: 250px;
-                    overflow-y: auto;
-                    border: 2px solid var(--border);
-                }
-                .viewer-card {
-                    display: flex;
-                    align-items: center;
-                    gap: 0.75rem;
-                    padding: 0.75rem;
-                    background: var(--card-bg);
-                    border-radius: 12px;
-                    border: 2px solid var(--border);
-                    cursor: pointer;
-                    transition: all 0.2s;
-                }
-                .viewer-card:hover { border-color: var(--primary); }
-                .viewer-card.selected {
-                    border-color: var(--primary);
-                    background: rgba(var(--primary-rgb), 0.05);
-                }
-                .avatar {
-                    width: 32px;
-                    height: 32px;
-                    background: var(--primary);
-                    color: white;
-                    border-radius: 50%;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    font-size: 0.75rem;
-                    font-weight: 800;
-                }
-                .no-followers {
-                    grid-column: 1 / -1;
-                    padding: 2rem;
-                    text-align: center;
-                    color: var(--text-muted);
-                    font-style: italic;
-                }
-                .helper { font-weight: 400; text-transform: none; font-size: 0.8rem; }
-                .file-input-wrapper {
-                    position: relative;
-                }
-                #image-upload {
-                    position: absolute;
-                    width: 0.1px;
-                    height: 0.1px;
-                    opacity: 0;
-                }
-                .file-label {
-                    display: block;
-                    padding: 1rem;
-                    background: var(--bg-main);
-                    border: 2px dashed var(--border);
-                    border-radius: 16px;
-                    text-align: center;
-                    cursor: pointer;
-                    color: var(--text-muted);
+                    gap: 6px;
+                    background: var(--bg);
+                    color: var(--text-secondary);
+                    padding: 10px;
+                    border-radius: var(--radius);
                     font-weight: 600;
-                    transition: all 0.2s;
+                    font-size: 13px;
+                    transition: background 0.15s, color 0.15s;
                 }
-                .file-label:hover {
-                    border-color: var(--primary);
-                    color: var(--primary);
+                .privacy-btn:hover { background: var(--bg-hover); }
+                .privacy-btn.active { background: rgba(var(--primary-rgb), 0.12); color: var(--primary); }
+                .viewers { padding: 8px 0; }
+                .viewers-title { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; }
+                .viewers-grid {
+                    display: grid;
+                    grid-template-columns: repeat(2, 1fr);
+                    gap: 8px;
                 }
-                .image-preview-container {
-                    position: relative;
-                    margin-top: 1rem;
-                    border-radius: 16px;
-                    overflow: hidden;
-                    border: 2px solid var(--border);
-                }
-                .image-preview-container img {
-                    width: 100%;
-                    display: block;
-                    max-height: 400px;
-                    object-fit: contain;
-                    background: #111;
-                }
-                .remove-img {
-                    position: absolute;
-                    top: 10px;
-                    right: 10px;
-                    background: rgba(0,0,0,0.6);
-                    color: white;
-                    border: none;
-                    width: 32px;
-                    height: 32px;
-                    border-radius: 50%;
-                    cursor: pointer;
-                    font-size: 1.5rem;
+                .viewer {
                     display: flex;
                     align-items: center;
-                    justify-content: center;
-                }
-                .actions {
-                    display: flex;
-                    gap: 1.5rem;
-                    margin-top: 2rem;
-                }
-                .submit-btn {
-                    flex: 2;
-                    background: var(--primary);
-                    color: white;
-                    padding: 1.25rem;
-                    border-radius: 16px;
-                    border: none;
-                    font-weight: 800;
-                    font-size: 1.2rem;
-                    cursor: pointer;
-                    transition: all 0.3s;
-                }
-                .submit-btn:hover:not(:disabled) {
-                    transform: translateY(-3px);
-                    box-shadow: 0 10px 20px rgba(var(--primary-rgb), 0.4);
-                }
-                .cancel-btn {
-                    flex: 1;
-                    background: transparent;
-                    color: var(--text-muted);
-                    padding: 1.25rem;
-                    border-radius: 16px;
-                    border: 2px solid var(--border);
-                    font-weight: 700;
-                    cursor: pointer;
-                    transition: all 0.2s;
-                }
-                .cancel-btn:hover {
-                    background: var(--bg-hover);
+                    gap: 8px;
+                    padding: 8px;
+                    background: var(--bg);
+                    border-radius: var(--radius);
+                    text-align: left;
+                    font-size: 13px;
                     color: var(--text-main);
+                    transition: background 0.15s;
                 }
-                .error-msg {
-                    background: rgba(255, 77, 77, 0.1);
-                    color: #ff4d4d;
-                    padding: 1.25rem;
-                    border-radius: 16px;
-                    margin-bottom: 2rem;
-                    border: 2px solid rgba(255, 77, 77, 0.2);
-                    font-weight: 700;
+                .viewer:hover { background: var(--bg-hover); }
+                .viewer.selected { background: rgba(var(--primary-rgb), 0.12); color: var(--primary); }
+                .image-row {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    padding: 10px 14px;
+                    background: var(--bg);
+                    border-radius: var(--radius);
+                    cursor: pointer;
+                    font-size: 14px;
+                    font-weight: 600;
+                    color: var(--text-secondary);
+                    transition: background 0.15s;
                 }
-                .text-danger { color: #ff4d4d; }
+                .image-row:hover { background: var(--bg-hover); }
+                .preview {
+                    position: relative;
+                    border-radius: var(--radius);
+                    overflow: hidden;
+                }
+                .preview img { width: 100%; max-height: 400px; object-fit: cover; display: block; }
+                .preview .remove {
+                    position: absolute;
+                    top: 8px;
+                    right: 8px;
+                    width: 32px;
+                    height: 32px;
+                    padding: 0;
+                    border-radius: 50%;
+                    font-size: 18px;
+                }
+                .submit { padding: 12px; font-size: 15px; }
             `}</style>
-        </div>
+        </Layout>
     );
 }

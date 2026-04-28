@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-error-container": "#93000a",
+                      "secondary": "#54606a",
+                      "secondary-fixed-dim": "#bcc8d3",
+                      "primary": "#0058bc",
+                      "background": "#f8f9fe",
+                      "tertiary-fixed-dim": "#6adf4f",
+                      "on-tertiary-fixed": "#022100",
+                      "primary-fixed-dim": "#adc6ff",
+                      "surface-container-high": "#e7e8ec",
+                      "surface-tint": "#005bc0",
+                      "surface-container-low": "#f3f3f8",
+                      "on-background": "#191c1f",
+                      "secondary-fixed": "#d8e4f0",
+                      "surface-container": "#edeef2",
+                      "secondary-container": "#d8e4f0",
+                      "on-primary-container": "#fefcff",
+                      "tertiary-container": "#188700",
+                      "on-error": "#ffffff",
+                      "surface": "#f8f9fe",
+                      "surface-variant": "#e1e2e7",
+                      "primary-fixed": "#d8e2ff",
+                      "surface-dim": "#d9dade",
+                      "error-container": "#ffdad6",
+                      "surface-container-highest": "#e1e2e7",
+                      "tertiary": "#116b00",
+                      "primary-container": "#0070eb",
+                      "on-tertiary": "#ffffff",
+                      "error": "#ba1a1a",
+                      "on-surface-variant": "#414754",
+                      "inverse-surface": "#2e3134",
+                      "on-secondary-fixed-variant": "#3d4852",
+                      "surface-bright": "#f8f9fe",
+                      "on-surface": "#191c1f",
+                      "on-secondary-fixed": "#111d25",
+                      "on-primary-fixed": "#001a41",
+                      "on-primary-fixed-variant": "#004493",
+                      "outline-variant": "#c1c6d6",
+                      "on-primary": "#ffffff",
+                      "surface-container-lowest": "#ffffff",
+                      "outline": "#727785",
+                      "on-secondary-container": "#5a6670",
+                      "tertiary-fixed": "#86fd68",
+                      "on-secondary": "#ffffff",
+                      "inverse-primary": "#adc6ff",
+                      "inverse-on-surface": "#f0f0f5",
+                      "on-tertiary-container": "#f8ffef",
+                      "on-tertiary-fixed-variant": "#0b5300"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "md": "12px",
+                      "sidebar-width": "320px",
+                      "xs": "4px",
+                      "sm": "8px",
+                      "base": "4px",
+                      "xl": "20px",
+                      "container-max": "1200px",
+                      "lg": "16px",
+                      "feed-width": "680px"
+              },
+              "fontFamily": {
+                      "label-sm": ["Plus Jakarta Sans"],
+                      "headline-md": ["Plus Jakarta Sans"],
+                      "headline-lg": ["Plus Jakarta Sans"],
+                      "body-lg": ["Plus Jakarta Sans"],
+                      "body-md": ["Plus Jakarta Sans"],
+                      "label-md": ["Plus Jakarta Sans"]
+              },
+              "fontSize": {
+                      "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                      "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                      "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "label-md": ["13px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        body {
+            background-color: #F0F2F5; /* Matches Style Guidance Background Layer */
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .active-nav-border {
+            border-bottom: 4px solid #1877F2;
+        }
+    </style>
+</head>
+<body class="font-body-md text-on-surface antialiased">
+<!-- TopNavBar -->
+<header class="fixed top-0 w-full h-14 bg-white dark:bg-gray-900 flex items-center justify-between px-4 z-50 border-b border-gray-200 dark:border-gray-800 shadow-sm">
+<div class="flex items-center gap-2">
+<span class="text-[#1877F2] text-3xl font-black tracking-tighter cursor-pointer">Connect</span>
+<div class="hidden md:flex ml-2 relative">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-gray-500 text-[20px]">search</span>
+</div>
+<input class="bg-[#F0F2F5] dark:bg-gray-800 border-none rounded-full pl-10 pr-4 py-2 w-[240px] focus:ring-2 focus:ring-[#1877F2] text-sm" placeholder="Search Connect" type="text"/>
+</div>
+</div>
+<nav class="hidden lg:flex items-center h-full">
+<div class="flex h-full items-center">
+<div class="px-8 h-full flex items-center text-[#1877F2] border-b-4 border-[#1877F2] py-3 cursor-pointer">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+</div>
+<div class="px-8 h-full flex items-center text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg p-2 transition-colors cursor-pointer">
+<span class="material-symbols-outlined">group</span>
+</div>
+<div class="px-8 h-full flex items-center text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg p-2 transition-colors cursor-pointer">
+<span class="material-symbols-outlined">smart_display</span>
+</div>
+<div class="px-8 h-full flex items-center text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg p-2 transition-colors cursor-pointer">
+<span class="material-symbols-outlined">storefront</span>
+</div>
+<div class="px-8 h-full flex items-center text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg p-2 transition-colors cursor-pointer">
+<span class="material-symbols-outlined">groups</span>
+</div>
+</div>
+</nav>
+<div class="flex items-center gap-2">
+<button class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center hover:bg-gray-200 transition-colors active:scale-95">
+<span class="material-symbols-outlined text-black dark:text-white">apps</span>
+</button>
+<button class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center hover:bg-gray-200 transition-colors active:scale-95">
+<span class="material-symbols-outlined text-black dark:text-white">chat</span>
+</button>
+<button class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center hover:bg-gray-200 transition-colors active:scale-95">
+<span class="material-symbols-outlined text-black dark:text-white">notifications</span>
+</button>
+<img alt="User Profile" class="w-10 h-10 rounded-full object-cover ml-1 border border-gray-200 cursor-pointer" data-alt="Portrait of a smiling young professional man with short dark hair in a casual business setting, high clarity social media profile" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBYhmAN2vYoW2NTLPERpGVIWzyaI6oHKYLSwWOZR4uru4bGdkLLjrpOHUdaFUiHkYfSV10LynBlMveNM_cmwAk2fm8sGJc0k4XPFkWxLkuQEaOHV6Z4T3I80pU9eZ3G032CEpi_brZcPCthgZ5bsiy_uFe7m4_xHQDVYWsZaY0R-hw3AY4Q7vKkgRUfbnMUmfTLY8heSrMhTvfA5cA1c1ELJwt_XPU7tiP1dDsiDgWsO1-43f39GZNHnRbR0MAybE4j6Li05B59fxRO"/>
+</div>
+</header>
+<main class="flex justify-center pt-14 min-h-screen">
+<!-- SideNavBar Left -->
+<aside class="hidden lg:flex flex-col gap-1 p-2 w-[320px] sticky top-14 h-[calc(100vh-56px)] overflow-y-auto">
+<div class="flex items-center gap-3 p-3 bg-gray-200 dark:bg-gray-800 text-[#1877F2] rounded-lg cursor-pointer transition-all duration-200">
+<img class="w-9 h-9 rounded-full" data-alt="Portrait of Alex Johnson, professional man profile image" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAjR9v6Ke0TBSkpA0FBkMTBpxaP-ERsZhlK7FLIoJM1gisjuh3qv5yp53HMht5H60k2Pw5I-Lw_OdiWWtPMrDgPQizhlA7LAEZCcepyRKuSPUQvBPbcqAHHKTXg-PwHE8P3wRiH7GBKGARjrEKWacnn97-BC-sh8TGlEy557oxIjyYyzhzv6fvtYyyLr9tHLZuqEK1Yajp7j0WmtZNmHOmEf1D-aDLcgMq19KYDzNF5hZyP4elU_MDEJhwymRK_Co35bJaNy_WgGkHd"/>
+<div class="flex flex-col">
+<span class="font-semibold text-[15px]">Alex Johnson</span>
+<span class="text-xs text-gray-500">View your profile</span>
+</div>
+</div>
+<div class="flex items-center gap-3 p-3 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 cursor-pointer transition-all duration-200">
+<span class="material-symbols-outlined text-[#1877F2]">home</span>
+<span class="font-semibold text-[15px]">Home</span>
+</div>
+<div class="flex items-center gap-3 p-3 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 cursor-pointer transition-all duration-200">
+<span class="material-symbols-outlined text-[#1877F2]">group</span>
+<span class="font-semibold text-[15px]">Friends</span>
+</div>
+<div class="flex items-center gap-3 p-3 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 cursor-pointer transition-all duration-200">
+<span class="material-symbols-outlined text-[#1877F2]">groups</span>
+<span class="font-semibold text-[15px]">Groups</span>
+</div>
+<div class="flex items-center gap-3 p-3 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 cursor-pointer transition-all duration-200">
+<span class="material-symbols-outlined text-[#1877F2]">storefront</span>
+<span class="font-semibold text-[15px]">Marketplace</span>
+</div>
+<div class="flex items-center gap-3 p-3 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 cursor-pointer transition-all duration-200">
+<span class="material-symbols-outlined text-[#1877F2]">smart_display</span>
+<span class="font-semibold text-[15px]">Watch</span>
+</div>
+<div class="flex items-center gap-3 p-3 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 cursor-pointer transition-all duration-200">
+<span class="material-symbols-outlined text-[#1877F2]">history</span>
+<span class="font-semibold text-[15px]">Memories</span>
+</div>
+<div class="flex items-center gap-3 p-3 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 cursor-pointer transition-all duration-200">
+<div class="w-9 h-9 bg-gray-300 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-gray-600">expand_more</span>
+</div>
+<span class="font-semibold text-[15px]">See more</span>
+</div>
+<div class="mt-4 pt-4 border-t border-gray-300 mx-3">
+<span class="text-[#65676B] font-semibold text-[17px]">Your shortcuts</span>
+<div class="mt-2 space-y-1">
+<div class="flex items-center gap-3 p-3 text-gray-700 rounded-lg hover:bg-gray-200 cursor-pointer">
+<img class="w-9 h-9 rounded-lg object-cover" data-alt="Music production group icon, vibrant colorful studio setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHMxp3xYHB8ViZ4nXxiVg-gHi8ylCbsq-xHn0uxPFs0p4eR5MQk-Nm9s3DmxxCM9XQjFC3RljLlDvhDJjOLBXjYdJwJpbzSmeAeh2aGEB38KkvxwekdjmZbEGcmP39AKkkaXJbTp5y8sllwN10Jl3LdYyEHyNhOLmDuuQO4HHD87OQTS3Nbp9MtwCwQm8vvLkuPu0QuOD4Jtw77PWi-crrUg011HM20AgerjUkhOe50rXbwdfnq0YTlSu4mZ9ZIlotOs8oCB6RwRe9"/>
+<span class="font-semibold text-[15px]">Digital Creators</span>
+</div>
+</div>
+</div>
+</aside>
+<!-- Feed Column -->
+<div class="w-full max-w-[680px] px-4 py-6 flex flex-col gap-4">
+<!-- Stories Bar -->
+<div class="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+<!-- Create Story -->
+<div class="relative min-w-[120px] h-48 bg-white rounded-xl shadow-sm overflow-hidden flex flex-col cursor-pointer transition-transform hover:scale-[1.02]">
+<img class="h-32 w-full object-cover" data-alt="Portrait of a young man smiling, background story image" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCK2jqRFSRJYiJXCu2pjTVFCC5iABey2kVCOZdB4C-SYZHQ-kUyUpqnF7YqiMF9ShCu_BwKFyhIwoMNiyHyZnMAoU_GrRqJUUOBoKUp3WFuSi5Zse3EiKGNDwyV1SXeFDeAGafRnIroA5tuhI1R1CukTRNYYD3Lr3Q0021pxWvCH3hM8-fVDXDnAQmKQR6P3Q1zdMcJp3Zoatk7z7r80Lqz1KyEWcC-_uBNnV2EFWLN5BfXCuPspqn-k6g4bpFZiTJoJ9NEwOE0Wmcq"/>
+<div class="absolute top-[118px] left-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-[#1877F2] border-4 border-white flex items-center justify-center">
+<span class="material-symbols-outlined text-white">add</span>
+</div>
+<div class="mt-auto p-2 text-center">
+<span class="text-xs font-semibold">Create story</span>
+</div>
+</div>
+<!-- Friend Story 1 -->
+<div class="relative min-w-[120px] h-48 bg-gray-200 rounded-xl shadow-sm overflow-hidden cursor-pointer transition-transform hover:scale-[1.02]">
+<img class="w-full h-full object-cover" data-alt="Mountain landscape at sunrise with purple and orange sky, cinematic story background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_u8ZlFpzftRhueq6F2DlX0YN0kHGfvw8i7wpcDSDB4K7CjYp76HbveR0_R38x-_XGyOUuYJn620awH1STgG_TZ-Gve9T2jRthl6EZZwL5ZHoxXjVjux0PCIEsbnW5L0fszoTaFOgR2IB4LuWJ1pgtVHVPsI7NKA53Okke6xhWvPqbxBzoMHP9ZhRykwJEHuUc5Puiu1gSsNU-QjxMBeN0oJE0mrWMq94HQ2vQxrOk6_tGYSfHxun84cfWJuHQwDfIhwZ-QJs8c3BA"/>
+<div class="absolute top-2 left-2 w-10 h-10 rounded-full border-4 border-[#1877F2] overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Profile of a young woman laughing outdoors" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCfcg3njAVdki5uH7_UIVtpWMo0nukEMBWBoonvgCH2Xvv9NwqZJQUSG0J_yEIyiMGpUXW7-1xRqsyuiuFzPw-6e7wI2D6CGzXo5KXHqskON-XRF5225Ro0LvBKmXFydwydOD_Gw-WJi_QdDwAggImAhJcMH9aQnf-kHqgtYpv509bYlI1tzxcxn9UiLoNivuLeJ_2Wfytvv6Hbc3T0vYLHWmbC3ktmPvCnrNZPQ5YiyeJglE0TLUFd9sPTi44YsnkHuKnuIzkRigI0"/>
+</div>
+<span class="absolute bottom-2 left-2 text-white text-xs font-semibold">Sarah Jenkins</span>
+</div>
+<!-- Friend Story 2 -->
+<div class="relative min-w-[120px] h-48 bg-gray-200 rounded-xl shadow-sm overflow-hidden cursor-pointer transition-transform hover:scale-[1.02]">
+<img class="w-full h-full object-cover" data-alt="Interior of a modern chic cafe with industrial decor and warm lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBoCGca2zNX8PBInydVzSUey6QRuAIctVoQWC0gbUpiot4WRXeXRTyBUvbboRTiq-PFCZTR686DxzHHCmqA030Omk8CnuWhjEFzNWFmCPuedhUk3d6csLMCddOFo4br4OU9J_ltMzlryl0ce9TjaJW4FET6xeAFtdG59Q_qczL0xYH37kdj4OWx4CHiD2VLNZMVLshTAPYOP85dAp-LvU_nx0jqPSK8Zz3gF7gLhTPCZoBJ9iVodb_BNieDdMmmqwRSun0088nTqxpG"/>
+<div class="absolute top-2 left-2 w-10 h-10 rounded-full border-4 border-[#1877F2] overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Profile of a professional man with beard and stylish haircut" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDdElclQEChQp4MBXIbWhRksY4PdTk7GrQ9ETdEJFIEIcVG4SXE8R4JdbViVhbXgFCSarSDRbG_cN7jD4HI57VtxFGSChktOrU5-4mQIFFOpiq_qgMaP5YhfQsik2MtEi3NH_s-rFJd3WrVqz7A6jkL_PqU6tfHaCyd3VwlDN8kJopSF5lXl7-nxfCpuWkdR44o4sf8Lbb0xbDUIwWaWrwzEmmABjlv3fds3mGKPaFrvMRPK-3CKtHS4RS3rzuEcWaygxlinA7kiEsH"/>
+</div>
+<span class="absolute bottom-2 left-2 text-white text-xs font-semibold">Mike Chen</span>
+</div>
+<!-- Friend Story 3 -->
+<div class="relative min-w-[120px] h-48 bg-gray-200 rounded-xl shadow-sm overflow-hidden cursor-pointer transition-transform hover:scale-[1.02]">
+<img class="w-full h-full object-cover" data-alt="City skyline at night with vibrant neon lights and motion blur of cars" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCylM15ihj12iUWf3ApyF1ENXfNs9kdt87Sfjrd4ZRQ17hFfzGUu6S8tu62vwID5iUd8ZRmCYpckSpIp_fvbqTX9U3jsynuedbEvvpPl8Tj6nGhbcD5I_G9ItBoYhZsomH4bmR7epikrBUr5U2sXwIyXXBAfl-Zk31Cxi4C5V_2fcbI2_3bHVTLark8nz4MwHxJqLvwIhuL1cSdgO9_wlOqxv152mOA1CCvb_f_TXwOfcG1c4CNVgtg7vI7bbgFlGyD_B7PlEXgUtJF"/>
+<div class="absolute top-2 left-2 w-10 h-10 rounded-full border-4 border-[#1877F2] overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Profile of a woman with red hair looking into the sunset" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDJJrnHGM782dwpDm-aqped4PP_NR3pauaMuuXz3CFqGXAY8og26Ec395f_o1b1bYXe3flQmBER-88U0iML3pYorY-bRnCPG4jYyvYkw5RDKwx50p3jj5-OD3GCQ10kaHimuVDWsHGok9yJUJn4Zp2z8rOaYHql74k48ZuTLgjc9u99froc5kgCUDtk5V0hPqAlcLfnU3vsnyF62ftt2bLzzppU4RczqIs22q6ccDJRKaL1WWb659AvxbjG2b5Wpo9k-4PORGuubMy0"/>
+</div>
+<span class="absolute bottom-2 left-2 text-white text-xs font-semibold">Elena Rossi</span>
+</div>
+</div>
+<!-- Status Box -->
+<div class="bg-white rounded-lg shadow-sm p-4">
+<div class="flex gap-3 pb-3 border-b border-gray-100">
+<img class="w-10 h-10 rounded-full object-cover" data-alt="Alex Johnson profile picture for status box" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDIknnTu_U1AINk1yNG5X9oVnZhXmst1KbRRfEtBzGY1hqh5i5GrFEoLUTA90qxHIBtNXKTsR8z96iWa5QaI9UkYflb9yDAlSrvUyLYuzTsoXehQkm0FhvsVR4CaGHamD4eM5r8arG85bjnj-4hdT5gmBLivQiLmWsmFgA8oGbxwBRp4WsHos1x-KK5cif6MwdS5CztqRZQ_9sYw1LpAhbdm0e6FMu5fZ6exEaOFtnTm72mUM6xcBxDvzTFb6t9oKZHjLOW2TrZz9L9"/>
+<button class="flex-1 bg-[#F0F2F5] hover:bg-[#E4E6EB] text-[#65676B] text-left px-4 py-2 rounded-full transition-colors font-body-md">
+                        What's on your mind, Alex?
+                    </button>
+</div>
+<div class="flex justify-between mt-2">
+<button class="flex-1 flex items-center justify-center gap-2 p-2 hover:bg-gray-100 rounded-lg transition-colors">
+<span class="material-symbols-outlined text-[#F02849]">video_camera_front</span>
+<span class="text-[#65676B] font-semibold text-sm">Live video</span>
+</button>
+<button class="flex-1 flex items-center justify-center gap-2 p-2 hover:bg-gray-100 rounded-lg transition-colors">
+<span class="material-symbols-outlined text-[#45BD62]">photo_library</span>
+<span class="text-[#65676B] font-semibold text-sm">Photo/video</span>
+</button>
+<button class="flex-1 flex items-center justify-center gap-2 p-2 hover:bg-gray-100 rounded-lg transition-colors">
+<span class="material-symbols-outlined text-[#F7B928]">mood</span>
+<span class="text-[#65676B] font-semibold text-sm">Feeling/activity</span>
+</button>
+</div>
+</div>
+<!-- Post Feed - Item 1 -->
+<article class="bg-white rounded-lg shadow-sm overflow-hidden">
+<div class="p-4 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<img class="w-10 h-10 rounded-full object-cover cursor-pointer" data-alt="Avatar of Sarah Jenkins" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBGyCfQ_A8sqUE1avmUIjhSKWlnDmMmSCsbqIlkLfS2G90yv5zus3QKN6nfZU_ByVQzfGYuPgSM4TEAyRhgNODsIytZzQcfj2VbuIsGarJthCoSdzfMTlZ_VSX9QJB_YEC1UIy0s5hQRSjC03i4emjVd9f8KD82eIaTmXltceSw0NQ8y9qnSfUrrQbe2M1KvQQ2ezDiH6MTMD23e3x08A-OA0QlVHiKCUVa13c_nU14W2F-oNjJuuIi9HeVroGkCokd1ukryzOpNkCT"/>
+<div>
+<div class="font-bold hover:underline cursor-pointer">Sarah Jenkins</div>
+<div class="text-xs text-gray-500 flex items-center gap-1">
+                                2h · <span class="material-symbols-outlined text-[12px]">public</span>
+</div>
+</div>
+</div>
+<button class="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined text-gray-600">more_horiz</span>
+</button>
+</div>
+<div class="px-4 pb-3">
+<p class="font-body-md text-on-surface">The hike this morning was absolutely worth the early wake-up call. Nature has a way of resetting your perspective. 🌲✨</p>
+</div>
+<img class="w-full object-cover max-h-[500px]" data-alt="Stunning morning landscape of a misty forest with golden sunlight filtering through evergreen trees" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC8F5vSsVzVJzO-Vai1sBiEUV5KVP9O_gXFeTuqtXchHmHBibDsRz_legS2H8x0wd3uB6pxg19kljR2doFdyPT4phsQ8d1Uxmp5fze8OaPd84a0DRPCbUyz7QL7R1oxszh5_IzwCpszlEnwrO1xagzBHz2IxmLBqlOtpaaiztMuiXy9NEkIebH5JP-jy-qTruGyU-qkbuXep7YDMiR3oxy38aIsHTPPVT9OEjA-11IYOnWO3UqeruCecxz6zn9O6R-_Q0HtUSTEk_Y2"/>
+<div class="px-4 py-3 border-b border-gray-100 flex justify-between items-center text-gray-500 text-sm">
+<div class="flex items-center gap-1">
+<div class="bg-[#1877F2] w-4 h-4 rounded-full flex items-center justify-center text-[10px] text-white">
+<span class="material-symbols-outlined text-[10px]" style="font-variation-settings: 'FILL' 1;">thumb_up</span>
+</div>
+<div class="bg-[#F02849] w-4 h-4 rounded-full flex items-center justify-center text-[10px] text-white -ml-1.5 border border-white">
+<span class="material-symbols-outlined text-[10px]" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</div>
+<span>Alex and 124 others</span>
+</div>
+<div>
+<span>12 comments · 5 shares</span>
+</div>
+</div>
+<div class="flex px-4 py-1">
+<button class="flex-1 flex items-center justify-center gap-2 p-2 hover:bg-gray-100 rounded-lg transition-colors">
+<span class="material-symbols-outlined text-gray-600">thumb_up</span>
+<span class="text-[#65676B] font-semibold text-sm">Like</span>
+</button>
+<button class="flex-1 flex items-center justify-center gap-2 p-2 hover:bg-gray-100 rounded-lg transition-colors">
+<span class="material-symbols-outlined text-gray-600">chat_bubble</span>
+<span class="text-[#65676B] font-semibold text-sm">Comment</span>
+</button>
+<button class="flex-1 flex items-center justify-center gap-2 p-2 hover:bg-gray-100 rounded-lg transition-colors">
+<span class="material-symbols-outlined text-gray-600">share</span>
+<span class="text-[#65676B] font-semibold text-sm">Share</span>
+</button>
+</div>
+</article>
+<!-- Post Feed - Item 2 -->
+<article class="bg-white rounded-lg shadow-sm overflow-hidden">
+<div class="p-4 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<img class="w-10 h-10 rounded-full object-cover cursor-pointer" data-alt="Avatar of Mike Chen" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCb-C87bWKNhhf8ZKvq0nKm12PHNs9ecCwbKino1xRwZPPGShYB-dZtvz1KEQiWi4GOpko8-roVRn9KUsK20f35JFEDo7ZTzBp609Zki8wf_CVM9ZwKB9DPB_H4rALhl9Gdmkr8mFqvz9lXpYTUrhbye1nHDAjXsmKzgtS3zEsURKVUOownCb9EIGjKSpgjMv1-MAGncW67XO_fDW0BDz255aj24Px5O1-HxlfsU1ZIGyicOcRAOJ_Ll2HOx808otd7E_C9pYwl073k"/>
+<div>
+<div class="font-bold hover:underline cursor-pointer">Mike Chen</div>
+<div class="text-xs text-gray-500 flex items-center gap-1">
+                                5h · <span class="material-symbols-outlined text-[12px]">public</span>
+</div>
+</div>
+</div>
+<button class="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined text-gray-600">more_horiz</span>
+</button>
+</div>
+<div class="px-4 pb-3">
+<p class="font-body-md text-on-surface">Finally checked out that new place downtown. Best atmosphere for productive mornings. ☕💻</p>
+</div>
+<div class="px-4 py-3 border-b border-gray-100 flex justify-between items-center text-gray-500 text-sm">
+<div class="flex items-center gap-1">
+<div class="bg-[#1877F2] w-4 h-4 rounded-full flex items-center justify-center text-[10px] text-white">
+<span class="material-symbols-outlined text-[10px]" style="font-variation-settings: 'FILL' 1;">thumb_up</span>
+</div>
+<span>42 others</span>
+</div>
+<div>
+<span>3 comments</span>
+</div>
+</div>
+<div class="flex px-4 py-1">
+<button class="flex-1 flex items-center justify-center gap-2 p-2 hover:bg-gray-100 rounded-lg transition-colors">
+<span class="material-symbols-outlined text-gray-600">thumb_up</span>
+<span class="text-[#65676B] font-semibold text-sm">Like</span>
+</button>
+<button class="flex-1 flex items-center justify-center gap-2 p-2 hover:bg-gray-100 rounded-lg transition-colors">
+<span class="material-symbols-outlined text-gray-600">chat_bubble</span>
+<span class="text-[#65676B] font-semibold text-sm">Comment</span>
+</button>
+<button class="flex-1 flex items-center justify-center gap-2 p-2 hover:bg-gray-100 rounded-lg transition-colors">
+<span class="material-symbols-outlined text-gray-600">share</span>
+<span class="text-[#65676B] font-semibold text-sm">Share</span>
+</button>
+</div>
+</article>
+</div>
+<!-- Right Sidebar -->
+<aside class="hidden xl:flex flex-col gap-4 p-4 w-[320px] sticky top-14 h-[calc(100vh-56px)] overflow-y-auto">
+<!-- Sponsored Section -->
+<div class="border-b border-gray-300 pb-4">
+<span class="text-[#65676B] font-semibold text-[17px] mb-3 block">Sponsored</span>
+<div class="space-y-4">
+<div class="flex items-center gap-3 cursor-pointer hover:bg-gray-200 p-2 rounded-lg transition-colors">
+<img class="w-28 h-28 rounded-lg object-cover" data-alt="Sleek modern smart watch on a minimal white background, product advertising shot" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBrzUxPRxzAyXbXb4Jr28zm22TheEmJjLOnTTmaBzfhXHA5QUTnmy71HDGy3R1Zc2sapmCBeTtYqE3EbUibDCyxHXvCeCLRzwKQaRZHSwmeMeKwy0ZlyNm6QE3bBkmRomFImHZ2aEBEOWBCE-tff-2CwyVxPsioYMSmRFv2SimDJi1DEF6Hgc3RinSEeaXDV2NqKngh0enN0hqZA8Ge2tzqkYAH4TB1uAYSnAIKD1YT7-7zyDv5ow4zjFuohcKw6wYTz719_YRgzoD0"/>
+<div>
+<div class="font-semibold text-sm line-clamp-2">The Future of Wearables is Here</div>
+<div class="text-xs text-gray-500">techsmart.com</div>
+</div>
+</div>
+<div class="flex items-center gap-3 cursor-pointer hover:bg-gray-200 p-2 rounded-lg transition-colors">
+<img class="w-28 h-28 rounded-lg object-cover" data-alt="Red vibrant running shoes on a polished concrete floor, athletic brand promotion" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC71Obn3f5lai6Drm7zt70JttRhZAwqZ0SzK1dZFPsjPFqXf_EUkZXS4aGC_B4Q9GyESMODX8TMJ0Smd1VmC4zxb-dU48PmQR6QN36aw1UKxJh_auWGg1jWwj8v0KksZoLsUhUuImljWilofpMGHLll52TWdJKGl72hhKJWOrcCYiknjULVhWQPNE7YA4JFSmgLNAwQ7SMF0RhflSTUVh-fd8KdQz2mFnAHl2p0MVtaX0qdKHop9EUKuncLQixcRbAJ_Fn6NvtyxVr7"/>
+<div>
+<div class="font-semibold text-sm line-clamp-2">Step up your running game today</div>
+<div class="text-xs text-gray-500">velocitykicks.io</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Birthdays Notification -->
+<div class="border-b border-gray-300 pb-4">
+<span class="text-[#65676B] font-semibold text-[17px] mb-3 block">Birthdays</span>
+<div class="flex items-center gap-3 p-2 hover:bg-gray-200 rounded-lg cursor-pointer">
+<div class="text-[#F02849]">
+<span class="material-symbols-outlined text-[32px]">featured_seasonal_and_gifts</span>
+</div>
+<span class="text-sm">
+<span class="font-bold">Jordan Smith</span> and <span class="font-bold">2 others</span> have birthdays today.
+                    </span>
+</div>
+</div>
+<!-- Contacts Section -->
+<div>
+<div class="flex justify-between items-center mb-3">
+<span class="text-[#65676B] font-semibold text-[17px]">Contacts</span>
+<div class="flex gap-2">
+<span class="material-symbols-outlined text-gray-600 text-[20px] cursor-pointer hover:bg-gray-200 rounded-full p-1">video_call</span>
+<span class="material-symbols-outlined text-gray-600 text-[20px] cursor-pointer hover:bg-gray-200 rounded-full p-1">search</span>
+<span class="material-symbols-outlined text-gray-600 text-[20px] cursor-pointer hover:bg-gray-200 rounded-full p-1">more_horiz</span>
+</div>
+</div>
+<div class="space-y-1">
+<div class="flex items-center gap-3 p-2 hover:bg-gray-200 rounded-lg cursor-pointer transition-colors">
+<div class="relative">
+<img class="w-9 h-9 rounded-full object-cover" data-alt="Sarah Jenkins profile small" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCN52ghK2eLCCCMauDBu-CPCrxMcOhCI2NK0Di1piUSV3C1hky8L9Crp0ugn9sFa5JR3ZA1u-E8eNvWqqnRjNCvW_2P-biXNREp4VoI5FUi6v7Izms2o7NO-W-vnUKX0V_wYtCLB6oUWeW_KYkp4YZ7uSjLmtovCPsdBH52w5vthL6zpWcSjduImNQs_4ekPoSKwY7iHfCOSMT5EYCyWk4jEcU3Br91jpDtmC9umPfOP7ozrBBzgs00RjRZVRJyuUYA-Aiy7qsX1oHm"/>
+<div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
+</div>
+<span class="font-semibold text-sm">Sarah Jenkins</span>
+</div>
+<div class="flex items-center gap-3 p-2 hover:bg-gray-200 rounded-lg cursor-pointer transition-colors">
+<div class="relative">
+<img class="w-9 h-9 rounded-full object-cover" data-alt="Marcus Brown profile image" src="https://lh3.googleusercontent.com/aida-public/AB6AXuALQKlwRvCbQvmTvpC3KlLcrq9K5GKLMOQlfaVPOnA_8f0IYNHWoAKhCQmwfgculhfPx-MhuHhqCfPKxl6nCIVRtvpJl6hbrSqqKGyofOl1y6kxvOBCPrq7lBsNRl7BhmZfPBjC5sPzvU6zNQsBTvxvgNKpeNOq8uqnkHNthXLOavaY1qLYAWc_yPv2I7tmzaibV6jf4GCymEcFm4xetE0HQQhcUCdOorWGIo0DUFr2yuEPIq78mhiyYdHaPOCMg0POMDAxvn9OZ10D"/>
+<div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
+</div>
+<span class="font-semibold text-sm">Marcus Brown</span>
+</div>
+<div class="flex items-center gap-3 p-2 hover:bg-gray-200 rounded-lg cursor-pointer transition-colors">
+<div class="relative">
+<img class="w-9 h-9 rounded-full object-cover" data-alt="Elena Rossi profile image" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1eI0_GhTpiyvww4jU714OERzG-fOgLQ-r8E6iiBYaB7xGkhSSS_ywVEGb0RU_Qf-Xk473ZBx6OizMZqARwPSSSVeS0P-FITEjzLcxOjNtDXrASmU06IS5iMRz3J2V63z495HchafK7bV4IUkIcjMz2IM0ISsn3nK9qh-9MTI-WP96d0_NvcPH_Ub699sx2z7TC_gxA_YM6eZ3W7Dyzre0JXXyy5uv2tDBs7soJhC0LF0Evv0pbxWkyAma42qP4ClXVjCiuKhHDGCT"/>
+<div class="absolute bottom-0 right-0 w-3 h-3 bg-gray-400 border-2 border-white rounded-full"></div>
+</div>
+<span class="font-semibold text-sm">Elena Rossi</span>
+</div>
+</div>
+</div>
+</aside>
+</main>
+<!-- FAB (Suppressed on main feed per instructions, but kept for context if specifically requested, following mandate logic - Hidden here) -->
+</body></html>

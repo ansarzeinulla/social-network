@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error-container": "#93000a",
+                    "secondary": "#54606a",
+                    "secondary-fixed-dim": "#bcc8d3",
+                    "primary": "#0058bc",
+                    "background": "#f8f9fe",
+                    "tertiary-fixed-dim": "#6adf4f",
+                    "on-tertiary-fixed": "#022100",
+                    "primary-fixed-dim": "#adc6ff",
+                    "surface-container-high": "#e7e8ec",
+                    "surface-tint": "#005bc0",
+                    "surface-container-low": "#f3f3f8",
+                    "on-background": "#191c1f",
+                    "secondary-fixed": "#d8e4f0",
+                    "surface-container": "#edeef2",
+                    "secondary-container": "#d8e4f0",
+                    "on-primary-container": "#fefcff",
+                    "tertiary-container": "#188700",
+                    "on-error": "#ffffff",
+                    "surface": "#f8f9fe",
+                    "surface-variant": "#e1e2e7",
+                    "primary-fixed": "#d8e2ff",
+                    "surface-dim": "#d9dade",
+                    "error-container": "#ffdad6",
+                    "surface-container-highest": "#e1e2e7",
+                    "tertiary": "#116b00",
+                    "primary-container": "#0070eb",
+                    "on-tertiary": "#ffffff",
+                    "error": "#ba1a1a",
+                    "on-surface-variant": "#414754",
+                    "inverse-surface": "#2e3134",
+                    "on-secondary-fixed-variant": "#3d4852",
+                    "surface-bright": "#f8f9fe",
+                    "on-surface": "#191c1f",
+                    "on-secondary-fixed": "#111d25",
+                    "on-primary-fixed": "#001a41",
+                    "on-primary-fixed-variant": "#004493",
+                    "outline-variant": "#c1c6d6",
+                    "on-primary": "#ffffff",
+                    "surface-container-lowest": "#ffffff",
+                    "outline": "#727785",
+                    "on-secondary-container": "#5a6670",
+                    "tertiary-fixed": "#86fd68",
+                    "on-secondary": "#ffffff",
+                    "inverse-primary": "#adc6ff",
+                    "inverse-on-surface": "#f0f0f5",
+                    "on-tertiary-container": "#f8ffef",
+                    "on-tertiary-fixed-variant": "#0b5300"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "md": "12px",
+                    "sidebar-width": "320px",
+                    "xs": "4px",
+                    "sm": "8px",
+                    "base": "4px",
+                    "xl": "20px",
+                    "container-max": "1200px",
+                    "lg": "16px",
+                    "feed-width": "680px"
+            },
+            "fontFamily": {
+                    "label-sm": ["Plus Jakarta Sans"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "body-lg": ["Plus Jakarta Sans"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "label-md": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "label-md": ["13px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #F0F2F5;
+        }
+    </style>
+</head>
+<body class="font-body-md text-on-surface antialiased">
+<!-- TopNavBar -->
+<header class="fixed top-0 w-full h-14 flex items-center justify-between px-4 z-50 bg-white border-b border-gray-200 shadow-sm font-['Plus_Jakarta_Sans'] text-sm antialiased">
+<div class="flex items-center gap-2">
+<span class="text-[#1877F2] text-3xl font-black tracking-tighter cursor-pointer active:scale-95 transition-transform">Connect</span>
+<div class="relative ml-4 hidden md:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+<input class="bg-[#F0F2F5] border-none rounded-full py-2 pl-10 pr-4 w-64 focus:ring-2 focus:ring-[#1877F2] text-sm" placeholder="Search Connect" type="text"/>
+</div>
+</div>
+<nav class="hidden lg:flex items-center gap-1 h-full">
+<div class="text-[#1877F2] border-b-4 border-[#1877F2] py-3 px-6 cursor-pointer flex items-center">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+</div>
+<div class="text-gray-500 hover:bg-gray-100 rounded-lg p-2 mx-2 cursor-pointer transition-colors duration-200 flex items-center">
+<span class="material-symbols-outlined">group</span>
+</div>
+<div class="text-gray-500 hover:bg-gray-100 rounded-lg p-2 mx-2 cursor-pointer transition-colors duration-200 flex items-center">
+<span class="material-symbols-outlined">smart_display</span>
+</div>
+<div class="text-gray-500 hover:bg-gray-100 rounded-lg p-2 mx-2 cursor-pointer transition-colors duration-200 flex items-center">
+<span class="material-symbols-outlined">storefront</span>
+</div>
+</nav>
+<div class="flex items-center gap-2">
+<div class="bg-gray-100 p-2 rounded-full cursor-pointer hover:bg-gray-200 transition-colors">
+<span class="material-symbols-outlined text-black" data-icon="apps">apps</span>
+</div>
+<div class="bg-gray-100 p-2 rounded-full cursor-pointer hover:bg-gray-200 transition-colors">
+<span class="material-symbols-outlined text-black" data-icon="chat">chat</span>
+</div>
+<div class="bg-gray-100 p-2 rounded-full cursor-pointer hover:bg-gray-200 transition-colors">
+<span class="material-symbols-outlined text-black" data-icon="notifications">notifications</span>
+</div>
+<img alt="User profile" class="w-10 h-10 rounded-full cursor-pointer active:scale-95 transition-transform" data-alt="professional headshot of a friendly man with a subtle smile, clean background, warm studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBrG9Wgb2BosQp40f_CMOaotEv992u9TmzNnypcvKtL7ViZSq6opeMiFnflsGIi8H3XPYQ0_9GfiTg2k-nH59i1YOLH9tovagdw1t9r4urD60JUGnz46uqa8anIa73IUtutCuTp9dRJ6r3O5eW9Uwm39xZvvfWB-GNY7yOJg2o5QO0mLsEvM0pHoLd88Aj9eTMhYkLAKYcdY4jMhY7mZNh-kZSW8C141eo0s7m8tyPR9kPJGKCfvG7wlcrNbxGAxfJEjBV-gcpdKCpC"/>
+</div>
+</header>
+<div class="flex pt-14">
+<!-- SideNavBar -->
+<aside class="hidden lg:flex flex-col gap-1 p-2 w-[320px] h-[calc(100vh-56px)] sticky top-14 overflow-y-auto font-['Plus_Jakarta_Sans'] font-semibold text-[15px]">
+<div class="px-2 py-4 flex items-center justify-between">
+<h2 class="text-2xl font-bold">Friends</h2>
+<div class="bg-gray-200 p-2 rounded-full flex items-center">
+<span class="material-symbols-outlined text-lg">settings</span>
+</div>
+</div>
+<nav class="flex flex-col gap-1">
+<a class="bg-gray-200 text-[#1877F2] rounded-lg p-3 flex items-center gap-3 transition-all duration-200" href="#">
+<div class="bg-[#1877F2] text-white p-2 rounded-full flex items-center">
+<span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">group</span>
+</div>
+<span>Home</span>
+</a>
+<a class="text-gray-700 hover:bg-gray-200 rounded-lg p-3 flex items-center gap-3 transition-all duration-200" href="#">
+<div class="bg-gray-200 text-black p-2 rounded-full flex items-center">
+<span class="material-symbols-outlined text-lg">person_remove</span>
+</div>
+<div class="flex-1 flex items-center justify-between">
+<span>Friend Requests</span>
+<span class="material-symbols-outlined text-gray-400">chevron_right</span>
+</div>
+</a>
+<a class="text-gray-700 hover:bg-gray-200 rounded-lg p-3 flex items-center gap-3 transition-all duration-200" href="#">
+<div class="bg-gray-200 text-black p-2 rounded-full flex items-center">
+<span class="material-symbols-outlined text-lg">person_add</span>
+</div>
+<div class="flex-1 flex items-center justify-between">
+<span>Suggestions</span>
+<span class="material-symbols-outlined text-gray-400">chevron_right</span>
+</div>
+</a>
+<a class="text-gray-700 hover:bg-gray-200 rounded-lg p-3 flex items-center gap-3 transition-all duration-200" href="#">
+<div class="bg-gray-200 text-black p-2 rounded-full flex items-center">
+<span class="material-symbols-outlined text-lg">list</span>
+</div>
+<div class="flex-1 flex items-center justify-between">
+<span>All Friends</span>
+<span class="material-symbols-outlined text-gray-400">chevron_right</span>
+</div>
+</a>
+<a class="text-gray-700 hover:bg-gray-200 rounded-lg p-3 flex items-center gap-3 transition-all duration-200" href="#">
+<div class="bg-gray-200 text-black p-2 rounded-full flex items-center">
+<span class="material-symbols-outlined text-lg">cake</span>
+</div>
+<span>Birthdays</span>
+</a>
+<a class="text-gray-700 hover:bg-gray-200 rounded-lg p-3 flex items-center gap-3 transition-all duration-200" href="#">
+<div class="bg-gray-200 text-black p-2 rounded-full flex items-center">
+<span class="material-symbols-outlined text-lg">person_pin</span>
+</div>
+<div class="flex-1 flex items-center justify-between">
+<span>Custom Lists</span>
+<span class="material-symbols-outlined text-gray-400">chevron_right</span>
+</div>
+</a>
+</nav>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 p-6 md:p-8 max-w-[1200px] mx-auto">
+<!-- Friend Requests Section -->
+<section class="mb-10">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-xl font-bold text-on-surface">Friend Requests</h3>
+<a class="text-[#1877F2] font-semibold hover:bg-gray-100 px-2 py-1 rounded transition-colors" href="#">See All</a>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+<!-- Request Card 1 -->
+<div class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100 flex flex-col">
+<img alt="Profile photo" class="w-full h-48 object-cover" data-alt="vibrant portrait of a woman with a bright smile, natural outdoor lighting, shallow depth of field" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDhxVvnFcXAxaBgAywICuY19sVzrNaQKrktl22T9qsBPXXy-6iNFuHZk1QEzNaBJZEI9OQDV7GO-_sEv0cUUrGoCh8X9yiCw-hMd19iZZVHP_b7ho8Ckg73mHAARCjxBxBvoIY7PrIKH8BYEPhXVoM9ALPrWgMfyHaMBoy7szb6KTYcRxfD0Xpa7edYReGIgF6nGb-Z-g328mhUZx9gkWN4DU05KJ42TrkrBOVH3EktZsh2eMjLU16l9V-A6c1GWpO_ea-DxqWgGSEs"/>
+<div class="p-3 flex-1 flex flex-col gap-1">
+<span class="font-bold text-[17px]">Sarah Jenkins</span>
+<div class="flex items-center gap-1 text-secondary mb-3">
+<div class="flex -space-x-2">
+<img class="w-5 h-5 rounded-full border-2 border-white" data-alt="avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCrvn_oeO6G_O2tBmzatNR_za_sjzR9VZWYKkdrEoNhVrnFI_ENl8W2Qbe4DL6omjLfF3i1an2oYZ7-nBR-aGudXUWjTYgCwF1z1RXkVob8lAaLT2G0yKdAjL87km_8j-yVxOIsvTVCUd5nfq2XV3cJ7lLFCZ_z25LxXaNH1W5OBH5lLE2E-HzZDfO6fj2pRedUenS3fXSRponEGfOXgqBvnoBTP6JLy6SNGYicGsYiD-rBYjNzCBM0d3hA_aMJrNAX1A_BdvQGDTWT"/>
+<img class="w-5 h-5 rounded-full border-2 border-white" data-alt="avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQMwFxeXFJ0nH7awvyiQf9GKCyKJ-KYsi5nXFi4NylmjtRmWFmHqi_6qrRd7VKqr5avSvkAEXiYVT917FYEl2Big2hjuHipN3EV3xCF_mIcD6552yT2VwqE9JHahG4qe0PSnYGFXr1A2jT7e66Shw1FT5-52QTBaDpM2NU8l-WvEFedjagL-zN9cKnRIcGIeQbzE6wrUTCU4s2mcVpwYh69xWVUDrA9V6xHWfvgXr3L3vBIPI3kbh_UkVQTZv_RP_pR_X9G5IhxFni"/>
+</div>
+<span class="text-xs ml-1">12 mutual friends</span>
+</div>
+<div class="flex flex-col gap-2 mt-auto">
+<button class="bg-primary-container text-on-primary-container py-2 rounded-lg font-semibold hover:opacity-90 transition-opacity active:scale-95">Confirm</button>
+<button class="bg-surface-container-high text-on-surface py-2 rounded-lg font-semibold hover:bg-gray-300 transition-colors active:scale-95">Delete</button>
+</div>
+</div>
+</div>
+<!-- Request Card 2 -->
+<div class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100 flex flex-col">
+<img alt="Profile photo" class="w-full h-48 object-cover" data-alt="modern close-up of a man in urban setting, wearing spectacles, confident expression, soft bokeh background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCa1-uoEQ7rI8jvdSkJLjBt5JdfjG31iwVK8IqgmZjOACcZQhz99UUKiaKnjZ54YDunKoYHkx0soYBAsYZtBidbQCZ75N4RxIJRxx3wSEiUYJXyzVRCBNd-AI9KvwgDP5CdrJQxsQAeRFflWcsKaXiyY4yfwlmGiW-I_AkQBYDKWJ2KMyG0iOjbB1Oz0TJAGOwoOcE82nAZWqhOfCJsq2KzAh7uCa3oTBhDwYfIPQqOcVLS7KCelLugjymvC570CkswuW_mJrfHtP6c"/>
+<div class="p-3 flex-1 flex flex-col gap-1">
+<span class="font-bold text-[17px]">Marcus Chen</span>
+<div class="flex items-center gap-1 text-secondary mb-3">
+<div class="flex -space-x-2">
+<img class="w-5 h-5 rounded-full border-2 border-white" data-alt="avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCLNb9l45SUsgYixxkn9cLXJzsjs2tpUZxiPWP4EJKqSPmdkxlg8xOmdq3mhpU2ulnSzfT5rqyLaQA7zH4YBe4_i9OWAfOfR_pP2DSL5vLoBd2DbyPf2nTJVSbcURRCF5FboSzRrog5WZAKYgQUHRWbX34WzN2K7efaEABCkjJCvetw-4ub8XHwEtaDpAvxz_Rjpd4hOBZJ6gG63kgYEr6RdWaFVbc9xzBGpZlOBlQrmgc77eE_bMPFZRIR9sMBX80vwApLdlpIuZ3a"/>
+</div>
+<span class="text-xs ml-1">3 mutual friends</span>
+</div>
+<div class="flex flex-col gap-2 mt-auto">
+<button class="bg-primary-container text-on-primary-container py-2 rounded-lg font-semibold hover:opacity-90 transition-opacity active:scale-95">Confirm</button>
+<button class="bg-surface-container-high text-on-surface py-2 rounded-lg font-semibold hover:bg-gray-300 transition-colors active:scale-95">Delete</button>
+</div>
+</div>
+</div>
+<!-- Quick suggestions/Ghost cards for visual rhythm -->
+<div class="hidden xl:flex flex-col gap-3 p-4 bg-surface-container-low rounded-xl border border-dashed border-gray-300 items-center justify-center text-center">
+<span class="material-symbols-outlined text-4xl text-gray-400">person_search</span>
+<p class="text-sm font-medium text-gray-500">More requests are pending your review.</p>
+<button class="text-[#1877F2] font-semibold text-sm">View All</button>
+</div>
+</div>
+</section>
+<hr class="border-gray-300 mb-10"/>
+<!-- People You May Know Section -->
+<section>
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-xl font-bold text-on-surface">People You May Know</h3>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+<!-- Suggestion Cards -->
+<div class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100">
+<img alt="Profile photo" class="w-full h-48 object-cover" data-alt="stylized portrait of a young woman with neon lighting accents, creative mood, focused expression" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDq1UFwLU-w5mgD7zqitH8R6ijnAALj6n6H49_BSJn6LyBWhuASac3woDabOwTRlP-KvrKDjUMQMo5dF43miDcC--_KSYiCgH9XOBeGMxO-q-aWyNvwbA7LRcUetNTf9x7C-6wrXvfkXA1sjChgycqivHDl6E5xX_rD6SN_vVrA0btAoWGRMRzW-NL8n22WDskSCs0oVV21xSBFe5716OpQyiGPj6EsS6ucu8QhZrgddIZ28MfNDw6FVR_FvKy4YbMBaUEGea72uitB"/>
+<div class="p-3">
+<span class="font-bold text-[17px] block truncate">Emily Rivera</span>
+<span class="text-xs text-secondary mb-3 block">8 mutual friends</span>
+<button class="w-full bg-[#E7F3FF] text-[#1877F2] py-2 rounded-lg font-semibold flex items-center justify-center gap-1 hover:bg-[#DCEBFB] transition-colors">
+<span class="material-symbols-outlined text-[20px]">person_add</span>
+                                Add Friend
+                            </button>
+</div>
+</div>
+<div class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100">
+<img alt="Profile photo" class="w-full h-48 object-cover" data-alt="close up headshot of a smiling man with a beard, natural daylight, soft green background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDL0sNDLWSdReAZq_0b3kt_oHpSXxWyLPb8MsYWRbYr7RlqhrXlzQ5i9XHJfeQZC4djhTOYTja4sideXzHmNzF5FaytsnRbSWyefI7_so88ow9Hr49afBtdlkxsGgpOTCeOLP3eBvPe9V3d2w_fjYlxgRyix-LuW2EjKmwJ2Oxp4-ndRoEwOVbEJB8Nx4I5miNM0_yIeyCJgBnAuRAJMVZDZMFeP3zKzdxQ9OQeYPx6gtGZs7YZZPbGoOrTOyS8Q-UcMk89l9SW4zvK"/>
+<div class="p-3">
+<span class="font-bold text-[17px] block truncate">David Wilson</span>
+<span class="text-xs text-secondary mb-3 block">25 mutual friends</span>
+<button class="w-full bg-[#E7F3FF] text-[#1877F2] py-2 rounded-lg font-semibold flex items-center justify-center gap-1 hover:bg-[#DCEBFB] transition-colors">
+<span class="material-symbols-outlined text-[20px]">person_add</span>
+                                Add Friend
+                            </button>
+</div>
+</div>
+<div class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100">
+<img alt="Profile photo" class="w-full h-48 object-cover" data-alt="portrait of a woman in high fashion attire, minimalist background, crisp lighting, elegant pose" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5eJbTBv_0zkBIOSsPWlJy4iCLPr3VhLubR-NInhzi08simUoRxB8UFcHGF_zEzkfi1bxMR3vM2-Aj8KcCKOIM6Sqr5FC8XFyIpNNO_URzoAUqPk3RcNWVRp7f9sFXLEbN4Nb3jDIllsDdGuBGnS4ArQtsXHTxj_-_j5FhLCWjEfeOamL8PAu7jFMl2vCNboaj3jmOlQpQTyc5Zq9TBpBeDe8ky1P4sZrClmhf8xoXaKOwVWwDNFJIC8WDQ8pKQvmzOcl49hqwfmaR"/>
+<div class="p-3">
+<span class="font-bold text-[17px] block truncate">Chloe Thompson</span>
+<span class="text-xs text-secondary mb-3 block">Connects via Sarah J.</span>
+<button class="w-full bg-[#E7F3FF] text-[#1877F2] py-2 rounded-lg font-semibold flex items-center justify-center gap-1 hover:bg-[#DCEBFB] transition-colors">
+<span class="material-symbols-outlined text-[20px]">person_add</span>
+                                Add Friend
+                            </button>
+</div>
+</div>
+<div class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100">
+<img alt="Profile photo" class="w-full h-48 object-cover" data-alt="serene portrait of a man looking off-camera, warm sunset lighting, coastal environment blurred background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDXdWbZONB8MJAd11KKNsudIF5wvr2T592m5kdvYBvcKmXT32qzG6WPqqBto2yJaNg9rudY35JheZ1xEApk1PWxFTa4zw70v-DOT2k1Mn4VjdgUoXyzmdUMw-HpmMv3nzRm2zt1oNZzJvSlp8LAyIqgsNWbjVQTYetgA9FaZS1VGvoelvyBmBLN5USvUBvIuqhVpc30ALX6_P1gapshc2geee4JB9uY12oldr8IikfUs4R9Ap13X9-72OQIIpWK-S02MASSFH5KOs0F"/>
+<div class="p-3">
+<span class="font-bold text-[17px] block truncate">James Miller</span>
+<span class="text-xs text-secondary mb-3 block">18 mutual friends</span>
+<button class="w-full bg-[#E7F3FF] text-[#1877F2] py-2 rounded-lg font-semibold flex items-center justify-center gap-1 hover:bg-[#DCEBFB] transition-colors">
+<span class="material-symbols-outlined text-[20px]">person_add</span>
+                                Add Friend
+                            </button>
+</div>
+</div>
+<div class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100">
+<img alt="Profile photo" class="w-full h-48 object-cover" data-alt="portrait of a creative professional woman in a studio setting, soft fill light, clean gray background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBAnPhcJym_imRGG3oj0ru6IFVcTGdb_WRVdU8AG48PKP97lDz9js2jkcxzEROQKd3jOqNIxQK91hXhEzFppsB661f3z1RzZrNP6S-NUba09olGS27-pGHSrETKeNBcxkuwYMIINcRlxdjv2wLh04hK77rLMI8JiVHvxP57Pw-htKivsq5diNRBgl_-aYgEgSv6xx2moYO5fAWuAAVZrEh8-aJWywbU0g5h4dxXoGYOba0Ay9F6QLNoUv9qjjNB1EGpBQ8VRzkv2BXp"/>
+<div class="p-3">
+<span class="font-bold text-[17px] block truncate">Sophia Garcia</span>
+<span class="text-xs text-secondary mb-3 block">12 mutual friends</span>
+<button class="w-full bg-[#E7F3FF] text-[#1877F2] py-2 rounded-lg font-semibold flex items-center justify-center gap-1 hover:bg-[#DCEBFB] transition-colors">
+<span class="material-symbols-outlined text-[20px]">person_add</span>
+                                Add Friend
+                            </button>
+</div>
+</div>
+</div>
+</section>
+</main>
+</div>
+<!-- Mobile Navigation (Responsive Pivot) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 h-16 flex items-center justify-around z-50">
+<div class="flex flex-col items-center gap-1 text-[#1877F2]">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="text-[10px] font-bold">Home</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-gray-500">
+<span class="material-symbols-outlined">group</span>
+<span class="text-[10px]">Friends</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-gray-500">
+<span class="material-symbols-outlined">smart_display</span>
+<span class="text-[10px]">Watch</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-gray-500">
+<span class="material-symbols-outlined">storefront</span>
+<span class="text-[10px]">Market</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-gray-500">
+<span class="material-symbols-outlined">notifications</span>
+<span class="text-[10px]">Alerts</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-gray-500">
+<span class="material-symbols-outlined">menu</span>
+<span class="text-[10px]">Menu</span>
+</div>
+</nav>
+</body></html>
