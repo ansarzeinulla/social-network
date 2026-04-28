@@ -14,7 +14,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-const avatarUploadDir = "./uploads/avatars"
+const avatarUploadDir = "./data/uploads"
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	user, err := parseRegistration(r)

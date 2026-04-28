@@ -21,8 +21,10 @@ services:
     ports:
       - "8080:8080" # exposed for direct access during dev (curl, tests)
     volumes:
-      - ./backend/pkg/db/sqlite:/app/pkg/db/sqlite
-      - ./backend/uploads:/app/uploads
+      # Runtime data only — DB file and uploaded images. Source code stays
+      # baked into the image. Named volume = no bind-mount perms issues
+      # on a fresh `git clone`.
+      - backend_data:/app/data
     restart: always
 
   frontend:
@@ -36,9 +38,8 @@ services:
     depends_on:
       - backend
     environment:
-      # When served behind Caddy at http://localhost, the browser uses
-      # same-origin URLs. NEXT_PUBLIC_API_URL is intentionally empty so
-      # api.js generates "/api/...".
+      # Behind Caddy at http://localhost the browser uses same-origin URLs.
+      # NEXT_PUBLIC_API_URL is intentionally empty so api.js generates "/api/...".
       - NEXT_PUBLIC_API_URL=
       - NEXT_PUBLIC_USE_MOCK_FOLLOWERS=false
       - NEXT_PUBLIC_USE_MOCK_PROFILE=false
@@ -51,3 +52,4 @@ services:
 volumes:
   caddy_data:
   caddy_config:
+  backend_data:

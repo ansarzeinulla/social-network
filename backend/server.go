@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"os"
 
 	"social-network/pkg/db/sqlite"
 	"social-network/pkg/handlers"
@@ -11,7 +12,13 @@ import (
 )
 
 func main() {
-	if err := sqlite.InitDB("./pkg/db/sqlite/social_network.db", "pkg/db/migrations/sqlite"); err != nil {
+	// Runtime data (DB + uploaded files) lives in ./data/ which is mounted as
+	// a Docker named volume. Source code in pkg/db/sqlite/ stays read-only.
+	if err := os.MkdirAll("./data/uploads", 0755); err != nil {
+		fmt.Printf("Error creating data dir: %v\n", err)
+		return
+	}
+	if err := sqlite.InitDB("./data/social_network.db", "pkg/db/migrations/sqlite"); err != nil {
 		fmt.Printf("Error initializing database: %v\n", err)
 		return
 	}
@@ -69,8 +76,8 @@ func main() {
 	// WebSocket
 	mux.HandleFunc("/ws", ws.ServeWS)
 
-	// Static files
-	mux.Handle("/uploads/", http.StripPrefix("/uploads/", http.FileServer(http.Dir("./uploads"))))
+	// Static files served from ./data/uploads
+	mux.Handle("/uploads/", http.StripPrefix("/uploads/", http.FileServer(http.Dir("./data/uploads"))))
 
 	fmt.Println("Server running on :8080")
 	http.ListenAndServe(":8080", middleware.CORSMiddleware(mux))

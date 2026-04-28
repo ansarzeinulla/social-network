@@ -88,11 +88,11 @@ func UpdatePostHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Handle Image
 	imageUrl := existing.ImageURL
-	newImage, err := utils.ProcessImageUpload(r, "image", "./uploads")
+	newImage, err := utils.ProcessImageUpload(r, "image", "./data/uploads")
 	if err == nil && newImage != "" {
 		// Delete old image if it exists and we have a new one
 		if existing.ImageURL != "" {
-			utils.DeleteImage(existing.ImageURL, "./uploads")
+			utils.DeleteImage(existing.ImageURL, "./data/uploads")
 		}
 		imageUrl = newImage
 	}
@@ -138,7 +138,7 @@ func DeletePostHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Delete image file from storage
 	if existing.ImageURL != "" {
-		utils.DeleteImage(existing.ImageURL, "./uploads")
+		utils.DeleteImage(existing.ImageURL, "./data/uploads")
 	}
 
 	fmt.Fprintf(w, "Post deleted")

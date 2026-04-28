@@ -43,7 +43,7 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	imageUrl, err := utils.ProcessImageUpload(r, "image", "./uploads")
+	imageUrl, err := utils.ProcessImageUpload(r, "image", "./data/uploads")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
