@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
+import Avatar from "./Avatar";
 import { fetchApi } from "../services/api";
+import { useUser, clearUserCache } from "../hooks/useUser";
 
 const NAV = [
     { href: "/", icon: "home", title: "Лента" },
@@ -11,9 +13,11 @@ const NAV = [
 
 export default function Navbar() {
     const router = useRouter();
+    const { user } = useUser();
 
     const handleLogout = async () => {
         try { await fetchApi("/logout", { method: "POST" }); } catch (_) {}
+        clearUserCache();
         router.push("/login");
     };
 
@@ -40,8 +44,8 @@ export default function Navbar() {
                 </nav>
 
                 <div className="topnav-right">
-                    <Link href="/profile" className="icon-btn" title="Мой профиль">
-                        <span className="material-symbols-outlined">person</span>
+                    <Link href="/profile" className="profile-btn" title="Мой профиль">
+                        <Avatar url={user?.avatar} name={user?.first_name} size={36} />
                     </Link>
                     <button onClick={handleLogout} className="icon-btn" title="Выход">
                         <span className="material-symbols-outlined">logout</span>
@@ -114,6 +118,13 @@ export default function Navbar() {
                     transition: background 0.15s;
                 }
                 .icon-btn:hover { background: var(--bg-hover); }
+                .profile-btn {
+                    display: grid;
+                    place-items: center;
+                    border-radius: 50%;
+                    transition: box-shadow 0.15s;
+                }
+                .profile-btn:hover { box-shadow: 0 0 0 2px var(--primary); }
                 @media (max-width: 1099px) {
                     .nav-tab { width: 60px; }
                 }

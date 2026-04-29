@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
 import Navbar from "./Navbar";
+import Avatar from "./Avatar";
 import { useUser } from "../hooks/useUser";
 
 const SIDE = [
@@ -23,9 +24,7 @@ export default function Layout({ children, title, action, mock, right }) {
                 <aside className="side">
                     {user && (
                         <Link href="/profile" className="me-card">
-                            <div className="avatar">
-                                {(user.first_name || "?").slice(0, 1).toUpperCase()}
-                            </div>
+                            <Avatar url={user.avatar} name={user.first_name} />
                             <div className="me-info">
                                 <div className="me-name">{user.first_name} {user.last_name}</div>
                                 <div className="me-handle">@{user.nickname || user.email}</div>

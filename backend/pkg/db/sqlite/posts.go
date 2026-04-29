@@ -229,3 +229,29 @@ func DeletePost(id int64) error {
 	_, err := DB.Exec(`DELETE FROM posts WHERE id = ?`, id)
 	return err
 }
+
+// GetPostsByAuthor returns posts authored by `authorID` that the caller is
+// allowed to see (privacy enforced):
+//   - public          -> visible to everyone
+//   - almost_private  -> visible if caller follows author OR is the author
+//   - private         -> visible if caller is in post_viewers OR is the author
+func GetPostsByAuthor(authorID, callerID int64, page, limit int) ([]models.Post, int, error) {
+	query := `
+		SELECT ` + postSelectCols + `
+		FROM posts p
+		JOIN users u ON p.user_id = u.id
+		WHERE p.user_id = ?
+		AND (
+			p.privacy = 'public'
+			OR p.user_id = ?
+			OR (p.privacy = 'almost_private' AND EXISTS (
+				SELECT 1 FROM followers f
+				WHERE f.follower_id = ? AND f.followee_id = p.user_id AND f.status = 'accepted'
+			))
+			OR (p.privacy = 'private' AND EXISTS (
+				SELECT 1 FROM post_viewers pv
+				WHERE pv.post_id = p.id AND pv.user_id = ?
+			))
+		)`
+	return fetchPostsWithFilters(query, []interface{}{authorID, callerID, callerID, callerID}, page, limit)
+}

@@ -31,7 +31,7 @@ func CreateUser(user models.User) (int64, error) {
 func GetUserByEmail(email string) (*models.User, error) {
 	return scanUser(DB.QueryRow(`
 		SELECT id, email, password, first_name, last_name, date_of_birth,
-		       COALESCE(avatar, ''), COALESCE(nickname, ''), COALESCE(about_me, ''),
+		       COALESCE(avatar, ''), COALESCE(cover, ''), COALESCE(nickname, ''), COALESCE(about_me, ''),
 		       is_public, created_at
 		FROM users WHERE email = ?`, email))
 }
@@ -39,7 +39,7 @@ func GetUserByEmail(email string) (*models.User, error) {
 func GetUserByID(id int64) (*models.User, error) {
 	return scanUser(DB.QueryRow(`
 		SELECT id, email, password, first_name, last_name, date_of_birth,
-		       COALESCE(avatar, ''), COALESCE(nickname, ''), COALESCE(about_me, ''),
+		       COALESCE(avatar, ''), COALESCE(cover, ''), COALESCE(nickname, ''), COALESCE(about_me, ''),
 		       is_public, created_at
 		FROM users WHERE id = ?`, id))
 }
@@ -48,7 +48,7 @@ func scanUser(row *sql.Row) (*models.User, error) {
 	var u models.User
 	err := row.Scan(
 		&u.ID, &u.Email, &u.Password, &u.FirstName, &u.LastName, &u.DateOfBirth,
-		&u.Avatar, &u.Nickname, &u.AboutMe,
+		&u.Avatar, &u.Cover, &u.Nickname, &u.AboutMe,
 		&u.IsPublic, &u.CreatedAt,
 	)
 	if err != nil {
@@ -58,6 +58,18 @@ func scanUser(row *sql.Row) (*models.User, error) {
 		return nil, err
 	}
 	return &u, nil
+}
+
+// UpdateUserAvatar replaces the avatar path for a user. Pass "" to clear.
+func UpdateUserAvatar(userID int64, url string) error {
+	_, err := DB.Exec(`UPDATE users SET avatar = ? WHERE id = ?`, nullIfEmpty(url), userID)
+	return err
+}
+
+// UpdateUserCover replaces the cover photo path for a user. Pass "" to clear.
+func UpdateUserCover(userID int64, url string) error {
+	_, err := DB.Exec(`UPDATE users SET cover = ? WHERE id = ?`, nullIfEmpty(url), userID)
+	return err
 }
 
 func nullIfEmpty(s string) any {

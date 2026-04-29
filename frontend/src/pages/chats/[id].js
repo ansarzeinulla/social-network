@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import Layout from "../../components/Layout";
+import Avatar from "../../components/Avatar";
 import { chat } from "../../services/chat";
+import { profile } from "../../services/profile";
 import { apiJSON } from "../../services/api";
 import { useWebSocket } from "../../hooks/useWebSocket";
 import { useUser } from "../../hooks/useUser";
@@ -15,13 +17,18 @@ export default function ThreadPage() {
     const [body, setBody] = useState("");
     const [loading, setLoading] = useState(true);
     const [peerOnline, setPeerOnline] = useState(false);
+    const [peer, setPeer] = useState(null);
     const endRef = useRef(null);
 
     useEffect(() => {
         if (!peerId) return;
         (async () => {
-            const list = await chat.history(peerId);
+            const [list, p] = await Promise.all([
+                chat.history(peerId),
+                profile.get(peerId).catch(() => null),
+            ]);
             setMessages(list || []);
+            setPeer(p);
             setLoading(false);
         })();
     }, [peerId]);
@@ -68,7 +75,14 @@ export default function ThreadPage() {
 
     return (
         <Layout
-            title="Диалог"
+            title={
+                peer ? (
+                    <span className="thread-title">
+                        <Avatar url={peer.avatar} name={peer.first_name} size={36} />
+                        <span className="thread-name">{peer.first_name} {peer.last_name}</span>
+                    </span>
+                ) : "Диалог"
+            }
             action={
                 <span className={`presence ${peerOnline ? "online" : ""}`}>
                     <span className="dot" />
@@ -109,6 +123,12 @@ export default function ThreadPage() {
             </div>
 
             <style jsx>{`
+                .thread-title {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 12px;
+                }
+                .thread-name { font-size: 18px; }
                 .presence {
                     display: inline-flex;
                     align-items: center;

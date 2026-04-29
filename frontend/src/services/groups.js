@@ -12,6 +12,11 @@ export const groups = {
             () => apiJSON(`/groups/${id}`),
             () => groupsMock.get(id)
         ),
+    members: (id) =>
+        withMock("GROUPS",
+            () => apiJSON(`/groups/${id}/members`),
+            () => Promise.resolve([])
+        ),
     create: (payload) =>
         withMock("GROUPS",
             () => apiJSON(`/groups`, { method: "POST", body: JSON.stringify(payload) }),

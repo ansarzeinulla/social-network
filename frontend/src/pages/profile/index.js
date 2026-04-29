@@ -1,8 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import Layout from "../../components/Layout";
+import Avatar from "../../components/Avatar";
+import Cover from "../../components/Cover";
+import PostCard from "../../components/PostCard";
 import { profile } from "../../services/profile";
 import { followers } from "../../services/followers";
+import { apiJSON } from "../../services/api";
+import { setUser } from "../../hooks/useUser";
 
 const TABS = ["timeline", "followers", "following", "requests"];
 
@@ -12,21 +17,28 @@ export default function MyProfile() {
     const [followersList, setFollowersList] = useState([]);
     const [followingList, setFollowingList] = useState([]);
     const [pendingList, setPendingList] = useState([]);
+    const [posts, setPosts] = useState([]);
     const [tab, setTab] = useState("timeline");
     const [loading, setLoading] = useState(true);
+    const [uploading, setUploading] = useState(false);
+    const [uploadError, setUploadError] = useState("");
+    const fileRef = useRef(null);
+    const coverFileRef = useRef(null);
 
     const loadAll = async () => {
         const data = await profile.get("me");
         setMe(data);
         if (data?.id) {
-            const [fl, fg, pen] = await Promise.all([
+            const [fl, fg, pen, p] = await Promise.all([
                 followers.listFollowers(data.id),
                 followers.listFollowing(data.id),
                 followers.listIncomingRequests().catch(() => []),
+                apiJSON(`/users/${data.id}/posts`).catch(() => null),
             ]);
             setFollowersList(fl || []);
             setFollowingList(fg || []);
             setPendingList(pen || []);
+            setPosts(p?.posts || []);
         }
     };
 
@@ -40,13 +52,59 @@ export default function MyProfile() {
     const togglePrivacy = async () => {
         const updated = await profile.setPrivacy(!me.is_public);
         setMe({ ...me, is_public: updated.is_public });
+        setUser({ is_public: updated.is_public });
+    };
+
+    const onPickAvatar = (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        e.target.value = ""; // reset so re-picking same file fires change
+        uploadAvatar(file);
+    };
+
+    const uploadAvatar = async (file) => {
+        setUploading(true);
+        setUploadError("");
+        try {
+            const res = await profile.uploadAvatar(file);
+            setMe((prev) => ({ ...prev, avatar: res.avatar }));
+            setUser({ avatar: res.avatar });
+        } catch (err) {
+            setUploadError(err.message || "Не удалось загрузить аватар");
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    const onPickCover = (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        e.target.value = "";
+        uploadCover(file);
+    };
+
+    const uploadCover = async (file) => {
+        setUploading(true);
+        setUploadError("");
+        try {
+            const res = await profile.uploadCover(file);
+            setMe((prev) => ({ ...prev, cover: res.cover }));
+            setUser({ cover: res.cover });
+        } catch (err) {
+            setUploadError(err.message || "Не удалось загрузить обложку");
+        } finally {
+            setUploading(false);
+        }
     };
 
     const userCard = (u, action) => (
         <div key={u.id} className="card user-row">
-            <div className="avatar" onClick={() => router.push(`/profile/${u.id}`)} style={{ cursor: "pointer" }}>
-                {(u.first_name || "?").slice(0, 1).toUpperCase()}
-            </div>
+            <Avatar
+                url={u.avatar}
+                name={u.first_name || u.nickname}
+                onClick={() => router.push(`/profile/${u.id}`)}
+                style={{ cursor: "pointer" }}
+            />
             <div className="user-info" onClick={() => router.push(`/profile/${u.id}`)} style={{ cursor: "pointer" }}>
                 <div className="user-name">{u.first_name} {u.last_name}</div>
                 <div className="user-handle">@{u.nickname || `id${u.id}`}</div>
@@ -58,10 +116,48 @@ export default function MyProfile() {
     return (
         <Layout>
             <div className="profile-cover">
-                <div className="cover-photo" />
+                <Cover url={me.cover} seed={me.id} height={220}>
+                    <button
+                        type="button"
+                        className="cover-edit"
+                        onClick={() => coverFileRef.current?.click()}
+                        disabled={uploading}
+                    >
+                        <span className="material-symbols-outlined" style={{ fontSize: 18 }}>photo_camera</span>
+                        Сменить обложку
+                    </button>
+                    <input
+                        ref={coverFileRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={onPickCover}
+                        hidden
+                    />
+                </Cover>
                 <div className="profile-header">
-                    <div className="avatar profile-avatar">
-                        {(me.first_name || "?").slice(0, 1).toUpperCase()}
+                    <div className="avatar-wrap">
+                        <Avatar
+                            url={me.avatar}
+                            name={me.first_name}
+                            size={144}
+                            className="profile-avatar"
+                        />
+                        <button
+                            type="button"
+                            className="avatar-edit"
+                            onClick={() => fileRef.current?.click()}
+                            disabled={uploading}
+                            title="Сменить аватар"
+                        >
+                            <span className="material-symbols-outlined">photo_camera</span>
+                        </button>
+                        <input
+                            ref={fileRef}
+                            type="file"
+                            accept="image/*"
+                            onChange={onPickAvatar}
+                            hidden
+                        />
                     </div>
                     <div className="profile-info">
                         <h1>{me.first_name} {me.last_name}</h1>
@@ -80,6 +176,8 @@ export default function MyProfile() {
                         {me.is_public ? "Публичный" : "Приватный"}
                     </button>
                 </div>
+                {uploading && <p className="upload-status">Загружаем аватар…</p>}
+                {uploadError && <p className="upload-status error">{uploadError}</p>}
                 {me.about_me && <p className="about">{me.about_me}</p>}
             </div>
 
@@ -99,7 +197,9 @@ export default function MyProfile() {
             </div>
 
             {tab === "timeline" && (
-                <div className="empty-state">Здесь будут ваши посты</div>
+                posts.length === 0
+                    ? <div className="empty-state">Постов пока нет</div>
+                    : posts.map((p) => <PostCard key={p.id} post={p} />)
             )}
             {tab === "followers" && (followersList.length === 0
                 ? <div className="empty-state">Пока никого</div>
@@ -130,10 +230,25 @@ export default function MyProfile() {
                     overflow: hidden;
                     box-shadow: var(--shadow-sm);
                 }
-                .cover-photo {
-                    height: 220px;
-                    background: linear-gradient(135deg, var(--primary), #4A99F8);
+                .cover-edit {
+                    position: absolute;
+                    bottom: 12px;
+                    right: 12px;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                    background: rgba(0, 0, 0, 0.5);
+                    color: white;
+                    padding: 6px 12px;
+                    border-radius: var(--radius);
+                    font-size: 13px;
+                    font-weight: 600;
+                    backdrop-filter: blur(4px);
+                    cursor: pointer;
+                    transition: background 0.15s;
                 }
+                .cover-edit:hover { background: rgba(0, 0, 0, 0.7); }
+                .cover-edit:disabled { opacity: 0.5; cursor: not-allowed; }
                 .profile-header {
                     display: flex;
                     align-items: flex-end;
@@ -141,12 +256,37 @@ export default function MyProfile() {
                     padding: 0 24px 16px;
                     margin-top: -56px;
                 }
+                .avatar-wrap {
+                    position: relative;
+                    flex-shrink: 0;
+                }
                 .profile-avatar {
-                    width: 144px;
-                    height: 144px;
-                    font-size: 48px;
                     border: 4px solid var(--card-bg);
                 }
+                .avatar-edit {
+                    position: absolute;
+                    bottom: 6px;
+                    right: 6px;
+                    width: 36px;
+                    height: 36px;
+                    border-radius: 50%;
+                    background: var(--card-bg);
+                    border: 1px solid var(--border);
+                    display: grid;
+                    place-items: center;
+                    cursor: pointer;
+                    transition: background 0.15s;
+                    box-shadow: var(--shadow-sm);
+                }
+                .avatar-edit:hover { background: var(--bg-hover); }
+                .avatar-edit:disabled { opacity: 0.5; cursor: not-allowed; }
+                .avatar-edit :global(.material-symbols-outlined) { font-size: 20px; }
+                .upload-status {
+                    padding: 0 24px 8px;
+                    font-size: 13px;
+                    color: var(--text-secondary);
+                }
+                .upload-status.error { color: var(--error); }
                 .profile-info { flex: 1; padding-bottom: 8px; }
                 .profile-info h1 { font-size: 24px; font-weight: 800; }
                 .profile-meta { color: var(--text-secondary); font-size: 14px; margin-top: 4px; }

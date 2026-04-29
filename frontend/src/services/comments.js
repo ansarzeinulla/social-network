@@ -9,7 +9,10 @@ export const comments = {
         ),
     add: (postId, body) =>
         withMock("COMMENTS",
-            () => apiJSON(`/posts/${postId}/comments`, { method: "POST", body: JSON.stringify({ body }) }),
+            () => apiJSON(`/posts/${postId}/comments`, {
+                method: "POST",
+                body: JSON.stringify({ content: body }),
+            }),
             () => commentsMock.add(postId, body)
         ),
 };

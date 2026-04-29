@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Layout from "../../components/Layout";
+import Avatar from "../../components/Avatar";
 import { chat } from "../../services/chat";
 
 export default function ChatsPage() {
@@ -35,7 +36,7 @@ export default function ChatsPage() {
                             className="card thread"
                             onClick={() => router.push(`/chats/${peerId}`)}
                         >
-                            <div className="avatar">{name.slice(0, 1).toUpperCase()}</div>
+                            <Avatar url={t.avatar} name={name} />
                             <div className="thread-info">
                                 <div className="thread-name">{name}</div>
                                 <div className="thread-last">{last}</div>

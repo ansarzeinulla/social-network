@@ -94,6 +94,8 @@ func usersDispatch(w http.ResponseWriter, r *http.Request) {
 		handlers.UserFollowingHandler(w, r)
 	case endsWith(r.URL.Path, "/online"):
 		handlers.UserOnlineHandler(w, r)
+	case endsWith(r.URL.Path, "/posts"):
+		handlers.UserPostsHandler(w, r)
 	default:
 		http.NotFound(w, r)
 	}

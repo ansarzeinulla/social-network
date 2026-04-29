@@ -1,33 +1,57 @@
 import { useEffect, useState } from "react";
 import { profile } from "../services/profile";
 
-// useUser — fetches the current user once and caches it in module scope.
-// Components that need to know "who am I" import this and don't have to
-// re-fetch on every mount.
+// Module-level cache + subscriber list. Any consumer that calls useUser()
+// re-renders when setUser/refreshUser/clearUserCache fires.
 let cached = null;
 let pending = null;
+const subscribers = new Set();
+
+const broadcast = () => {
+    subscribers.forEach((fn) => fn(cached));
+};
 
 export function useUser() {
-    const [user, setUser] = useState(cached);
+    const [user, setUserState] = useState(cached);
     const [loading, setLoading] = useState(!cached);
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        if (cached) return;
+        subscribers.add(setUserState);
+        if (cached) {
+            setUserState(cached);
+            return () => { subscribers.delete(setUserState); };
+        }
         if (!pending) {
             pending = profile.get("me")
-                .then((u) => { cached = u; return u; })
+                .then((u) => { cached = u; broadcast(); return u; })
                 .catch((e) => { pending = null; throw e; });
         }
         pending
-            .then((u) => { setUser(u); setLoading(false); })
+            .then(() => { setLoading(false); })
             .catch((e) => { setError(e); setLoading(false); });
+        return () => { subscribers.delete(setUserState); };
     }, []);
 
     return { user, loading, error };
 }
 
+// Patch one or more fields and broadcast to all consumers.
+// Example: setUser({ avatar: "/uploads/abc.png" })
+export function setUser(patch) {
+    if (!cached) return;
+    cached = { ...cached, ...patch };
+    broadcast();
+}
+
+// Force re-fetch from server and broadcast.
+export async function refreshUser() {
+    pending = profile.get("me").then((u) => { cached = u; broadcast(); return u; });
+    return pending;
+}
+
 export function clearUserCache() {
     cached = null;
     pending = null;
+    broadcast();
 }

@@ -1,5 +1,6 @@
 import { useRouter } from 'next/router';
 import { assetURL } from '../services/api';
+import Avatar from './Avatar';
 
 const PRIVACY_ICON = {
     public: "public",
@@ -20,9 +21,7 @@ export default function PostCard({ post }) {
         <article className="post-card" onClick={() => router.push(`/post/${post.id}`)}>
             <div className="post-header">
                 <div className="post-author">
-                    <div className="avatar">
-                        {(post.first_name || "?").slice(0, 1).toUpperCase()}
-                    </div>
+                    <Avatar url={post.avatar} name={post.first_name} />
                     <div>
                         <div className="author-name">{post.first_name} {post.last_name}</div>
                         <div className="author-meta">

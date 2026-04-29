@@ -20,4 +20,14 @@ export const profile = {
             () => apiJSON(`/profile/privacy`, { method: "POST", body: JSON.stringify({ is_public: !!isPublic }) }),
             () => profileMock.setPrivacy(isPublic)
         ),
+    uploadAvatar: (file) => {
+        const fd = new FormData();
+        fd.append("avatar", file);
+        return apiJSON(`/profile/avatar`, { method: "POST", body: fd });
+    },
+    uploadCover: (file) => {
+        const fd = new FormData();
+        fd.append("cover", file);
+        return apiJSON(`/profile/cover`, { method: "POST", body: fd });
+    },
 };

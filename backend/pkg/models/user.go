@@ -10,6 +10,7 @@ type User struct {
 	LastName    string    `json:"last_name"`
 	DateOfBirth string    `json:"date_of_birth"`
 	Avatar      string    `json:"avatar,omitempty"`     // optional path to avatar
+	Cover       string    `json:"cover,omitempty"`      // optional path to cover photo
 	Nickname    string    `json:"nickname,omitempty"`   // optional public handle
 	AboutMe     string    `json:"about_me,omitempty"`   // optional bio
 	IsPublic    bool      `json:"is_public"`

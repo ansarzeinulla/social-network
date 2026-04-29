@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Layout from '../../../components/Layout';
+import Avatar from '../../../components/Avatar';
 import { fetchApi, assetURL } from '../../../services/api';
 
 export default function EditPost() {
@@ -123,9 +124,7 @@ export default function EditPost() {
                                 className={`viewer ${selectedViewers.includes(f.id) ? 'selected' : ''}`}
                                 onClick={() => toggleViewer(f.id)}
                             >
-                                <div className="avatar" style={{ width: 32, height: 32, fontSize: 14 }}>
-                                    {(f.first_name || '?').slice(0, 1).toUpperCase()}
-                                </div>
+                                <Avatar url={f.avatar} name={f.first_name} size={32} />
                                 <span>{f.first_name} {f.last_name}</span>
                             </button>
                         ))}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Layout from '../../components/Layout';
+import Avatar from '../../components/Avatar';
 import { fetchApi, assetURL, apiJSON } from '../../services/api';
 import { comments as commentsSvc } from '../../services/comments';
 
@@ -61,7 +62,7 @@ export default function PostDetails() {
         <Layout>
             <article className="card post">
                 <div className="post-header">
-                    <div className="avatar">{(post.first_name || "?").slice(0, 1).toUpperCase()}</div>
+                    <Avatar url={post.avatar} name={post.first_name} />
                     <div className="author-info">
                         <div className="author-name">{post.first_name} {post.last_name}</div>
                         <div className="author-meta">
@@ -101,14 +102,16 @@ export default function PostDetails() {
                         value={newComment}
                         onChange={(e) => setNewComment(e.target.value)}
                     />
+                    <button type="submit" className="btn" disabled={!newComment.trim()}>
+                        <span className="material-symbols-outlined" style={{ fontSize: 18 }}>send</span>
+                        Опубликовать
+                    </button>
                 </form>
             </div>
 
             {comments.map((c) => (
                 <div key={c.id} className="card comment">
-                    <div className="avatar" style={{ width: 36, height: 36 }}>
-                        {(c.first_name || "?").slice(0, 1).toUpperCase()}
-                    </div>
+                    <Avatar url={c.avatar} name={c.first_name} size={36} />
                     <div className="comment-body">
                         <div className="comment-author">
                             {c.first_name} {c.last_name}
@@ -155,14 +158,25 @@ export default function PostDetails() {
                     gap: 6px;
                 }
                 .composer { padding: 8px 12px; }
+                .composer form {
+                    display: flex;
+                    gap: 8px;
+                }
                 .composer input {
-                    width: 100%;
+                    flex: 1;
                     background: var(--bg);
                     border: none;
                     outline: none;
                     padding: 10px 16px;
                     border-radius: 999px;
                     font-size: 14px;
+                }
+                .composer .btn {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 4px;
+                    padding: 0 16px;
+                    border-radius: 999px;
                 }
                 .comment {
                     display: flex;
