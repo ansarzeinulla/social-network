@@ -43,3 +43,17 @@ type GroupComment struct {
 	Nickname  string `json:"nickname,omitempty"`
 	Avatar    string `json:"avatar,omitempty"`
 }
+
+type GroupEvent struct {
+	ID          int64     `json:"id"`
+	GroupID     int64     `json:"group_id"`
+	CreatorID   int64     `json:"creator_id"`
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
+	EventDate   time.Time `json:"event_date"`
+	CreatedAt   time.Time `json:"created_at"`
+	MyVote      string    `json:"my_vote,omitempty"`
+	Going       int       `json:"going"`
+	NotGoing    int       `json:"not_going"`
+	Options     []string  `json:"options"`
+}

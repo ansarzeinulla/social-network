@@ -54,12 +54,16 @@ func ListNotifications(userID int64) ([]models.Notification, error) {
 	return out, nil
 }
 
-func MarkNotificationRead(id, userID int64) error {
-	_, err := DB.Exec(
+func MarkNotificationRead(id, userID int64) (bool, error) {
+	res, err := DB.Exec(
 		`UPDATE notifications SET is_read = 1 WHERE id = ? AND receiver_id = ?`,
 		id, userID,
 	)
-	return err
+	if err != nil {
+		return false, err
+	}
+	n, _ := res.RowsAffected()
+	return n > 0, nil
 }
 
 func MarkAllNotificationsRead(userID int64) error {

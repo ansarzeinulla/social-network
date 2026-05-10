@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"social-network/pkg/db/sqlite"
 	"social-network/pkg/middleware"
@@ -98,6 +99,12 @@ func GroupItemHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "db error", http.StatusInternalServerError)
 			return
 		}
+		if status == "requested" {
+			if g, err := sqlite.GetGroup(gid, userID); err == nil && g != nil && g.CreatorID != userID {
+				eid := gid
+				_, _ = sqlite.CreateNotification(g.CreatorID, userID, "group_request", &eid)
+			}
+		}
 		writeJSON(w, map[string]string{"status": status})
 
 	case action == "invite" && r.Method == http.MethodPost:
@@ -157,6 +164,12 @@ func GroupItemHandler(w http.ResponseWriter, r *http.Request) {
 
 	case strings.HasPrefix(action, "posts/"):
 		handleGroupPostSubpath(w, r, action, gid, userID)
+
+	case action == "events" && (r.Method == http.MethodGet || r.Method == http.MethodPost):
+		handleGroupEvents(w, r, gid, userID)
+
+	case strings.HasPrefix(action, "events/"):
+		handleGroupEventSubpath(w, r, action, gid, userID)
 
 	default:
 		http.NotFound(w, r)
@@ -308,4 +321,151 @@ func handleGroupPostSubpath(w http.ResponseWriter, r *http.Request, action strin
 	default:
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 	}
+}
+
+func handleGroupEvents(w http.ResponseWriter, r *http.Request, groupID, userID int64) {
+	member, err := sqlite.IsGroupMember(groupID, userID)
+	if err != nil {
+		http.Error(w, "db error", http.StatusInternalServerError)
+		return
+	}
+	if !member {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
+
+	switch r.Method {
+	case http.MethodGet:
+		events, err := sqlite.ListGroupEvents(groupID, userID)
+		if err != nil {
+			http.Error(w, "db error", http.StatusInternalServerError)
+			return
+		}
+		writeJSON(w, events)
+	case http.MethodPost:
+		var body struct {
+			Title       string   `json:"title"`
+			Description string   `json:"description"`
+			EventDate   string   `json:"event_date"`
+			Options     []string `json:"options"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			http.Error(w, "invalid body", http.StatusBadRequest)
+			return
+		}
+		if body.Title == "" || body.EventDate == "" {
+			http.Error(w, "title and event_date required", http.StatusBadRequest)
+			return
+		}
+		if len(body.Options) > 0 && !validEventOptions(body.Options) {
+			http.Error(w, "invalid event options", http.StatusBadRequest)
+			return
+		}
+		eventTime, err := parseEventTime(body.EventDate)
+		if err != nil {
+			http.Error(w, "invalid event_date", http.StatusBadRequest)
+			return
+		}
+		if !eventTime.After(time.Now()) {
+			http.Error(w, "event_date must be in the future", http.StatusBadRequest)
+			return
+		}
+		id, err := sqlite.CreateGroupEvent(groupID, userID, body.Title, body.Description, eventTime.Format("2006-01-02 15:04:05"))
+		if err != nil {
+			http.Error(w, "db error", http.StatusInternalServerError)
+			return
+		}
+		if members, err := sqlite.ListGroupMembers(groupID); err == nil {
+			for _, member := range members {
+				if member.ID == userID {
+					continue
+				}
+				eid := id
+				_, _ = sqlite.CreateNotification(member.ID, userID, "new_event", &eid)
+			}
+		}
+		writeJSON(w, map[string]any{"id": id, "options": []string{"going", "not_going"}})
+	}
+}
+
+func handleGroupEventSubpath(w http.ResponseWriter, r *http.Request, action string, groupID, userID int64) {
+	parts := strings.Split(action, "/")
+	if len(parts) != 3 || parts[0] != "events" || parts[2] != "vote" {
+		http.NotFound(w, r)
+		return
+	}
+	if r.Method != http.MethodPost {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	eventID, err := strconv.ParseInt(parts[1], 10, 64)
+	if err != nil {
+		http.Error(w, "invalid event id", http.StatusBadRequest)
+		return
+	}
+	ev, err := sqlite.GetGroupEvent(eventID, userID)
+	if err != nil {
+		http.Error(w, "db error", http.StatusInternalServerError)
+		return
+	}
+	if ev == nil || ev.GroupID != groupID {
+		http.Error(w, "event not found", http.StatusNotFound)
+		return
+	}
+	member, err := sqlite.IsGroupMember(groupID, userID)
+	if err != nil {
+		http.Error(w, "db error", http.StatusInternalServerError)
+		return
+	}
+	if !member {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
+	var body struct {
+		Vote string `json:"vote"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		http.Error(w, "invalid body", http.StatusBadRequest)
+		return
+	}
+	if body.Vote != "going" && body.Vote != "not_going" {
+		http.Error(w, "invalid vote", http.StatusBadRequest)
+		return
+	}
+	if err := sqlite.VoteGroupEvent(eventID, userID, body.Vote); err != nil {
+		http.Error(w, "db error", http.StatusInternalServerError)
+		return
+	}
+	writeJSON(w, map[string]string{"vote": body.Vote})
+}
+
+func validEventOptions(options []string) bool {
+	if len(options) < 2 {
+		return false
+	}
+	seen := map[string]bool{}
+	for _, opt := range options {
+		if opt != "going" && opt != "not_going" {
+			return false
+		}
+		seen[opt] = true
+	}
+	return seen["going"] && seen["not_going"]
+}
+
+func parseEventTime(raw string) (time.Time, error) {
+	layouts := []string{
+		time.RFC3339,
+		"2006-01-02 15:04:05",
+		"2006-01-02",
+	}
+	var lastErr error
+	for _, layout := range layouts {
+		t, err := time.Parse(layout, raw)
+		if err == nil {
+			return t, nil
+		}
+		lastErr = err
+	}
+	return time.Time{}, lastErr
 }

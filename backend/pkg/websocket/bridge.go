@@ -28,9 +28,11 @@ type groupChatSendPayload struct {
 // Storage callbacks (savePrivateMessage, saveGroupMessage, listGroupMembers)
 // are injected so this package doesn't import db/sqlite directly.
 type Storage struct {
-	SavePrivateMessage func(senderID, receiverID int64, body string) (int64, error)
-	SaveGroupMessage   func(groupID, senderID int64, body string) (int64, error)
-	ListGroupMembers   func(groupID int64) ([]int64, error)
+	SavePrivateMessage    func(senderID, receiverID int64, body string) (int64, error)
+	CanSendPrivateMessage func(senderID, receiverID int64) (bool, error)
+	SaveGroupMessage      func(groupID, senderID int64, body string) (int64, error)
+	CanSendGroupMessage   func(groupID, senderID int64) (bool, error)
+	ListGroupMembers      func(groupID int64) ([]int64, error)
 }
 
 func InitBridge(store Storage) {
@@ -47,16 +49,22 @@ func InitBridge(store Storage) {
 			if p.Body == "" || p.ToUserID == 0 {
 				return
 			}
+			if store.CanSendPrivateMessage != nil {
+				allowed, err := store.CanSendPrivateMessage(userID, p.ToUserID)
+				if err != nil || !allowed {
+					return
+				}
+			}
 			id, err := store.SavePrivateMessage(userID, p.ToUserID, p.Body)
 			if err != nil {
 				log.Printf("[ws] save chat error: %v", err)
 				return
 			}
 			out := Event{Type: "chat.new", Payload: mustJSON(map[string]any{
-				"id":         id,
-				"from":       userID,
-				"to":         p.ToUserID,
-				"body":       p.Body,
+				"id":   id,
+				"from": userID,
+				"to":   p.ToUserID,
+				"body": p.Body,
 			})}
 			HubInstance.SendToUser(p.ToUserID, out)
 			HubInstance.SendToUser(userID, out) // echo to sender's other tabs
@@ -68,6 +76,12 @@ func InitBridge(store Storage) {
 			}
 			if p.Body == "" || p.GroupID == 0 {
 				return
+			}
+			if store.CanSendGroupMessage != nil {
+				allowed, err := store.CanSendGroupMessage(p.GroupID, userID)
+				if err != nil || !allowed {
+					return
+				}
 			}
 			members, err := store.ListGroupMembers(p.GroupID)
 			if err != nil {

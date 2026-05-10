@@ -346,3 +346,79 @@ func ListGroupComments(groupPostID int64) ([]models.GroupComment, error) {
 	}
 	return out, nil
 }
+
+func CreateGroupEvent(groupID, creatorID int64, title, description, eventDate string) (int64, error) {
+	res, err := DB.Exec(
+		`INSERT INTO group_events (group_id, creator_id, title, description, event_date)
+		 VALUES (?, ?, ?, ?, ?)`,
+		groupID, creatorID, title, description, eventDate,
+	)
+	if err != nil {
+		return 0, err
+	}
+	return res.LastInsertId()
+}
+
+func ListGroupEvents(groupID, userID int64) ([]models.GroupEvent, error) {
+	rows, err := DB.Query(`
+		SELECT ge.id, ge.group_id, ge.creator_id, ge.title, ge.description, ge.event_date, ge.created_at,
+		       COALESCE(my.vote, ''),
+		       (SELECT COUNT(*) FROM event_polls ep WHERE ep.event_id = ge.id AND ep.vote = 'going') AS going_count,
+		       (SELECT COUNT(*) FROM event_polls ep WHERE ep.event_id = ge.id AND ep.vote = 'not_going') AS not_going_count
+		FROM group_events ge
+		LEFT JOIN event_polls my ON my.event_id = ge.id AND my.user_id = ?
+		WHERE ge.group_id = ?
+		ORDER BY ge.event_date ASC`, userID, groupID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []models.GroupEvent
+	for rows.Next() {
+		ev, err := scanGroupEvent(rows.Scan)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, ev)
+	}
+	return out, nil
+}
+
+func GetGroupEvent(eventID, userID int64) (*models.GroupEvent, error) {
+	ev, err := scanGroupEvent(DB.QueryRow(`
+		SELECT ge.id, ge.group_id, ge.creator_id, ge.title, ge.description, ge.event_date, ge.created_at,
+		       COALESCE(my.vote, ''),
+		       (SELECT COUNT(*) FROM event_polls ep WHERE ep.event_id = ge.id AND ep.vote = 'going') AS going_count,
+		       (SELECT COUNT(*) FROM event_polls ep WHERE ep.event_id = ge.id AND ep.vote = 'not_going') AS not_going_count
+		FROM group_events ge
+		LEFT JOIN event_polls my ON my.event_id = ge.id AND my.user_id = ?
+		WHERE ge.id = ?`, userID, eventID).Scan)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &ev, nil
+}
+
+func scanGroupEvent(scan func(...any) error) (models.GroupEvent, error) {
+	var ev models.GroupEvent
+	if err := scan(
+		&ev.ID, &ev.GroupID, &ev.CreatorID, &ev.Title, &ev.Description, &ev.EventDate, &ev.CreatedAt,
+		&ev.MyVote, &ev.Going, &ev.NotGoing,
+	); err != nil {
+		return ev, err
+	}
+	ev.Options = []string{"going", "not_going"}
+	return ev, nil
+}
+
+func VoteGroupEvent(eventID, userID int64, vote string) error {
+	_, err := DB.Exec(
+		`INSERT INTO event_polls (event_id, user_id, vote) VALUES (?, ?, ?)
+		 ON CONFLICT(event_id, user_id) DO UPDATE SET vote = excluded.vote`,
+		eventID, userID, vote,
+	)
+	return err
+}

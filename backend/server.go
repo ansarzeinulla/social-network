@@ -25,9 +25,11 @@ func main() {
 	sqlite.CleanUpSessions()
 
 	ws.InitBridge(ws.Storage{
-		SavePrivateMessage: sqlite.SavePrivateMessage,
-		SaveGroupMessage:   sqlite.SaveGroupMessage,
-		ListGroupMembers:   sqlite.ListGroupMemberIDs,
+		SavePrivateMessage:    sqlite.SavePrivateMessage,
+		CanSendPrivateMessage: sqlite.CanSendPrivateMessage,
+		SaveGroupMessage:      sqlite.SaveGroupMessage,
+		CanSendGroupMessage:   sqlite.CanSendGroupMessage,
+		ListGroupMembers:      sqlite.ListGroupMemberIDs,
 	})
 
 	mux := http.NewServeMux()
@@ -43,11 +45,11 @@ func main() {
 	mux.HandleFunc("/api/profile/", middleware.AuthMiddleware(handlers.ProfileHandler))
 
 	// Followers
-	mux.HandleFunc("/api/followers", middleware.AuthMiddleware(handlers.FollowersHandler))                       // legacy
-	mux.HandleFunc("/api/users/", middleware.AuthMiddleware(usersDispatch))                                       // /api/users/{id}/followers|following
-	mux.HandleFunc("/api/follow/", middleware.AuthMiddleware(handlers.FollowHandler))                             // POST/DELETE /api/follow/{id}
-	mux.HandleFunc("/api/follow-requests", middleware.AuthMiddleware(handlers.PendingFollowRequestsHandler))      // GET
-	mux.HandleFunc("/api/follow-requests/", middleware.AuthMiddleware(followRequestsDispatch))                    // /accept|/decline
+	mux.HandleFunc("/api/followers", middleware.AuthMiddleware(handlers.FollowersHandler))                   // legacy
+	mux.HandleFunc("/api/users/", middleware.AuthMiddleware(usersDispatch))                                  // /api/users/{id}/followers|following
+	mux.HandleFunc("/api/follow/", middleware.AuthMiddleware(handlers.FollowHandler))                        // POST/DELETE /api/follow/{id}
+	mux.HandleFunc("/api/follow-requests", middleware.AuthMiddleware(handlers.PendingFollowRequestsHandler)) // GET
+	mux.HandleFunc("/api/follow-requests/", middleware.AuthMiddleware(followRequestsDispatch))               // /accept|/decline
 
 	// Posts
 	mux.HandleFunc("/api/posts", middleware.AuthMiddleware(handlers.GetPostsHandler))

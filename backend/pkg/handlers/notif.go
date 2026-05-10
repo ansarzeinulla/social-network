@@ -39,8 +39,13 @@ func MarkNotificationReadHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid id", http.StatusBadRequest)
 		return
 	}
-	if err := sqlite.MarkNotificationRead(id, userID); err != nil {
+	ok, err := sqlite.MarkNotificationRead(id, userID)
+	if err != nil {
 		http.Error(w, "db error", http.StatusInternalServerError)
+		return
+	}
+	if !ok {
+		http.Error(w, "not found", http.StatusNotFound)
 		return
 	}
 	writeJSON(w, map[string]string{"status": "ok"})

@@ -1,6 +1,9 @@
 package sqlite
 
-import "social-network/pkg/models"
+import (
+	"errors"
+	"social-network/pkg/models"
+)
 
 func SavePrivateMessage(senderID, receiverID int64, body string) (int64, error) {
 	res, err := DB.Exec(
@@ -13,6 +16,25 @@ func SavePrivateMessage(senderID, receiverID int64, body string) (int64, error) 
 	return res.LastInsertId()
 }
 
+func CanSendPrivateMessage(senderID, receiverID int64) (bool, error) {
+	target, err := GetUserByID(receiverID)
+	if err != nil {
+		return false, err
+	}
+	if target == nil {
+		return false, errors.New("user not found")
+	}
+	outgoing, err := GetFollowState(senderID, receiverID)
+	if err != nil {
+		return false, err
+	}
+	incoming, err := GetFollowState(receiverID, senderID)
+	if err != nil {
+		return false, err
+	}
+	return outgoing.Status == "accepted" || incoming.Status == "accepted", nil
+}
+
 func SaveGroupMessage(groupID, senderID int64, body string) (int64, error) {
 	res, err := DB.Exec(
 		`INSERT INTO group_chats (group_id, sender_id, content) VALUES (?, ?, ?)`,
@@ -22,6 +44,10 @@ func SaveGroupMessage(groupID, senderID int64, body string) (int64, error) {
 		return 0, err
 	}
 	return res.LastInsertId()
+}
+
+func CanSendGroupMessage(groupID, senderID int64) (bool, error) {
+	return IsGroupMember(groupID, senderID)
 }
 
 // ListGroupMemberIDs returns IDs of users with status='member' in a group,
