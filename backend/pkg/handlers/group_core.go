@@ -86,6 +86,15 @@ func GroupItemHandler(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, g)
 
 	case action == "members" && r.Method == http.MethodGet:
+		member, err := sqlite.IsGroupMember(gid, userID)
+		if err != nil {
+			http.Error(w, "db error", http.StatusInternalServerError)
+			return
+		}
+		if !member {
+			http.Error(w, "Forbidden", http.StatusForbidden)
+			return
+		}
 		members, err := sqlite.ListGroupMembers(gid)
 		if err != nil {
 			http.Error(w, "db error", http.StatusInternalServerError)

@@ -6,6 +6,11 @@ import (
 )
 
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	cookie, err := r.Cookie("session_token")
 	if err == nil {
 		sqlite.DeleteSession(cookie.Value)

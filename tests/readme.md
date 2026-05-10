@@ -47,6 +47,10 @@ for test in tests/groups/*.sh; do "$test"; done
 for test in tests/events/*.sh; do "$test"; done
 for test in tests/chat/*.sh; do "$test"; done
 for test in tests/notifications/*.sh; do "$test"; done
+for test in tests/cors/*.sh; do "$test"; done
+for test in tests/methods/*.sh; do "$test"; done
+for test in tests/uploads/*.sh; do "$test"; done
+for test in tests/concurrency/*.sh; do "$test"; done
 ```
 
 ## 4. Запустить один тест
@@ -90,7 +94,17 @@ cd backend
 go test ./...
 ```
 
-## 8. Чистая база
+## 8. Frontend sanity check
+
+Frontend unit-тесты и production build:
+
+```bash
+cd frontend
+npm test -- --runInBand
+npm run build
+```
+
+## 9. Чистая база
 
 Docker использует named volume `backend_data`, поэтому данные переживают перезапуск контейнера. Обычно это не мешает: тесты создают уникальные email через `RUN_ID`.
 
@@ -106,7 +120,7 @@ Docker использует named volume `backend_data`, поэтому данн
 ./tests/system/fresh_boot.sh
 ```
 
-## 9. Частые проблемы
+## 10. Частые проблемы
 
 `curl: Failed to connect to localhost port 8080`  
 Backend не запущен или порт занят. Запусти:

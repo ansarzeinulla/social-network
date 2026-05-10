@@ -45,12 +45,29 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 		setPrivacy(w, r, userID)
 		return
 	}
+	if r.URL.Path == "/api/profile/privacy" {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
 	if r.URL.Path == "/api/profile/avatar" && r.Method == http.MethodPost {
 		uploadAvatar(w, r, userID)
 		return
 	}
+	if r.URL.Path == "/api/profile/avatar" {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
 	if r.URL.Path == "/api/profile/cover" && r.Method == http.MethodPost {
 		uploadCover(w, r, userID)
+		return
+	}
+	if r.URL.Path == "/api/profile/cover" {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
