@@ -25,10 +25,7 @@ curl -i http://localhost:8080/api/profile
 Из корня проекта:
 
 ```bash
-find tests -mindepth 2 -maxdepth 2 -name "*.sh" | sort | while read -r test; do
-  echo "==> $test"
-  "$test"
-done
+./tests/run_all.sh
 ```
 
 Если все хорошо, каждый файл закончится строкой вида:
@@ -100,8 +97,13 @@ Docker использует named volume `backend_data`, поэтому данн
 Если нужен полностью чистый старт:
 
 ```bash
-docker compose down -v
-docker compose up --build -d backend
+./tests/run_all.sh --fresh-db
+```
+
+Отдельная smoke-проверка миграций и seed-данных:
+
+```bash
+./tests/system/fresh_boot.sh
 ```
 
 ## 9. Частые проблемы

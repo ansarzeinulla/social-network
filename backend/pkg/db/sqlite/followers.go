@@ -8,7 +8,7 @@ import (
 
 // FollowState describes a follow request between two users.
 type FollowState struct {
-	Status   string // "" (none) | "pending" | "accepted"
+	Status      string // "" (none) | "pending" | "accepted"
 	IsFollowing bool
 }
 
@@ -64,12 +64,21 @@ func Follow(followerID, followeeID int64) (string, error) {
 	if pub {
 		status = "accepted"
 	}
-	_, err = DB.Exec(
-		`INSERT INTO followers (follower_id, followee_id, status) VALUES (?, ?, ?)`,
+	res, err := DB.Exec(
+		`INSERT OR IGNORE INTO followers (follower_id, followee_id, status) VALUES (?, ?, ?)`,
 		followerID, followeeID, status,
 	)
 	if err != nil {
 		return "", err
+	}
+	if n, _ := res.RowsAffected(); n == 0 {
+		cur, err := GetFollowState(followerID, followeeID)
+		if err != nil {
+			return "", err
+		}
+		if cur.Status != "" {
+			return cur.Status, nil
+		}
 	}
 	return status, nil
 }
