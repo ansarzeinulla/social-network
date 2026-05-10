@@ -8,10 +8,12 @@ import (
 
 	"social-network/pkg/db/sqlite"
 	"social-network/pkg/middleware"
+	"social-network/pkg/utils"
 )
 
 // GET  /api/posts/{postID}/comments
 // POST /api/posts/{postID}/comments  { "content": "...", "image_url": "..." (opt) }
+// POST /api/posts/{postID}/comments  multipart/form-data with content + image
 func PostCommentsHandler(w http.ResponseWriter, r *http.Request) {
 	rest := strings.TrimPrefix(r.URL.Path, "/api/posts/")
 	rest = strings.TrimSuffix(rest, "/comments")
@@ -59,19 +61,16 @@ func PostCommentsHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Forbidden", http.StatusForbidden)
 			return
 		}
-		var body struct {
-			Content  string `json:"content"`
-			ImageURL string `json:"image_url"`
-		}
-		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		content, imageURL, err := parseCommentBody(r)
+		if err != nil {
 			http.Error(w, "invalid body", http.StatusBadRequest)
 			return
 		}
-		if body.Content == "" {
+		if content == "" && imageURL == "" {
 			http.Error(w, "content required", http.StatusBadRequest)
 			return
 		}
-		id, err := sqlite.CreateComment(postID, userID, body.Content, body.ImageURL)
+		id, err := sqlite.CreateComment(postID, userID, content, imageURL)
 		if err != nil {
 			http.Error(w, "db error", http.StatusInternalServerError)
 			return
@@ -81,4 +80,26 @@ func PostCommentsHandler(w http.ResponseWriter, r *http.Request) {
 	default:
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 	}
+}
+
+func parseCommentBody(r *http.Request) (string, string, error) {
+	if strings.HasPrefix(r.Header.Get("Content-Type"), "multipart/form-data") {
+		if err := r.ParseMultipartForm(10 << 20); err != nil {
+			return "", "", err
+		}
+		imageURL, err := utils.ProcessImageUpload(r, "image", "./data/uploads")
+		if err != nil {
+			return "", "", err
+		}
+		return r.FormValue("content"), imageURL, nil
+	}
+
+	var body struct {
+		Content  string `json:"content"`
+		ImageURL string `json:"image_url"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		return "", "", err
+	}
+	return body.Content, body.ImageURL, nil
 }

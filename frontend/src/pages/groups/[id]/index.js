@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import Layout from "../../../components/Layout";
 import Avatar from "../../../components/Avatar";
+import { assetURL } from "../../../services/api";
 import { groups } from "../../../services/groups";
 
 export default function GroupPage() {
@@ -10,6 +11,11 @@ export default function GroupPage() {
     const { id } = router.query;
     const [g, setG] = useState(null);
     const [members, setMembers] = useState([]);
+    const [posts, setPosts] = useState([]);
+    const [postBody, setPostBody] = useState("");
+    const [postImageURL, setPostImageURL] = useState("");
+    const [commentDrafts, setCommentDrafts] = useState({});
+    const [commentsByPost, setCommentsByPost] = useState({});
     const [showMembers, setShowMembers] = useState(false);
     const [loading, setLoading] = useState(true);
 
@@ -22,6 +28,10 @@ export default function GroupPage() {
             ]);
             setG(data);
             setMembers(mems || []);
+            if (data?.joined) {
+                const list = await groups.posts(id).catch(() => []);
+                setPosts(list || []);
+            }
             setLoading(false);
         })();
     }, [id]);
@@ -30,6 +40,39 @@ export default function GroupPage() {
     if (!g) return <Layout><div className="empty-state">Группа не найдена</div></Layout>;
 
     const creatorName = `${g.creator_first_name || ""} ${g.creator_last_name || ""}`.trim() || `User #${g.creator_id}`;
+
+    const loadPosts = async () => {
+        const list = await groups.posts(id).catch(() => []);
+        setPosts(list || []);
+    };
+
+    const submitPost = async (e) => {
+        e.preventDefault();
+        const content = postBody.trim();
+        if (!content) return;
+        await groups.createPost(id, { content, image_url: postImageURL.trim() });
+        setPostBody("");
+        setPostImageURL("");
+        await loadPosts();
+    };
+
+    const toggleComments = async (postID) => {
+        if (commentsByPost[postID]) {
+            setCommentsByPost((prev) => ({ ...prev, [postID]: null }));
+            return;
+        }
+        const list = await groups.comments(id, postID).catch(() => []);
+        setCommentsByPost((prev) => ({ ...prev, [postID]: list || [] }));
+    };
+
+    const submitComment = async (postID) => {
+        const content = (commentDrafts[postID] || "").trim();
+        if (!content) return;
+        await groups.addComment(id, postID, { content });
+        setCommentDrafts((prev) => ({ ...prev, [postID]: "" }));
+        const list = await groups.comments(id, postID).catch(() => []);
+        setCommentsByPost((prev) => ({ ...prev, [postID]: list || [] }));
+    };
 
     return (
         <Layout>
@@ -74,7 +117,79 @@ export default function GroupPage() {
                 </Link>
             </div>
 
-            <div className="empty-state">Посты группы появятся здесь</div>
+            {g.joined ? (
+                <>
+                    <form className="card group-composer" onSubmit={submitPost}>
+                        <textarea
+                            value={postBody}
+                            onChange={(e) => setPostBody(e.target.value)}
+                            placeholder="Напишите пост в группе"
+                            rows={3}
+                        />
+                        <div className="composer-row">
+                            <input
+                                value={postImageURL}
+                                onChange={(e) => setPostImageURL(e.target.value)}
+                                placeholder="GIF/image URL"
+                            />
+                            <button className="btn" disabled={!postBody.trim()}>
+                                <span className="material-symbols-outlined" style={{ fontSize: 18 }}>send</span>
+                                Опубликовать
+                            </button>
+                        </div>
+                    </form>
+
+                    {posts.length === 0 ? (
+                        <div className="empty-state">Постов в группе пока нет</div>
+                    ) : posts.map((p) => {
+                        const postComments = commentsByPost[p.id];
+                        return (
+                            <article key={p.id} className="card group-post">
+                                <div className="post-head">
+                                    <Avatar url={p.avatar} name={p.first_name} />
+                                    <div>
+                                        <div className="post-author">{p.first_name} {p.last_name}</div>
+                                        <div className="post-time">{new Date(p.created_at).toLocaleString()}</div>
+                                    </div>
+                                </div>
+                                <div className="post-body">{p.content}</div>
+                                {p.image_url && <img className="post-image" src={assetURL(p.image_url)} alt="" />}
+                                <button className="comment-toggle" onClick={() => toggleComments(p.id)}>
+                                    <span className="material-symbols-outlined" style={{ fontSize: 18 }}>chat_bubble</span>
+                                    Комментарии
+                                </button>
+                                {postComments && (
+                                    <div className="comments">
+                                        {postComments.length === 0 ? (
+                                            <div className="empty-comments">Комментариев пока нет</div>
+                                        ) : postComments.map((c) => (
+                                            <div key={c.id} className="group-comment">
+                                                <Avatar url={c.avatar} name={c.first_name} size={32} />
+                                                <div>
+                                                    <div className="comment-author">{c.first_name} {c.last_name}</div>
+                                                    <div className="comment-text">{c.content}</div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                        <div className="comment-form">
+                                            <input
+                                                value={commentDrafts[p.id] || ""}
+                                                onChange={(e) => setCommentDrafts((prev) => ({ ...prev, [p.id]: e.target.value }))}
+                                                placeholder="Комментарий"
+                                            />
+                                            <button className="btn" onClick={() => submitComment(p.id)} disabled={!(commentDrafts[p.id] || "").trim()}>
+                                                <span className="material-symbols-outlined" style={{ fontSize: 18 }}>send</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </article>
+                        );
+                    })}
+                </>
+            ) : (
+                <div className="empty-state">Вступите в группу, чтобы видеть посты и комментарии</div>
+            )}
 
             {showMembers && (
                 <div className="modal-backdrop" onClick={() => setShowMembers(false)}>
@@ -180,6 +295,101 @@ export default function GroupPage() {
                 }
                 .action-btn:hover { background: var(--bg-hover); color: var(--text-main); }
                 .action-btn :global(.material-symbols-outlined) { color: var(--primary); font-size: 22px; }
+                .group-composer {
+                    padding: 14px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
+                }
+                .group-composer textarea,
+                .group-composer input,
+                .comment-form input {
+                    width: 100%;
+                    border: 1px solid var(--border);
+                    border-radius: var(--radius);
+                    background: var(--bg);
+                    padding: 10px 12px;
+                    outline: none;
+                }
+                .composer-row,
+                .comment-form {
+                    display: flex;
+                    gap: 8px;
+                    align-items: center;
+                }
+                .composer-row input { flex: 1; }
+                .group-post { padding: 0; overflow: hidden; }
+                .post-head {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    padding: 14px 14px 8px;
+                }
+                .post-author,
+                .comment-author {
+                    font-weight: 700;
+                    font-size: 14px;
+                }
+                .post-time {
+                    color: var(--text-muted);
+                    font-size: 12px;
+                }
+                .post-body {
+                    padding: 0 14px 12px;
+                    white-space: pre-wrap;
+                    word-break: break-word;
+                }
+                .post-image {
+                    width: 100%;
+                    max-height: 420px;
+                    object-fit: cover;
+                    display: block;
+                }
+                .comment-toggle {
+                    width: 100%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 6px;
+                    padding: 10px;
+                    border-top: 1px solid var(--border-soft);
+                    background: transparent;
+                    color: var(--text-secondary);
+                    font-weight: 700;
+                }
+                .comment-toggle:hover { background: var(--bg-hover); }
+                .comments {
+                    border-top: 1px solid var(--border-soft);
+                    padding: 10px 14px 14px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 8px;
+                }
+                .empty-comments {
+                    color: var(--text-muted);
+                    font-size: 13px;
+                    text-align: center;
+                    padding: 6px;
+                }
+                .group-comment {
+                    display: flex;
+                    align-items: flex-start;
+                    gap: 8px;
+                    background: var(--bg);
+                    border-radius: var(--radius);
+                    padding: 8px;
+                }
+                .comment-text {
+                    font-size: 13px;
+                    word-break: break-word;
+                }
+                .comment-form .btn {
+                    width: 42px;
+                    height: 40px;
+                    display: grid;
+                    place-items: center;
+                    padding: 0;
+                }
 
                 /* Modal */
                 .modal-backdrop {

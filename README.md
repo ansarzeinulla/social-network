@@ -11,7 +11,7 @@
 | Auth | Сессии через cookie + bcrypt |
 | Realtime | `gorilla/websocket` |
 | Frontend | Next.js 14 (Pages Router) + React 18 |
-| Reverse proxy | Caddy 2 |
+| Reverse proxy | Caddy 2 (optional profile) |
 | Контейнеры | Docker Compose |
 
 Все Go-зависимости из списка **Allowed Packages** учебного ТЗ:
@@ -21,10 +21,20 @@
 
 ## Быстрый старт
 
-### Через Caddy (single-origin, как на проде)
+### Docker Compose
 
 ```bash
 docker compose up --build
+```
+
+Открой: **http://localhost:3000**
+
+По умолчанию стартуют 2 контейнера: `backend` и `frontend`. Фронт обращается к API напрямую на `http://localhost:8080`.
+
+### Через Caddy (optional single-origin proxy)
+
+```bash
+docker compose --profile proxy up --build
 ```
 
 Открой: **http://localhost**
@@ -44,7 +54,7 @@ cd frontend && npm install && npm run dev  # фронт локально
 
 ```bash
 docker compose down
-rm -f backend/pkg/db/sqlite/social_network.db
+docker volume rm social-network_backend_data
 docker compose up --build
 ```
 
@@ -70,8 +80,8 @@ docker compose up --build
 
 ```
 social-network/
-├── docker-compose.yml          # caddy + backend + frontend
-├── Caddyfile                   # reverse proxy: /api → backend, /ws → backend, /* → frontend
+├── docker-compose.yml          # backend + frontend (+ optional caddy profile)
+├── Caddyfile                   # optional reverse proxy: /api → backend, /ws → backend, /* → frontend
 ├── README.md                   # этот файл
 │
 ├── backend/
@@ -306,6 +316,6 @@ NEXT_PUBLIC_USE_MOCK_GROUPS=false     # модуль готов, идём в р�
 docker compose logs -f                    # логи всех сервисов
 docker compose logs -f backend            # только бэк
 docker compose up -d --build backend      # перезапустить только бэк
-docker compose exec backend sqlite3 /app/pkg/db/sqlite/social_network.db
+docker compose exec backend sqlite3 /app/data/social_network.db
 docker compose down                       # остановить
 ```

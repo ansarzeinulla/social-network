@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 import Avatar from "./Avatar";
 import { fetchApi } from "../services/api";
 import { useUser, clearUserCache } from "../hooks/useUser";
+import { useWebSocket } from "../hooks/useWebSocket";
+import { notifications } from "../services/notifications";
 
 const NAV = [
     { href: "/", icon: "home", title: "Лента" },
@@ -14,6 +17,23 @@ const NAV = [
 export default function Navbar() {
     const router = useRouter();
     const { user } = useUser();
+    const [unread, setUnread] = useState(0);
+
+    useEffect(() => {
+        if (!user) {
+            setUnread(0);
+            return;
+        }
+        notifications.list()
+            .then((items) => setUnread((items || []).filter((n) => !n.is_read && !n.read).length))
+            .catch(() => setUnread(0));
+    }, [user]);
+
+    useWebSocket((ev) => {
+        if (ev.type === "notification.new") {
+            setUnread((n) => n + 1);
+        }
+    }, { enabled: !!user });
 
     const handleLogout = async () => {
         try { await fetchApi("/logout", { method: "POST" }); } catch (_) {}
@@ -38,6 +58,9 @@ export default function Navbar() {
                                 title={item.title}
                             >
                                 <span className="material-symbols-outlined">{item.icon}</span>
+                                {item.href === "/notifications" && unread > 0 && (
+                                    <span className="notif-badge">{unread > 99 ? "99+" : unread}</span>
+                                )}
                             </Link>
                         );
                     })}
@@ -87,6 +110,7 @@ export default function Navbar() {
                     justify-self: center;
                 }
                 .nav-tab {
+                    position: relative;
                     display: grid;
                     place-items: center;
                     width: 80px;
@@ -101,6 +125,22 @@ export default function Navbar() {
                     border-bottom-color: var(--primary);
                 }
                 .nav-tab :global(.material-symbols-outlined) { font-size: 26px; }
+                .notif-badge {
+                    position: absolute;
+                    top: 8px;
+                    right: 18px;
+                    min-width: 18px;
+                    height: 18px;
+                    padding: 0 5px;
+                    border-radius: 999px;
+                    background: var(--error);
+                    color: #fff;
+                    font-size: 11px;
+                    font-weight: 800;
+                    line-height: 18px;
+                    text-align: center;
+                    box-shadow: 0 0 0 2px var(--card-bg);
+                }
                 .topnav-right {
                     display: flex;
                     align-items: center;
@@ -131,6 +171,7 @@ export default function Navbar() {
                 @media (max-width: 768px) {
                     .nav-tab { width: 48px; }
                     .nav-tab :global(.material-symbols-outlined) { font-size: 22px; }
+                    .notif-badge { right: 6px; }
                 }
             `}</style>
         </header>

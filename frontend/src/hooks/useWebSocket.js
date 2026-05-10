@@ -13,7 +13,8 @@ import { useEffect, useRef, useState, useCallback } from "react";
 //    doesn't trigger an exponential-backoff reconnect storm.
 //
 // Returns: { send, lastEvent, status }
-export function useWebSocket(onEvent) {
+export function useWebSocket(onEvent, options = {}) {
+    const enabled = options.enabled !== false;
     const wsRef = useRef(null);
     const reconnectTimerRef = useRef(null);
     const attemptRef = useRef(0);
@@ -28,6 +29,7 @@ export function useWebSocket(onEvent) {
     });
 
     const connect = useCallback(() => {
+        if (!enabled) return;
         if (isUnmountedRef.current) return;
         const apiBase = process.env.NEXT_PUBLIC_API_URL || "";
         const wsURL = (apiBase || window.location.origin).replace(/^http/, "ws") + "/ws";
@@ -57,9 +59,13 @@ export function useWebSocket(onEvent) {
                 if (fn) fn(ev);
             } catch (_) {}
         };
-    }, []);
+    }, [enabled]);
 
     useEffect(() => {
+        if (!enabled) {
+            setStatus("idle");
+            return;
+        }
         isUnmountedRef.current = false;
         connect();
         return () => {
@@ -79,7 +85,7 @@ export function useWebSocket(onEvent) {
                 try { ws.close(); } catch (_) {}
             }
         };
-    }, [connect]);
+    }, [connect, enabled]);
 
     const send = useCallback((typeOrEvent, payload) => {
         const ws = wsRef.current;

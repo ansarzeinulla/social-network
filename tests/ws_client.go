@@ -28,6 +28,8 @@ func main() {
 	body := flag.String("body", "hello over websocket", "message body")
 	expect := flag.String("expect", "pong", "event type expected from server")
 	hold := flag.Duration("hold", 0, "keep websocket open after expected event")
+	timeout := flag.Duration("timeout", 3*time.Second, "read timeout")
+	readyFile := flag.String("ready", "", "write this file after websocket connects")
 	flag.Parse()
 
 	token, err := sessionToken(*cookieJar)
@@ -46,12 +48,19 @@ func main() {
 		die(err)
 	}
 	defer conn.Close()
+	if *readyFile != "" {
+		if err := os.WriteFile(*readyFile, []byte("ready\n"), 0644); err != nil {
+			die(err)
+		}
+	}
 
 	var payload any
 	eventType := "ping"
 	switch *mode {
 	case "ping":
 		payload = map[string]any{}
+	case "listen", "noevent":
+		// Listener-only modes are used by fan-out tests with multiple clients.
 	case "private":
 		eventType = "chat.send"
 		payload = map[string]any{"to_user_id": *toUserID, "body": *body}
@@ -62,22 +71,34 @@ func main() {
 		die(fmt.Errorf("unknown mode %q", *mode))
 	}
 
-	payloadBytes, _ := json.Marshal(payload)
-	if err := conn.WriteJSON(event{Type: eventType, Payload: payloadBytes}); err != nil {
-		die(err)
+	if *mode != "listen" && *mode != "noevent" {
+		payloadBytes, _ := json.Marshal(payload)
+		if err := conn.WriteJSON(event{Type: eventType, Payload: payloadBytes}); err != nil {
+			die(err)
+		}
 	}
 
 	if *expect == "" {
+		if *hold > 0 {
+			time.Sleep(*hold)
+		}
 		return
 	}
 
-	_ = conn.SetReadDeadline(time.Now().Add(3 * time.Second))
+	_ = conn.SetReadDeadline(time.Now().Add(*timeout))
 	for {
 		var ev event
 		if err := conn.ReadJSON(&ev); err != nil {
+			if *mode == "noevent" {
+				fmt.Println("noevent")
+				return
+			}
 			die(err)
 		}
 		if ev.Type == *expect {
+			if *mode == "noevent" {
+				die(fmt.Errorf("unexpected event %q", ev.Type))
+			}
 			fmt.Println(ev.Type)
 			if *hold > 0 {
 				time.Sleep(*hold)

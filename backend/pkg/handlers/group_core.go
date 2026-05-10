@@ -9,6 +9,7 @@ import (
 
 	"social-network/pkg/db/sqlite"
 	"social-network/pkg/middleware"
+	ws "social-network/pkg/websocket"
 )
 
 // GET  /api/groups
@@ -111,7 +112,11 @@ func GroupItemHandler(w http.ResponseWriter, r *http.Request) {
 		if status == "requested" {
 			if g, err := sqlite.GetGroup(gid, userID); err == nil && g != nil && g.CreatorID != userID {
 				eid := gid
-				_, _ = sqlite.CreateNotification(g.CreatorID, userID, "group_request", &eid)
+				if id, err := sqlite.CreateNotification(g.CreatorID, userID, "group_request", &eid); err == nil {
+					ws.PushNotification(g.CreatorID, map[string]any{
+						"id": id, "sender_id": userID, "type": "group_request", "entity_id": gid,
+					})
+				}
 			}
 		}
 		writeJSON(w, map[string]string{"status": status})
@@ -138,7 +143,11 @@ func GroupItemHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		eid := gid
-		_, _ = sqlite.CreateNotification(body.UserID, userID, "group_invite", &eid)
+		if id, err := sqlite.CreateNotification(body.UserID, userID, "group_invite", &eid); err == nil {
+			ws.PushNotification(body.UserID, map[string]any{
+				"id": id, "sender_id": userID, "type": "group_invite", "entity_id": gid,
+			})
+		}
 		writeJSON(w, map[string]string{"status": "invited"})
 
 	case action == "accept" && r.Method == http.MethodPost:
@@ -390,7 +399,11 @@ func handleGroupEvents(w http.ResponseWriter, r *http.Request, groupID, userID i
 					continue
 				}
 				eid := id
-				_, _ = sqlite.CreateNotification(member.ID, userID, "new_event", &eid)
+				if nid, err := sqlite.CreateNotification(member.ID, userID, "new_event", &eid); err == nil {
+					ws.PushNotification(member.ID, map[string]any{
+						"id": nid, "sender_id": userID, "type": "new_event", "entity_id": id,
+					})
+				}
 			}
 		}
 		writeJSON(w, map[string]any{"id": id, "options": []string{"going", "not_going"}})

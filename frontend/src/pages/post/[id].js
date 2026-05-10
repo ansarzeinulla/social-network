@@ -15,6 +15,7 @@ export default function PostDetails() {
     const [me, setMe] = useState(null);
     const [comments, setComments] = useState([]);
     const [newComment, setNewComment] = useState("");
+    const [commentImage, setCommentImage] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
@@ -44,10 +45,11 @@ export default function PostDetails() {
     const submitComment = async (e) => {
         e.preventDefault();
         const text = newComment.trim();
-        if (!text) return;
+        if (!text && !commentImage) return;
         try {
-            await commentsSvc.add(id, text);
+            await commentsSvc.add(id, text, commentImage);
             setNewComment("");
+            setCommentImage(null);
             await loadComments();
         } catch (_) {}
     };
@@ -102,11 +104,26 @@ export default function PostDetails() {
                         value={newComment}
                         onChange={(e) => setNewComment(e.target.value)}
                     />
-                    <button type="submit" className="btn" disabled={!newComment.trim()}>
+                    <label className="image-pick" title="Прикрепить изображение">
+                        <span className="material-symbols-outlined" style={{ fontSize: 18 }}>photo_library</span>
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => setCommentImage(e.target.files?.[0] || null)}
+                            hidden
+                        />
+                    </label>
+                    <button type="submit" className="btn" disabled={!newComment.trim() && !commentImage}>
                         <span className="material-symbols-outlined" style={{ fontSize: 18 }}>send</span>
                         Опубликовать
                     </button>
                 </form>
+                {commentImage && (
+                    <div className="picked-file">
+                        {commentImage.name}
+                        <button type="button" onClick={() => setCommentImage(null)}>×</button>
+                    </div>
+                )}
             </div>
 
             {comments.map((c) => (
@@ -118,6 +135,7 @@ export default function PostDetails() {
                             <span className="comment-time">{new Date(c.created_at).toLocaleString()}</span>
                         </div>
                         <div className="comment-text">{c.content}</div>
+                        {c.image_url && <img className="comment-image" src={assetURL(c.image_url)} alt="" />}
                     </div>
                 </div>
             ))}
@@ -178,6 +196,34 @@ export default function PostDetails() {
                     padding: 0 16px;
                     border-radius: 999px;
                 }
+                .image-pick {
+                    width: 42px;
+                    height: 42px;
+                    border-radius: 999px;
+                    background: var(--bg);
+                    color: var(--accent);
+                    display: grid;
+                    place-items: center;
+                    flex-shrink: 0;
+                    cursor: pointer;
+                }
+                .image-pick:hover { background: var(--bg-hover); }
+                .picked-file {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 8px;
+                    margin-top: 8px;
+                    color: var(--text-secondary);
+                    font-size: 12px;
+                }
+                .picked-file button {
+                    width: 24px;
+                    height: 24px;
+                    border-radius: 50%;
+                    background: var(--bg-hover);
+                    color: var(--text-main);
+                }
                 .comment {
                     display: flex;
                     align-items: flex-start;
@@ -202,6 +248,14 @@ export default function PostDetails() {
                     margin-top: 2px;
                     white-space: pre-wrap;
                     word-break: break-word;
+                }
+                .comment-image {
+                    display: block;
+                    max-width: min(100%, 360px);
+                    max-height: 260px;
+                    object-fit: cover;
+                    border-radius: var(--radius);
+                    margin-top: 8px;
                 }
                 .btn { display: inline-flex; align-items: center; gap: 4px; }
             `}</style>

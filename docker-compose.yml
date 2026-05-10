@@ -1,6 +1,7 @@
 services:
   caddy:
     image: caddy:2-alpine
+    profiles: ["proxy"]
     ports:
       - "80:80"
     volumes:
@@ -31,6 +32,14 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: "http://localhost:8080"
+        NEXT_PUBLIC_USE_MOCK_FOLLOWERS: "false"
+        NEXT_PUBLIC_USE_MOCK_PROFILE: "false"
+        NEXT_PUBLIC_USE_MOCK_NOTIFICATIONS: "false"
+        NEXT_PUBLIC_USE_MOCK_COMMENTS: "false"
+        NEXT_PUBLIC_USE_MOCK_CHAT: "false"
+        NEXT_PUBLIC_USE_MOCK_GROUPS: "false"
     expose:
       - "3000"
     ports:
@@ -38,9 +47,9 @@ services:
     depends_on:
       - backend
     environment:
-      # Behind Caddy at http://localhost the browser uses same-origin URLs.
-      # NEXT_PUBLIC_API_URL is intentionally empty so api.js generates "/api/...".
-      - NEXT_PUBLIC_API_URL=
+      # Default compose uses two containers (backend + frontend), so the
+      # browser calls the backend directly with CORS + credentials.
+      - NEXT_PUBLIC_API_URL=http://localhost:8080
       - NEXT_PUBLIC_USE_MOCK_FOLLOWERS=false
       - NEXT_PUBLIC_USE_MOCK_PROFILE=false
       - NEXT_PUBLIC_USE_MOCK_NOTIFICATIONS=false

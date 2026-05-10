@@ -3,7 +3,7 @@ set -euo pipefail
 
 # Comments:
 # - successful text comment;
-# - successful comment with GIF URL;
+# - successful comment with GIF URL and multipart GIF upload;
 # - forbidden user cannot comment under a private post they cannot see.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -13,6 +13,8 @@ source "$SCRIPT_DIR/../helpers.sh"
 author_cookie="$TMP_DIR/author.cookies"
 viewer_cookie="$TMP_DIR/viewer.cookies"
 stranger_cookie="$TMP_DIR/stranger.cookies"
+gif_file="$TMP_DIR/comment.gif"
+write_test_gif "$gif_file"
 
 register_user "pm-author-${RUN_ID}@t.io" "Comment" "Author" true "$author_cookie" "Comment author bio"
 author_id="$CREATED_USER_ID"
@@ -51,11 +53,20 @@ status="$(request_json POST "/api/posts/$public_id/comments" "{\"content\":\"$gi
 assert_status "create comment with gif url" 200 "$status"
 assert_body_contains "gif comment returns id" "\"id\":"
 
+upload_comment="uploaded gif comment ${RUN_ID}"
+status="$(request_form POST "/api/posts/$public_id/comments" "$viewer_cookie" \
+  -F "content=$upload_comment" \
+  -F "image=@$gif_file;filename=comment.gif;type=image/gif")"
+assert_status "create multipart comment with gif upload" 200 "$status"
+assert_body_contains "multipart gif comment returns id" "\"id\":"
+
 status="$(request_get "/api/posts/$public_id/comments" "$viewer_cookie")"
 assert_status "load public post comments" 200 "$status"
 assert_body_contains "comments include text comment" "$text_comment"
 assert_body_contains "comments include gif comment" "$gif_comment"
 assert_body_contains "comments include gif url" "/uploads/test.gif"
+assert_body_contains "comments include multipart gif comment" "$upload_comment"
+assert_body_contains "comments include uploaded gif url" ".gif"
 
 status="$(request_json POST "/api/posts/$private_id/comments" "{\"content\":\"forbidden comment ${RUN_ID}\"}" "$stranger_cookie")"
 assert_status "reject comment under invisible private post" 403 "$status"

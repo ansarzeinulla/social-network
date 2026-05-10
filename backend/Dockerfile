@@ -20,7 +20,7 @@ RUN CGO_ENABLED=1 go build -o main server.go
 # Run stage
 FROM alpine:latest
 
-RUN apk add --no-cache sqlite-libs ca-certificates
+RUN apk add --no-cache sqlite sqlite-libs ca-certificates
 
 WORKDIR /app
 
