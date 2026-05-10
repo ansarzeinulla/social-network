@@ -124,6 +124,24 @@ json_number_field() {
   sed -nE "s/.*\"$field\"[[:space:]]*:[[:space:]]*([0-9]+).*/\1/p" "$LAST_BODY" | head -n 1
 }
 
+post_id_by_content() {
+  local content="$1"
+  tr '{' '\n' < "$LAST_BODY" |
+    grep -F "\"content\":\"$content\"" |
+    sed -nE 's/.*"id":[[:space:]]*([0-9]+).*/\1/p' |
+    head -n 1
+}
+
+write_test_gif() {
+  local path="$1"
+  printf 'GIF89a\001\000\001\000\200\000\000\000\000\000\377\377\377!\371\004\001\000\000\000\000,\000\000\000\000\001\000\001\000\000\002\002D\001\000;' > "$path"
+}
+
+write_fake_pdf_jpg() {
+  local path="$1"
+  printf '%%PDF-1.7\nnot really an image\n' > "$path"
+}
+
 register_user() {
   local email="$1"
   local first_name="$2"

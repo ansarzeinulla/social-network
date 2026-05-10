@@ -122,8 +122,30 @@ func GetPostsByUserIDandFilters(userID int64, content, startDate, endDate, priva
 	case "private":
 		return GetPrivatePostsByUserIDandFilter(userID, content, startDate, endDate, page, limit)
 	default:
-		return GetPublicPostsByUserIDandFilter(userID, content, startDate, endDate, page, limit)
+		return GetVisiblePostsByUserIDandFilter(userID, content, startDate, endDate, page, limit)
 	}
+}
+
+func GetVisiblePostsByUserIDandFilter(userID int64, content, startDate, endDate string, page, limit int) ([]models.Post, int, error) {
+	filterClause, args := buildFilters(content, startDate, endDate)
+	query := `
+		SELECT ` + postSelectCols + `
+		FROM posts p
+		JOIN users u ON p.user_id = u.id
+		WHERE (
+			p.privacy = 'public'
+			OR p.user_id = ?
+			OR (p.privacy = 'almost_private' AND EXISTS (
+				SELECT 1 FROM followers f
+				WHERE f.follower_id = ? AND f.followee_id = p.user_id AND f.status = 'accepted'
+			))
+			OR (p.privacy = 'private' AND EXISTS (
+				SELECT 1 FROM post_viewers pv
+				WHERE pv.post_id = p.id AND pv.user_id = ?
+			))
+		)` + filterClause
+	finalArgs := append([]interface{}{userID, userID, userID}, args...)
+	return fetchPostsWithFilters(query, finalArgs, page, limit)
 }
 
 func CreatePost(userID int64, content, imageUrl, privacy string, viewers []int64) (int64, error) {

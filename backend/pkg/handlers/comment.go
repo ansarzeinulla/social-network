@@ -23,6 +23,20 @@ func PostCommentsHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
+		userID := r.Context().Value(middleware.UserIDKey).(int64)
+		post, err := sqlite.GetPostByID(postID)
+		if err != nil {
+			http.Error(w, "db error", http.StatusInternalServerError)
+			return
+		}
+		if post == nil {
+			http.Error(w, "post not found", http.StatusNotFound)
+			return
+		}
+		if !canViewPost(userID, post) {
+			http.Error(w, "Forbidden", http.StatusForbidden)
+			return
+		}
 		out, err := sqlite.ListComments(postID)
 		if err != nil {
 			http.Error(w, "db error", http.StatusInternalServerError)
@@ -32,6 +46,19 @@ func PostCommentsHandler(w http.ResponseWriter, r *http.Request) {
 
 	case http.MethodPost:
 		userID := r.Context().Value(middleware.UserIDKey).(int64)
+		post, err := sqlite.GetPostByID(postID)
+		if err != nil {
+			http.Error(w, "db error", http.StatusInternalServerError)
+			return
+		}
+		if post == nil {
+			http.Error(w, "post not found", http.StatusNotFound)
+			return
+		}
+		if !canViewPost(userID, post) {
+			http.Error(w, "Forbidden", http.StatusForbidden)
+			return
+		}
 		var body struct {
 			Content  string `json:"content"`
 			ImageURL string `json:"image_url"`

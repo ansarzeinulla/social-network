@@ -6,11 +6,13 @@ import (
 	"net/http"
 	"social-network/pkg/db/sqlite"
 	"social-network/pkg/middleware"
+	"social-network/pkg/models"
 	"social-network/pkg/utils"
 	"strconv"
 )
 
 func GetPostHandler(w http.ResponseWriter, r *http.Request) {
+	userID := r.Context().Value(middleware.UserIDKey).(int64)
 	idStr := r.URL.Query().Get("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
@@ -27,6 +29,10 @@ func GetPostHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Post not found", http.StatusNotFound)
 		return
 	}
+	if !canViewPost(userID, post) {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
 
 	// Fetch viewers if private
 	viewers := []int64{}
@@ -41,6 +47,28 @@ func GetPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resp)
+}
+
+func canViewPost(userID int64, post *models.Post) bool {
+	if post.UserID == userID || post.Privacy == "public" {
+		return true
+	}
+	if post.Privacy == "almost_private" {
+		state, err := sqlite.GetFollowState(userID, post.UserID)
+		return err == nil && state.Status == "accepted"
+	}
+	if post.Privacy == "private" {
+		viewers, err := sqlite.GetPostViewers(post.ID)
+		if err != nil {
+			return false
+		}
+		for _, viewerID := range viewers {
+			if viewerID == userID {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func UpdatePostHandler(w http.ResponseWriter, r *http.Request) {
