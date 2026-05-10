@@ -26,8 +26,8 @@ type MeResponse struct {
 	IsSelf         bool   `json:"is_self"`
 	IsFollowing    bool   `json:"is_following"`
 	IsPending      bool   `json:"is_pending"`
-	FollowersCount int    `json:"followers_count"`
-	FollowingCount int    `json:"following_count"`
+	FollowersCount *int   `json:"followers_count,omitempty"`
+	FollowingCount *int   `json:"following_count,omitempty"`
 }
 
 // ProfileHandler routes:
@@ -106,10 +106,12 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 	if visible {
 		resp.AboutMe = target.AboutMe
 		if followers, err := sqlite.ListFollowers(target.ID); err == nil {
-			resp.FollowersCount = len(followers)
+			count := len(followers)
+			resp.FollowersCount = &count
 		}
 		if following, err := sqlite.ListFollowing(target.ID); err == nil {
-			resp.FollowingCount = len(following)
+			count := len(following)
+			resp.FollowingCount = &count
 		}
 	}
 

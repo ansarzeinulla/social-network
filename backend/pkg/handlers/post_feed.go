@@ -69,6 +69,15 @@ func UserPostsHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
+	visible, err := canViewProfileData(callerID, authorID)
+	if err != nil {
+		http.Error(w, "User not found", http.StatusNotFound)
+		return
+	}
+	if !visible {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
 
 	page := 1
 	if p := r.URL.Query().Get("page"); p != "" {

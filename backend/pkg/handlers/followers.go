@@ -26,9 +26,19 @@ func FollowersHandler(w http.ResponseWriter, r *http.Request) {
 
 // GET /api/users/{id}/followers
 func UserFollowersHandler(w http.ResponseWriter, r *http.Request) {
+	viewerID := r.Context().Value(middleware.UserIDKey).(int64)
 	id, err := pathID(r.URL.Path, "/api/users/", "/followers")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	visible, err := canViewProfileData(viewerID, id)
+	if err != nil {
+		http.Error(w, "User not found", http.StatusNotFound)
+		return
+	}
+	if !visible {
+		http.Error(w, "Forbidden", http.StatusForbidden)
 		return
 	}
 	out, err := sqlite.ListFollowers(id)
@@ -51,9 +61,19 @@ func UserOnlineHandler(w http.ResponseWriter, r *http.Request) {
 
 // GET /api/users/{id}/following
 func UserFollowingHandler(w http.ResponseWriter, r *http.Request) {
+	viewerID := r.Context().Value(middleware.UserIDKey).(int64)
 	id, err := pathID(r.URL.Path, "/api/users/", "/following")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	visible, err := canViewProfileData(viewerID, id)
+	if err != nil {
+		http.Error(w, "User not found", http.StatusNotFound)
+		return
+	}
+	if !visible {
+		http.Error(w, "Forbidden", http.StatusForbidden)
 		return
 	}
 	out, err := sqlite.ListFollowing(id)
@@ -89,8 +109,8 @@ func FollowHandler(w http.ResponseWriter, r *http.Request) {
 		if status == "pending" {
 			if _, err := sqlite.CreateNotification(targetID, userID, "follow_request", nil); err == nil {
 				ws.PushNotification(targetID, map[string]any{
-					"type":   "follow_request",
-					"from":   userID,
+					"type": "follow_request",
+					"from": userID,
 				})
 			}
 		}
@@ -203,3 +223,26 @@ var errInvalidPath = httpError{msg: "invalid path"}
 type httpError struct{ msg string }
 
 func (e httpError) Error() string { return e.msg }
+
+func canViewProfileData(viewerID, targetID int64) (bool, error) {
+	if viewerID == targetID {
+		return true, nil
+	}
+
+	target, err := sqlite.GetUserByID(targetID)
+	if err != nil {
+		return false, err
+	}
+	if target == nil {
+		return false, errInvalidPath
+	}
+	if target.IsPublic {
+		return true, nil
+	}
+
+	state, err := sqlite.GetFollowState(viewerID, targetID)
+	if err != nil {
+		return false, err
+	}
+	return state.Status == "accepted", nil
+}
