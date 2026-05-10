@@ -85,7 +85,11 @@ func UpdatePostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	idStr := r.FormValue("id")
-	postID, _ := strconv.ParseInt(idStr, 10, 64)
+	postID, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil || postID == 0 {
+		http.Error(w, "Invalid post ID", http.StatusBadRequest)
+		return
+	}
 
 	// Check ownership
 	existing, err := sqlite.GetPostByID(postID)
@@ -117,7 +121,11 @@ func UpdatePostHandler(w http.ResponseWriter, r *http.Request) {
 	// Handle Image
 	imageUrl := existing.ImageURL
 	newImage, err := utils.ProcessImageUpload(r, "image", "./data/uploads")
-	if err == nil && newImage != "" {
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	if newImage != "" {
 		// Delete old image if it exists and we have a new one
 		if existing.ImageURL != "" {
 			utils.DeleteImage(existing.ImageURL, "./data/uploads")
@@ -145,7 +153,11 @@ func DeletePostHandler(w http.ResponseWriter, r *http.Request) {
 	if idStr == "" {
 		idStr = r.FormValue("id")
 	}
-	postID, _ := strconv.ParseInt(idStr, 10, 64)
+	postID, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil || postID == 0 {
+		http.Error(w, "Invalid post ID", http.StatusBadRequest)
+		return
+	}
 
 	// Check ownership
 	existing, err := sqlite.GetPostByID(postID)

@@ -37,7 +37,9 @@ protected_routes=(
   "POST /api/posts/1/comments"
   "GET /api/chats"
   "GET /api/chats/messages?peer_id=1"
+  "POST /api/chats/messages"
   "GET /api/groups/chat/history?group_id=1"
+  "POST /api/groups/chat/history"
   "GET /api/notifications"
   "POST /api/notifications/read-all"
   "POST /api/notifications/1"
@@ -48,6 +50,16 @@ protected_routes=(
   "POST /api/groups/1/join"
   "POST /api/groups/1/invite"
   "POST /api/groups/1/accept"
+  "GET /api/groups/1/requests"
+  "POST /api/groups/1/requests/2/accept"
+  "POST /api/groups/1/requests/2/decline"
+  "GET /api/groups/1/posts"
+  "POST /api/groups/1/posts"
+  "GET /api/groups/1/posts/1/comments"
+  "POST /api/groups/1/posts/1/comments"
+  "GET /api/groups/1/events"
+  "POST /api/groups/1/events"
+  "POST /api/groups/1/events/1/vote"
 )
 
 status_of() {

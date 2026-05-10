@@ -18,6 +18,8 @@ curl -i http://localhost:8080/api/profile
 
 Ожидаемый ответ без cookie: `401 Unauthorized`. Это нормально: значит backend жив и защищенные ручки работают.
 
+Для WebSocket-тестов нужен установленный Go: они запускают маленький helper [ws_client.go](./ws_client.go) через `go run` из backend-модуля.
+
 ## 2. Запустить все shell-тесты
 
 Из корня проекта:

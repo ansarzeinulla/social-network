@@ -124,6 +124,11 @@ json_number_field() {
   sed -nE "s/.*\"$field\"[[:space:]]*:[[:space:]]*([0-9]+).*/\1/p" "$LAST_BODY" | head -n 1
 }
 
+json_string_field() {
+  local field="$1"
+  sed -nE "s/.*\"$field\"[[:space:]]*:[[:space:]]*\"([^\"]*)\".*/\1/p" "$LAST_BODY" | head -n 1
+}
+
 post_id_by_content() {
   local content="$1"
   tr '{' '\n' < "$LAST_BODY" |
