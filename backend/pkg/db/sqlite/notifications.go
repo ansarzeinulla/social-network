@@ -66,6 +66,18 @@ func MarkNotificationRead(id, userID int64) (bool, error) {
 	return n > 0, nil
 }
 
+func NotificationReceiver(id int64) (int64, bool, error) {
+	var receiverID int64
+	err := DB.QueryRow(`SELECT receiver_id FROM notifications WHERE id = ?`, id).Scan(&receiverID)
+	if err == sql.ErrNoRows {
+		return 0, false, nil
+	}
+	if err != nil {
+		return 0, false, err
+	}
+	return receiverID, true, nil
+}
+
 func MarkAllNotificationsRead(userID int64) error {
 	_, err := DB.Exec(`UPDATE notifications SET is_read = 1 WHERE receiver_id = ?`, userID)
 	return err
