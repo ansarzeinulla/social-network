@@ -27,6 +27,7 @@ func scanGroup(scan func(...any) error) (models.Group, error) {
 	if err != nil {
 		return g, err
 	}
+	g.Status = myStatus
 	g.Joined = myStatus == "member"
 	g.Pending = myStatus == "requested" || myStatus == "invited"
 	return g, nil
@@ -174,6 +175,22 @@ func AcceptGroupMembership(groupID, userID int64) error {
 	n, _ := res.RowsAffected()
 	if n == 0 {
 		return errors.New("no membership to accept")
+	}
+	return nil
+}
+
+func DeclineGroupMembership(groupID, userID int64) error {
+	res, err := DB.Exec(
+		`DELETE FROM group_members
+		 WHERE group_id = ? AND user_id = ? AND status = 'invited'`,
+		groupID, userID,
+	)
+	if err != nil {
+		return err
+	}
+	n, _ := res.RowsAffected()
+	if n == 0 {
+		return errors.New("no invitation to decline")
 	}
 	return nil
 }

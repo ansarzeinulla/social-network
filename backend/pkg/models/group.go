@@ -14,6 +14,7 @@ type Group struct {
 	MembersCount     int       `json:"members_count"`
 	Joined           bool      `json:"joined"`
 	Pending          bool      `json:"pending"`
+	Status           string    `json:"status,omitempty"`
 }
 
 type GroupPost struct {

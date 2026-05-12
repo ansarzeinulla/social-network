@@ -32,6 +32,16 @@ export const groups = {
             () => apiJSON(`/groups/${groupId}/invite`, { method: "POST", body: JSON.stringify({ user_id: userId }) }),
             () => groupsMock.invite(groupId, userId)
         ),
+    acceptInvite: (groupId) =>
+        withMock("GROUPS",
+            () => apiJSON(`/groups/${groupId}/accept`, { method: "POST" }),
+            () => groupsMock.acceptInvite(groupId)
+        ),
+    declineInvite: (groupId) =>
+        withMock("GROUPS",
+            () => apiJSON(`/groups/${groupId}/decline`, { method: "POST" }),
+            () => groupsMock.declineInvite(groupId)
+        ),
     posts: (groupId) =>
         withMock("GROUPS",
             () => apiJSON(`/groups/${groupId}/posts`),

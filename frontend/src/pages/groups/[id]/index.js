@@ -74,6 +74,22 @@ export default function GroupPage() {
         setCommentsByPost((prev) => ({ ...prev, [postID]: list || [] }));
     };
 
+    const acceptInvite = async () => {
+        await groups.acceptInvite(id);
+        const data = await groups.get(id);
+        setG(data);
+        setMembers(await groups.members(id).catch(() => []));
+        await loadPosts();
+    };
+
+    const declineInvite = async () => {
+        await groups.declineInvite(id);
+        const data = await groups.get(id);
+        setG(data);
+        setMembers([]);
+        setPosts([]);
+    };
+
     return (
         <Layout>
             <div className="group-cover">
@@ -105,6 +121,19 @@ export default function GroupPage() {
                 </div>
                 {g.description && <p className="about">{g.description}</p>}
             </div>
+
+            {g.status === "invited" && (
+                <div className="card invite-card">
+                    <div>
+                        <strong>Вас пригласили в эту группу</strong>
+                        <p>Примите приглашение, чтобы видеть посты, события и чат.</p>
+                    </div>
+                    <div className="invite-actions">
+                        <button className="btn" onClick={acceptInvite}>Принять</button>
+                        <button className="btn btn-danger" onClick={declineInvite}>Отклонить</button>
+                    </div>
+                </div>
+            )}
 
             <div className="card actions-card">
                 <Link href={`/groups/${id}/chat`} className="action-btn">
@@ -280,6 +309,19 @@ export default function GroupPage() {
                 }
                 .about { padding: 0 24px 16px; font-size: 14px; line-height: 1.5; }
                 .actions-card { display: flex; gap: 8px; padding: 8px; }
+                .invite-card {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 12px;
+                    padding: 14px;
+                }
+                .invite-card p {
+                    color: var(--text-secondary);
+                    font-size: 13px;
+                    margin-top: 2px;
+                }
+                .invite-actions { display: flex; gap: 8px; }
                 .action-btn {
                     flex: 1;
                     display: flex;

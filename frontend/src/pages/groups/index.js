@@ -22,6 +22,8 @@ export default function GroupsSearch() {
     useEffect(() => { load(); }, []);
 
     const join = async (id) => { await groups.join(id); await load(); };
+    const acceptInvite = async (id) => { await groups.acceptInvite(id); await load(); };
+    const declineInvite = async (id) => { await groups.declineInvite(id); await load(); };
 
     const filtered = list.filter((g) =>
         g.title.toLowerCase().includes(query.toLowerCase())
@@ -62,6 +64,11 @@ export default function GroupsSearch() {
                             </div>
                             {g.joined ? (
                                 <button className="btn btn-ghost" onClick={() => router.push(`/groups/${g.id}`)}>Открыть</button>
+                            ) : g.status === "invited" ? (
+                                <div className="invite-actions">
+                                    <button className="btn" onClick={() => acceptInvite(g.id)}>Принять</button>
+                                    <button className="btn btn-ghost" onClick={() => declineInvite(g.id)}>Отклонить</button>
+                                </div>
                             ) : g.pending ? (
                                 <button className="btn btn-ghost" disabled>Запрос отправлен</button>
                             ) : (
@@ -90,6 +97,7 @@ export default function GroupsSearch() {
                 }
                 .group-card { padding: 16px; }
                 .group-header { display: flex; align-items: center; gap: 12px; }
+                .invite-actions { display: flex; gap: 8px; }
                 .group-avatar {
                     width: 56px;
                     height: 56px;

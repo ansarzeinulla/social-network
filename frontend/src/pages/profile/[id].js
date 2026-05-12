@@ -7,6 +7,7 @@ import PostCard from "../../components/PostCard";
 import { profile } from "../../services/profile";
 import { followers } from "../../services/followers";
 import { apiJSON } from "../../services/api";
+import { formatDate } from "../../utils/date";
 
 export default function UserProfile() {
     const router = useRouter();
@@ -87,7 +88,14 @@ export default function UserProfile() {
                 </div>
 
                 {canSee ? (
-                    user.about_me && <p className="about">{user.about_me}</p>
+                    <>
+                        {user.date_of_birth && (
+                            <p className="about meta-line">
+                                <strong>Дата рождения:</strong> {formatDate(user.date_of_birth)}
+                            </p>
+                        )}
+                        {user.about_me && <p className="about">{user.about_me}</p>}
+                    </>
                 ) : (
                     <p className="about" style={{ color: "var(--text-secondary)" }}>
                         🔒 Этот профиль приватный. Подпишитесь, чтобы увидеть подробности.
@@ -124,6 +132,12 @@ export default function UserProfile() {
                 .profile-meta { color: var(--text-secondary); font-size: 14px; margin-top: 4px; }
                 .profile-meta strong { color: var(--text-main); }
                 .about { padding: 0 24px 16px; color: var(--text-main); font-size: 15px; line-height: 1.5; }
+                .meta-line {
+                    padding-bottom: 6px;
+                    color: var(--text-secondary);
+                    font-size: 14px;
+                }
+                .meta-line strong { color: var(--text-main); }
                 .profile-actions {
                     display: flex;
                     flex-direction: column;

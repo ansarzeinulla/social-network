@@ -82,3 +82,12 @@ func DeleteFollowRequestNotification(receiverID, senderID int64) error {
 	)
 	return err
 }
+
+func DeleteGroupInviteNotification(receiverID, groupID int64) error {
+	_, err := DB.Exec(
+		`DELETE FROM notifications
+		 WHERE receiver_id = ? AND entity_id = ? AND type = 'group_invite'`,
+		receiverID, groupID,
+	)
+	return err
+}

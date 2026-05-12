@@ -30,4 +30,16 @@ export const groupsMock = {
         await delay();
         return { ok: true };
     },
+    acceptInvite: async (id) => {
+        await delay();
+        const g = _groups.find((x) => x.id === id);
+        if (g) { g.joined = true; g.pending = false; g.status = "member"; }
+        return { status: "member" };
+    },
+    declineInvite: async (id) => {
+        await delay();
+        const g = _groups.find((x) => x.id === id);
+        if (g) { g.joined = false; g.pending = false; g.status = ""; }
+        return { status: "declined" };
+    },
 };

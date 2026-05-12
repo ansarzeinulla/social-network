@@ -8,6 +8,7 @@ import { profile } from "../../services/profile";
 import { followers } from "../../services/followers";
 import { apiJSON } from "../../services/api";
 import { setUser } from "../../hooks/useUser";
+import { formatDate } from "../../utils/date";
 
 const TABS = ["timeline", "followers", "following", "requests"];
 
@@ -178,6 +179,11 @@ export default function MyProfile() {
                 </div>
                 {uploading && <p className="upload-status">Загружаем аватар…</p>}
                 {uploadError && <p className="upload-status error">{uploadError}</p>}
+                {me.date_of_birth && (
+                    <p className="about meta-line">
+                        <strong>Дата рождения:</strong> {formatDate(me.date_of_birth)}
+                    </p>
+                )}
                 {me.about_me && <p className="about">{me.about_me}</p>}
             </div>
 
@@ -297,6 +303,12 @@ export default function MyProfile() {
                     font-size: 15px;
                     line-height: 1.5;
                 }
+                .meta-line {
+                    padding-bottom: 6px;
+                    color: var(--text-secondary);
+                    font-size: 14px;
+                }
+                .meta-line strong { color: var(--text-main); }
                 .tabs {
                     display: flex;
                     gap: 4px;

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Layout from "../components/Layout";
 import { notifications } from "../services/notifications";
 import { followers } from "../services/followers";
+import { groups } from "../services/groups";
 
 const ICONS = {
     follow_request: "person_add",
@@ -15,6 +16,12 @@ const MESSAGES = {
     group_invite: "приглашает в группу",
     group_request: "просится в вашу группу",
     new_event: "создал(а) новое событие",
+};
+
+const notifyBadgeChanged = () => {
+    if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("notifications:changed"));
+    }
 };
 
 export default function NotificationsPage() {
@@ -48,18 +55,34 @@ export default function NotificationsPage() {
     const markRead = async (id) => {
         await notifications.markRead(id);
         setItems((prev) => prev.map((n) => (n.id === id ? { ...n, is_read: true } : n)));
+        notifyBadgeChanged();
     };
     const markAllRead = async () => {
         await notifications.markAllRead();
         setItems((prev) => prev.map((n) => ({ ...n, is_read: true })));
+        notifyBadgeChanged();
     };
     const acceptFollow = async (n) => {
         try { await followers.accept(n.sender_id); } catch (_) {}
         setItems((prev) => prev.filter((x) => x.id !== n.id));
+        notifyBadgeChanged();
     };
     const declineFollow = async (n) => {
         try { await followers.decline(n.sender_id); } catch (_) {}
         setItems((prev) => prev.filter((x) => x.id !== n.id));
+        notifyBadgeChanged();
+    };
+    const acceptGroupInvite = async (n) => {
+        if (!n.entity_id) return;
+        try { await groups.acceptInvite(n.entity_id); } catch (_) {}
+        setItems((prev) => prev.filter((x) => x.id !== n.id));
+        notifyBadgeChanged();
+    };
+    const declineGroupInvite = async (n) => {
+        if (!n.entity_id) return;
+        try { await groups.declineInvite(n.entity_id); } catch (_) {}
+        setItems((prev) => prev.filter((x) => x.id !== n.id));
+        notifyBadgeChanged();
     };
 
     const unread = items.filter((n) => !n.is_read).length;
@@ -95,6 +118,11 @@ export default function NotificationsPage() {
                             <div className="notif-actions">
                                 <button className="btn" onClick={() => acceptFollow(n)}>Принять</button>
                                 <button className="btn btn-danger" onClick={() => declineFollow(n)}>Отклонить</button>
+                            </div>
+                        ) : n.type === "group_invite" && !n.is_read ? (
+                            <div className="notif-actions">
+                                <button className="btn" onClick={() => acceptGroupInvite(n)}>Принять</button>
+                                <button className="btn btn-danger" onClick={() => declineGroupInvite(n)}>Отклонить</button>
                             </div>
                         ) : !n.is_read ? (
                             <button className="btn btn-ghost" onClick={() => markRead(n.id)}>Прочитать</button>

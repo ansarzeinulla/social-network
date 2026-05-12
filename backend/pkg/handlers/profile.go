@@ -18,6 +18,7 @@ type MeResponse struct {
 	Email          string `json:"email,omitempty"`
 	FirstName      string `json:"first_name"`
 	LastName       string `json:"last_name"`
+	DateOfBirth    string `json:"date_of_birth,omitempty"`
 	Nickname       string `json:"nickname,omitempty"`
 	Avatar         string `json:"avatar,omitempty"`
 	Cover          string `json:"cover,omitempty"`
@@ -121,6 +122,7 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if visible {
+		resp.DateOfBirth = target.DateOfBirth
 		resp.AboutMe = target.AboutMe
 		if followers, err := sqlite.ListFollowers(target.ID); err == nil {
 			count := len(followers)

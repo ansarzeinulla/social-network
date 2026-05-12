@@ -56,6 +56,7 @@ func GroupsRootHandler(w http.ResponseWriter, r *http.Request) {
 // POST /api/groups/{id}/join
 // POST /api/groups/{id}/invite   { "user_id": N }
 // POST /api/groups/{id}/accept   (called by invited user)
+// POST /api/groups/{id}/decline  (called by invited user)
 func GroupItemHandler(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value(middleware.UserIDKey).(int64)
 	rest := strings.TrimPrefix(r.URL.Path, "/api/groups/")
@@ -155,7 +156,16 @@ func GroupItemHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+		_ = sqlite.DeleteGroupInviteNotification(userID, gid)
 		writeJSON(w, map[string]string{"status": "member"})
+
+	case action == "decline" && r.Method == http.MethodPost:
+		if err := sqlite.DeclineGroupMembership(gid, userID); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		_ = sqlite.DeleteGroupInviteNotification(userID, gid)
+		writeJSON(w, map[string]string{"status": "declined"})
 
 	case action == "requests" && r.Method == http.MethodGet:
 		creator, err := sqlite.IsGroupCreator(gid, userID)

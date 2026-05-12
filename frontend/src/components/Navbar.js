@@ -24,9 +24,14 @@ export default function Navbar() {
             setUnread(0);
             return;
         }
-        notifications.list()
-            .then((items) => setUnread((items || []).filter((n) => !n.is_read && !n.read).length))
-            .catch(() => setUnread(0));
+        const refreshUnread = () => {
+            notifications.list()
+                .then((items) => setUnread((items || []).filter((n) => !n.is_read && !n.read).length))
+                .catch(() => setUnread(0));
+        };
+        refreshUnread();
+        window.addEventListener("notifications:changed", refreshUnread);
+        return () => window.removeEventListener("notifications:changed", refreshUnread);
     }, [user]);
 
     useWebSocket((ev) => {
