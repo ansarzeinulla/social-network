@@ -2,18 +2,40 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Layout from "../components/Layout";
 import { groups } from "../services/groups";
+import { useUser } from "../hooks/useUser";
+import { useWebSocket } from "../hooks/useWebSocket";
 
 export default function MyGroups() {
     const router = useRouter();
+    const { user } = useUser();
     const [list, setList] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    const load = async () => {
+        const data = await groups.list();
+        setList((data || []).filter((g) => g.joined));
+    };
+
     useEffect(() => {
         (async () => {
-            const data = await groups.list();
-            setList((data || []).filter((g) => g.joined));
+            await load();
             setLoading(false);
         })();
+    }, []);
+
+    // Newly approved request / accepted invite should make the group appear
+    // in "My groups" immediately, without F5.
+    useWebSocket((ev) => {
+        if (ev.type !== "notification.new") return;
+        const p = ev.payload || {};
+        if (p.type === "group_accepted") load();
+    }, { enabled: !!user });
+
+    // Fallback: refetch on every WS reconnect, in case the push was missed.
+    useEffect(() => {
+        const onOpen = () => load();
+        window.addEventListener("ws:open", onOpen);
+        return () => window.removeEventListener("ws:open", onOpen);
     }, []);
 
     return (

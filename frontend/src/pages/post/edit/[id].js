@@ -34,7 +34,9 @@ export default function EditPost() {
                     setContent(post.content);
                     setPrivacy(post.privacy);
                     setExistingImage(post.image_url);
-                    setSelectedViewers(data.viewers || []);
+                    // Backend now returns [{id, first_name, ...}] for viewers
+                    // (was []int64 before). Normalize to plain ID array.
+                    setSelectedViewers((data.viewers || []).map((v) => (typeof v === "object" ? v.id : v)));
                 } else setError('Post not found');
             } catch (_) { setError('Failed to fetch'); }
             finally { setLoading(false); }

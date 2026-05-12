@@ -52,6 +52,7 @@ export default function UserProfile() {
                         name={user.first_name || user.nickname}
                         size={144}
                         className="profile-avatar"
+                        style={{ boxShadow: "0 0 0 4px #ffffff", flexShrink: 0, position: "relative", zIndex: 1 }}
                     />
                     <div className="profile-info">
                         <h1>{user.first_name} {user.last_name}</h1>
@@ -90,7 +91,8 @@ export default function UserProfile() {
                     user.about_me && <p className="about">{user.about_me}</p>
                 ) : (
                     <p className="about" style={{ color: "var(--text-secondary)" }}>
-                        🔒 Этот профиль приватный. Подпишитесь, чтобы увидеть подробности.
+                        <span className="material-symbols-outlined" style={{ fontSize: 16, verticalAlign: "middle", marginRight: 4 }}>lock</span>
+                        Этот профиль приватный. Подпишитесь, чтобы увидеть подробности.
                     </p>
                 )}
             </div>
@@ -109,6 +111,7 @@ export default function UserProfile() {
                     box-shadow: var(--shadow-sm);
                 }
                 .profile-header {
+                    position: relative;
                     display: flex;
                     align-items: flex-end;
                     gap: 16px;
@@ -119,16 +122,18 @@ export default function UserProfile() {
                     border: 4px solid var(--card-bg);
                     flex-shrink: 0;
                 }
-                .profile-info { flex: 1; padding-bottom: 8px; }
+                .profile-info { flex: 1; padding-bottom: 8px; padding-right: 180px; }
                 .profile-info h1 { font-size: 24px; font-weight: 800; }
                 .profile-meta { color: var(--text-secondary); font-size: 14px; margin-top: 4px; }
                 .profile-meta strong { color: var(--text-main); }
                 .about { padding: 0 24px 16px; color: var(--text-main); font-size: 15px; line-height: 1.5; }
                 .profile-actions {
+                    position: absolute;
+                    right: 24px;
+                    bottom: 16px;
                     display: flex;
                     flex-direction: column;
-                    gap: 6px;
-                    padding-bottom: 8px;
+                    gap: 8px;
                 }
                 .profile-actions :global(.btn) {
                     display: inline-flex;

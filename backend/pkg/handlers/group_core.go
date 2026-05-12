@@ -157,6 +157,25 @@ func GroupItemHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		writeJSON(w, map[string]string{"status": "member"})
 
+	case action == "leave" && r.Method == http.MethodPost:
+		if err := sqlite.LeaveGroup(gid, userID); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		writeJSON(w, map[string]string{"status": "left"})
+
+	case action == "cancel-request" && r.Method == http.MethodPost:
+		if err := sqlite.CancelMyGroupRequest(gid, userID); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		// Clean up the "просится в вашу группу" notification at the creator's
+		// side so it doesn't linger after the request is gone.
+		if g, err := sqlite.GetGroup(gid, userID); err == nil && g != nil {
+			_ = sqlite.DeleteGroupRequestNotification(g.CreatorID, userID, gid)
+		}
+		writeJSON(w, map[string]string{"status": "canceled"})
+
 	case action == "requests" && r.Method == http.MethodGet:
 		creator, err := sqlite.IsGroupCreator(gid, userID)
 		if err != nil {
@@ -226,12 +245,29 @@ func handleGroupRequestAction(w http.ResponseWriter, action string, groupID, use
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+		// Clear the source "X просится в вашу группу" notification at the
+		// creator's side — it's no longer actionable.
+		_ = sqlite.DeleteGroupRequestNotification(userID, requesterID, groupID)
+		// Tell the requester their join was approved: persist a record AND
+		// push over WS so their bell badge bumps and any open group page can
+		// re-fetch its membership state without a manual refresh.
+		eid := groupID
+		if nid, err := sqlite.CreateNotification(requesterID, userID, "group_accepted", &eid); err == nil {
+			ws.PushNotification(requesterID, map[string]any{
+				"id":        nid,
+				"sender_id": userID,
+				"type":      "group_accepted",
+				"entity_id": groupID,
+			})
+		}
 		writeJSON(w, map[string]string{"status": "member"})
 	case "decline":
 		if err := sqlite.DeclineGroupRequest(groupID, requesterID); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+		// Drop the source notification — request is no longer pending.
+		_ = sqlite.DeleteGroupRequestNotification(userID, requesterID, groupID)
 		writeJSON(w, map[string]string{"status": "declined"})
 	default:
 		http.Error(w, "not found", http.StatusNotFound)
@@ -448,6 +484,16 @@ func handleGroupEventSubpath(w http.ResponseWriter, r *http.Request, action stri
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		http.Error(w, "invalid body", http.StatusBadRequest)
+		return
+	}
+	// Empty vote means "retract my vote". Anything else must be one of the
+	// two valid options.
+	if body.Vote == "" {
+		if err := sqlite.RemoveGroupEventVote(eventID, userID); err != nil {
+			http.Error(w, "db error", http.StatusInternalServerError)
+			return
+		}
+		writeJSON(w, map[string]string{"vote": ""})
 		return
 	}
 	if body.Vote != "going" && body.Vote != "not_going" {

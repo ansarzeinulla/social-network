@@ -1,11 +1,16 @@
 services:
   caddy:
-    image: caddy:2-alpine
+    # Custom image with Caddyfile baked in (see caddy.Dockerfile). Avoids the
+    # Docker Desktop on Windows bug where single-file bind-mounts fail with
+    # "mkdir /run/desktop/mnt/host/d: file exists". Folder mounts (caddy_data,
+    # caddy_config) still bind to named volumes which work fine.
+    build:
+      context: .
+      dockerfile: caddy.Dockerfile
     profiles: ["proxy"]
     ports:
       - "80:80"
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
     depends_on:

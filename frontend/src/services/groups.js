@@ -27,11 +27,24 @@ export const groups = {
             () => apiJSON(`/groups/${id}/join`, { method: "POST" }),
             () => groupsMock.join(id)
         ),
+    // Leave the group (only for non-creators).
+    leave: (id) => apiJSON(`/groups/${id}/leave`, { method: "POST" }),
+    // User cancels their own pending join request before it's been processed.
+    cancelRequest: (id) => apiJSON(`/groups/${id}/cancel-request`, { method: "POST" }),
     invite: (groupId, userId) =>
         withMock("GROUPS",
             () => apiJSON(`/groups/${groupId}/invite`, { method: "POST", body: JSON.stringify({ user_id: userId }) }),
             () => groupsMock.invite(groupId, userId)
         ),
+    // Invited user accepts an invitation to join the group.
+    acceptInvite: (groupId) =>
+        apiJSON(`/groups/${groupId}/accept`, { method: "POST" }),
+    // Group owner approves a pending join request from a user.
+    acceptRequest: (groupId, userId) =>
+        apiJSON(`/groups/${groupId}/requests/${userId}/accept`, { method: "POST" }),
+    // Group owner declines a pending join request from a user.
+    declineRequest: (groupId, userId) =>
+        apiJSON(`/groups/${groupId}/requests/${userId}/decline`, { method: "POST" }),
     posts: (groupId) =>
         withMock("GROUPS",
             () => apiJSON(`/groups/${groupId}/posts`),

@@ -39,13 +39,14 @@ func MarkNotificationReadHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid id", http.StatusBadRequest)
 		return
 	}
-	ok, err := sqlite.MarkNotificationRead(id, userID)
-	if err != nil {
+	// Idempotent: 0 rows affected is the normal case when the notification
+	// has already been deleted by the accompanying action (e.g. accept-group-
+	// request removes the source "X просится в вашу группу" before runAction
+	// calls markRead). Returning 404 for that triggered withMock fallback on
+	// the client and noisy "[api] module not ready, using mock" warnings even
+	// though the desired end-state (notification is read/gone) is achieved.
+	if _, err := sqlite.MarkNotificationRead(id, userID); err != nil {
 		http.Error(w, "db error", http.StatusInternalServerError)
-		return
-	}
-	if !ok {
-		http.Error(w, "not found", http.StatusNotFound)
 		return
 	}
 	writeJSON(w, map[string]string{"status": "ok"})

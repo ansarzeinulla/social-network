@@ -3,11 +3,15 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import Layout from "../../../components/Layout";
 import Avatar from "../../../components/Avatar";
+import ConfirmModal from "../../../components/ConfirmModal";
 import { assetURL } from "../../../services/api";
 import { groups } from "../../../services/groups";
+import { useUser } from "../../../hooks/useUser";
+import { useWebSocket } from "../../../hooks/useWebSocket";
 
 export default function GroupPage() {
     const router = useRouter();
+    const { user } = useUser();
     const { id } = router.query;
     const [g, setG] = useState(null);
     const [members, setMembers] = useState([]);
@@ -18,22 +22,50 @@ export default function GroupPage() {
     const [commentsByPost, setCommentsByPost] = useState({});
     const [showMembers, setShowMembers] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [confirmLeave, setConfirmLeave] = useState(false);
+
+    const refresh = async () => {
+        if (!id) return;
+        const [data, mems] = await Promise.all([
+            groups.get(id),
+            groups.members(id).catch(() => []),
+        ]);
+        setG(data);
+        setMembers(mems || []);
+        if (data?.joined) {
+            const list = await groups.posts(id).catch(() => []);
+            setPosts(list || []);
+        }
+    };
 
     useEffect(() => {
         if (!id) return;
         (async () => {
-            const [data, mems] = await Promise.all([
-                groups.get(id),
-                groups.members(id).catch(() => []),
-            ]);
-            setG(data);
-            setMembers(mems || []);
-            if (data?.joined) {
-                const list = await groups.posts(id).catch(() => []);
-                setPosts(list || []);
-            }
+            await refresh();
             setLoading(false);
         })();
+    }, [id]);
+
+    // Listen for membership-state-changed events on this group: when the
+    // creator approves a pending request, the requester gets a "group_accepted"
+    // notification with entity_id = this group. Reload so the PENDING badge
+    // flips to JOINED without a manual F5.
+    useWebSocket((ev) => {
+        if (ev.type !== "notification.new") return;
+        const p = ev.payload || {};
+        if (!id) return;
+        const matchesThisGroup = String(p.entity_id) === String(id);
+        if (matchesThisGroup && (p.type === "group_accepted" || p.type === "group_invite")) {
+            refresh();
+        }
+    });
+
+    // Same idea as the list pages: on WS reconnect we may have missed a
+    // push, so re-pull this group's state to stay accurate.
+    useEffect(() => {
+        const onOpen = () => { if (id) refresh(); };
+        window.addEventListener("ws:open", onOpen);
+        return () => window.removeEventListener("ws:open", onOpen);
     }, [id]);
 
     if (loading) return <Layout><div className="empty-state">Loading…</div></Layout>;
@@ -73,6 +105,19 @@ export default function GroupPage() {
         const list = await groups.comments(id, postID).catch(() => []);
         setCommentsByPost((prev) => ({ ...prev, [postID]: list || [] }));
     };
+
+    const handleLeave = () => setConfirmLeave(true);
+    const doLeave = async () => {
+        setConfirmLeave(false);
+        try {
+            await groups.leave(id);
+            router.push("/mygroups");
+        } catch (e) {
+            alert(e?.message || "Не удалось покинуть группу");
+        }
+    };
+
+    const isCreator = user && g && user.id === g.creator_id;
 
     return (
         <Layout>
@@ -115,6 +160,12 @@ export default function GroupPage() {
                     <span className="material-symbols-outlined">event</span>
                     <span>События</span>
                 </Link>
+                {g.joined && !isCreator && (
+                    <button type="button" className="action-btn leave-btn" onClick={handleLeave}>
+                        <span className="material-symbols-outlined">logout</span>
+                        <span>Покинуть группу</span>
+                    </button>
+                )}
             </div>
 
             {g.joined ? (
@@ -190,6 +241,17 @@ export default function GroupPage() {
             ) : (
                 <div className="empty-state">Вступите в группу, чтобы видеть посты и комментарии</div>
             )}
+
+            <ConfirmModal
+                open={confirmLeave}
+                title={g ? `Покинуть группу «${g.title}»?` : "Покинуть группу?"}
+                message="Вы перестанете видеть посты, события и чат этой группы. Вступить снова можно будет в любой момент."
+                confirmLabel="Покинуть"
+                cancelLabel="Остаться"
+                danger
+                onConfirm={doLeave}
+                onClose={() => setConfirmLeave(false)}
+            />
 
             {showMembers && (
                 <div className="modal-backdrop" onClick={() => setShowMembers(false)}>
@@ -280,21 +342,33 @@ export default function GroupPage() {
                 }
                 .about { padding: 0 24px 16px; font-size: 14px; line-height: 1.5; }
                 .actions-card { display: flex; gap: 8px; padding: 8px; }
-                .action-btn {
-                    flex: 1;
+                /* .actions-card is on a <div> (gets scope hash). Inside, we
+                   use :global(.action-btn) so the rule applies regardless of
+                   whether the child is a Next.js <Link>-rendered <a> (no
+                   scope) or a native <button> (with scope). */
+                .actions-card :global(.action-btn) {
+                    flex: 1 1 0;
+                    min-width: 0;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     gap: 8px;
-                    padding: 10px;
+                    padding: 10px 12px;
                     border-radius: var(--radius);
                     color: var(--text-main);
                     font-weight: 600;
                     font-size: 14px;
-                    transition: background 0.15s;
+                    background: transparent;
+                    border: none;
+                    cursor: pointer;
+                    font-family: inherit;
+                    white-space: nowrap;
+                    transition: background 0.15s, color 0.15s;
                 }
-                .action-btn:hover { background: var(--bg-hover); color: var(--text-main); }
-                .action-btn :global(.material-symbols-outlined) { color: var(--primary); font-size: 22px; }
+                .actions-card :global(.action-btn:hover) { background: var(--bg-hover); color: var(--text-main); }
+                .actions-card :global(.action-btn .material-symbols-outlined) { color: var(--primary); font-size: 22px; }
+                .actions-card :global(.leave-btn:hover) { background: rgba(240, 40, 73, 0.08); color: var(--error); }
+                .actions-card :global(.leave-btn:hover .material-symbols-outlined) { color: var(--error); }
                 .group-composer {
                     padding: 14px;
                     display: flex;

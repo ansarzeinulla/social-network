@@ -43,6 +43,8 @@ func GetPostsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	enrichPostsWithLikes(userID, posts)
+
 	response := models.PostFeedResponse{
 		Posts:     posts,
 		PageCount: pageCount,
@@ -91,6 +93,7 @@ func UserPostsHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "db error", http.StatusInternalServerError)
 		return
 	}
+	enrichPostsWithLikes(callerID, posts)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(models.PostFeedResponse{Posts: posts, PageCount: pageCount})
 }

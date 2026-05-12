@@ -1,0 +1,125 @@
+/* ============================================================
+   Connect — Design System
+   colors_and_type.css
+   Import this single file to get all foundations.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+
+:root {
+  /* ─── Colors: Brand ─────────────────────────────────────── */
+  --primary:        #1877F2;
+  --primary-rgb:    24, 119, 242;
+  --primary-hover:  #166FE5;
+  --primary-tint:   rgba(24, 119, 242, 0.12);
+
+  /* ─── Colors: Surfaces (light) ──────────────────────────── */
+  --bg:             #F0F2F5;
+  --bg-hover:       #E4E6EB;
+  --bg-press:       #D8DADF;
+  --card-bg:        #FFFFFF;
+
+  /* ─── Colors: Text ──────────────────────────────────────── */
+  --text-main:      #050505;
+  --text-secondary: #65676B;
+  --text-muted:     #8A8D91;
+  --text-on-primary:#FFFFFF;
+
+  /* ─── Colors: Borders ───────────────────────────────────── */
+  --border:         #DADDE1;
+  --border-soft:    #E4E6EB;
+
+  /* ─── Colors: Semantic accents ──────────────────────────── */
+  --accent:  #45BD62; /* success, online, photo button */
+  --warning: #F7B928; /* feeling, warning banner */
+  --error:   #F02849; /* live, dislike, errors */
+  --like:    #1877F2; /* reaction: like */
+  --love:    #F33E58; /* reaction: love */
+
+  --accent-tint:  rgba(69, 189, 98, 0.12);
+  --warning-tint: rgba(247, 185, 40, 0.12);
+  --error-tint:   rgba(240, 40, 73, 0.10);
+
+  /* ─── Shadows ───────────────────────────────────────────── */
+  --shadow-sm:  0 1px 2px  rgba(0, 0, 0, 0.06);
+  --shadow:     0 2px 8px  rgba(0, 0, 0, 0.08);
+  --shadow-lg:  0 8px 24px rgba(0, 0, 0, 0.12);
+
+  /* ─── Radii ─────────────────────────────────────────────── */
+  --radius-sm:   6px;
+  --radius:      8px;
+  --radius-lg:   12px;
+  --radius-xl:   16px;
+  --radius-pill: 999px;
+
+  /* ─── Spacing (4px linear) ──────────────────────────────── */
+  --s-xs:  4px;
+  --s-sm:  8px;
+  --s-md:  12px;
+  --s-lg:  16px;
+  --s-xl:  20px;
+  --s-2xl: 32px;
+
+  /* ─── Layout ────────────────────────────────────────────── */
+  --nav-height:    56px;
+  --sidebar-w:     320px;
+  --feed-w:        680px;
+  --container-max: 1320px;
+
+  /* ─── Type: families ────────────────────────────────────── */
+  --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-icon: 'Material Symbols Outlined';
+
+  /* ─── Type: scale (size / weight / line-height) ─────────── */
+  --display-size: 36px; --display-weight: 800; --display-lh: 1.1;  --display-tracking: -0.04em;
+  --h1-size: 24px; --h1-weight: 700; --h1-lh: 1.3;
+  --h2-size: 20px; --h2-weight: 600; --h2-lh: 1.4;
+  --h3-size: 17px; --h3-weight: 700; --h3-lh: 1.4;
+  --body-size: 15px; --body-weight: 400; --body-lh: 1.45;
+  --body-strong-weight: 700;
+  --meta-size: 13px; --meta-weight: 500; --meta-lh: 1.4;
+  --label-size: 12px; --label-weight: 600; --label-lh: 1.3; --label-tracking: 0.04em;
+}
+
+/* ============================================================
+   Semantic typography classes
+   ============================================================ */
+.t-display { font: var(--display-weight) var(--display-size)/var(--display-lh) var(--font-body); letter-spacing: var(--display-tracking); color: var(--primary); }
+.t-h1      { font: var(--h1-weight) var(--h1-size)/var(--h1-lh) var(--font-body); color: var(--text-main); }
+.t-h2      { font: var(--h2-weight) var(--h2-size)/var(--h2-lh) var(--font-body); color: var(--text-main); }
+.t-h3      { font: var(--h3-weight) var(--h3-size)/var(--h3-lh) var(--font-body); color: var(--text-main); }
+.t-body    { font: var(--body-weight) var(--body-size)/var(--body-lh) var(--font-body); color: var(--text-main); }
+.t-strong  { font: var(--body-strong-weight) var(--body-size)/var(--body-lh) var(--font-body); color: var(--text-main); }
+.t-meta    { font: var(--meta-weight) var(--meta-size)/var(--meta-lh) var(--font-mono); color: var(--text-secondary); }
+.t-label   { font: var(--label-weight) var(--label-size)/var(--label-lh) var(--font-mono); letter-spacing: var(--label-tracking); text-transform: uppercase; color: var(--text-secondary); }
+
+/* ============================================================
+   Material Symbols defaults
+   ============================================================ */
+.material-symbols-outlined {
+  font-family: var(--font-icon);
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  display: inline-block;
+  white-space: nowrap;
+  direction: ltr;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  vertical-align: middle;
+}
+.icon-fill { font-variation-settings: 'FILL' 1; }
+
+/* ============================================================
+   Base body
+   ============================================================ */
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+  line-height: var(--body-lh);
+}

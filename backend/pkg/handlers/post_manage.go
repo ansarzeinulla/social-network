@@ -39,11 +39,18 @@ func GetPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Fetch viewers if private
-	viewers := []int64{}
-	if post.Privacy == "private" {
-		viewers, _ = sqlite.GetPostViewers(id)
+	// Fetch viewers (user info) if private. Only the author gets the full
+	// list — sharing it with arbitrary readers would leak private info about
+	// who else has access.
+	viewers := []models.PublicUser{}
+	if post.Privacy == "private" && post.UserID == userID {
+		viewers, _ = sqlite.GetPostViewersWithInfo(id)
 	}
+
+	// Enrich with like info (caller's perspective).
+	postsSlice := []models.Post{*post}
+	enrichPostsWithLikes(userID, postsSlice)
+	post = &postsSlice[0]
 
 	resp := map[string]interface{}{
 		"post":    post,

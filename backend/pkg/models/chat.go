@@ -18,6 +18,10 @@ type ChatThread struct {
 	Avatar      string    `json:"avatar,omitempty"`
 	LastMessage string    `json:"last_message"`
 	LastAt      time.Time `json:"last_at"`
+	// Count of messages FROM the peer that arrived after the user's
+	// chat_reads.last_read_at. Zero on fresh accounts (no chat_reads row yet
+	// is treated as "everything read").
+	UnreadCount int `json:"unread_count"`
 }
 
 type GroupChatMessage struct {

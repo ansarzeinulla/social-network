@@ -34,15 +34,30 @@ export default function Home() {
 
     return (
         <Layout>
-            <button className="card create-post" onClick={() => router.push("/newpost")}>
-                <div className="avatar">
-                    {(user?.first_name || "?").slice(0, 1).toUpperCase()}
+            <div className="card create-post">
+                <button
+                    type="button"
+                    className="create-post-pill"
+                    onClick={() => router.push("/newpost")}
+                >
+                    <div className="avatar">
+                        {(user?.first_name || "?").slice(0, 1).toUpperCase()}
+                    </div>
+                    <span className="placeholder">
+                        Что у вас нового{user?.first_name ? `, ${user.first_name}` : ""}?
+                    </span>
+                </button>
+                <div className="composer-actions">
+                    <button
+                        type="button"
+                        className="composer-action"
+                        onClick={() => router.push("/newpost")}
+                    >
+                        <span className="material-symbols-outlined" style={{ color: "var(--accent)" }}>photo_library</span>
+                        Фото
+                    </button>
                 </div>
-                <span className="placeholder">
-                    Что у вас нового{user?.first_name ? `, ${user.first_name}` : ""}?
-                </span>
-                <span className="material-symbols-outlined photo-icon">photo_library</span>
-            </button>
+            </div>
 
             {loading ? (
                 <div className="empty-state">Загружаем ленту…</div>
@@ -54,18 +69,20 @@ export default function Home() {
 
             <style jsx>{`
                 .create-post {
+                    padding: 12px 16px 0;
+                }
+                .create-post-pill {
                     display: flex;
                     align-items: center;
                     gap: 12px;
                     width: 100%;
-                    padding: 12px 16px;
-                    background: var(--card-bg);
+                    padding: 0 0 12px;
+                    background: transparent;
                     border: none;
                     cursor: pointer;
                     text-align: left;
-                    transition: box-shadow 0.15s;
+                    font-family: inherit;
                 }
-                .create-post:hover { box-shadow: var(--shadow); }
                 .placeholder {
                     flex: 1;
                     background: var(--bg);
@@ -73,9 +90,6 @@ export default function Home() {
                     padding: 10px 16px;
                     border-radius: 999px;
                     font-size: 15px;
-                }
-                .photo-icon {
-                    color: var(--accent);
                 }
             `}</style>
         </Layout>

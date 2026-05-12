@@ -63,6 +63,9 @@ func main() {
 	mux.HandleFunc("/api/chats/messages", middleware.AuthMiddleware(handlers.ChatHistoryHandler))
 	mux.HandleFunc("/api/groups/chat/history", middleware.AuthMiddleware(handlers.GroupChatHistoryHandler))
 
+	// Search across users / posts / comments / messages
+	mux.HandleFunc("/api/search", middleware.AuthMiddleware(handlers.SearchHandler))
+
 	// Notifications
 	mux.HandleFunc("/api/notifications", middleware.AuthMiddleware(handlers.ListNotificationsHandler))
 	mux.HandleFunc("/api/notifications/read-all", middleware.AuthMiddleware(handlers.MarkAllNotificationsReadHandler))
@@ -126,11 +129,23 @@ func groupsDispatch(w http.ResponseWriter, r *http.Request) {
 
 // postsSubpaths routes the variants under /api/posts/...:
 //   - /api/posts/{id}/comments  -> PostCommentsHandler (GET, POST)
-//   - everything else here is unrecognized (the singular /api/post and
-//     bulk /api/posts are registered above)
+//   - /api/posts/{id}/likes     -> PostLikersHandler   (GET list of likers)
+//   - /api/posts/{id}/like      -> PostLikeHandler     (POST toggle)
+//
+// Order matters: "/likes" is checked before "/like" because endsWith("/like")
+// would also match a path ending with "/likes" only if we trimmed differently;
+// we check the longer suffix first to avoid ambiguity.
 func postsSubpaths(w http.ResponseWriter, r *http.Request) {
 	if endsWith(r.URL.Path, "/comments") {
 		handlers.PostCommentsHandler(w, r)
+		return
+	}
+	if endsWith(r.URL.Path, "/likes") {
+		handlers.PostLikersHandler(w, r)
+		return
+	}
+	if endsWith(r.URL.Path, "/like") {
+		handlers.PostLikeHandler(w, r)
 		return
 	}
 	http.NotFound(w, r)

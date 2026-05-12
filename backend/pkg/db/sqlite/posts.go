@@ -219,6 +219,33 @@ func GetPostViewers(postID int64) ([]int64, error) {
 	return viewers, nil
 }
 
+// GetPostViewersWithInfo returns the users who have explicit view access to a
+// private post, with display data (id, name, avatar, nickname). Used by the
+// post-detail handler so the post author can see who gets to read their
+// private post.
+func GetPostViewersWithInfo(postID int64) ([]models.PublicUser, error) {
+	rows, err := DB.Query(`
+		SELECT u.id, u.first_name, u.last_name, COALESCE(u.nickname, ''), COALESCE(u.avatar, '')
+		FROM post_viewers pv
+		JOIN users u ON u.id = pv.user_id
+		WHERE pv.post_id = ?
+		ORDER BY u.first_name`, postID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	out := []models.PublicUser{}
+	for rows.Next() {
+		var u models.PublicUser
+		if err := rows.Scan(&u.ID, &u.FirstName, &u.LastName, &u.Nickname, &u.Avatar); err != nil {
+			return nil, err
+		}
+		out = append(out, u)
+	}
+	return out, nil
+}
+
 func UpdatePost(postID int64, content, imageUrl, privacy string, viewers []int64) error {
 	tx, err := DB.Begin()
 	if err != nil {

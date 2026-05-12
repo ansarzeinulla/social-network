@@ -14,6 +14,8 @@ type Group struct {
 	MembersCount     int       `json:"members_count"`
 	Joined           bool      `json:"joined"`
 	Pending          bool      `json:"pending"`
+	// Unread group chat messages for the caller. Always 0 for non-members.
+	UnreadCount int `json:"unread_count"`
 }
 
 type GroupPost struct {

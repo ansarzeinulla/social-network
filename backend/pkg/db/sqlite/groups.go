@@ -7,12 +7,34 @@ import (
 	"strings"
 )
 
+// callerID is consumed three times when this is used with the standard FROM
+// clause: once for the LEFT JOIN, twice for the unread subquery (skip-own +
+// last-read lookup + join-time fallback). See ListGroups / GetGroup callers.
+//
+// Unread fallback order:
+//  1) group_chat_reads.last_read_at  — explicit "I opened this chat at T"
+//  2) gm.created_at                  — moment the user joined the group; we
+//                                       don't surface chat history that pre-
+//                                       dates the user's membership as "unread"
+//                                       (huge groups would scream "1000 new!"
+//                                       on first join)
+//  3) epoch                          — non-member or no membership row at all
 const groupSelectCols = `
 	g.id, g.creator_id,
 	creator.first_name, creator.last_name, COALESCE(creator.nickname, ''),
 	g.title, g.description, g.created_at,
 	(SELECT COUNT(*) FROM group_members WHERE group_id = g.id AND status = 'member') AS members,
-	COALESCE(gm.status, '') AS my_status
+	COALESCE(gm.status, '') AS my_status,
+	COALESCE((
+		SELECT COUNT(*) FROM group_chats gc
+		WHERE gc.group_id = g.id AND gc.sender_id != ?
+		  AND gc.created_at > COALESCE(
+		      (SELECT last_read_at FROM group_chat_reads gcr
+		       WHERE gcr.user_id = ? AND gcr.group_id = g.id),
+		      gm.created_at,
+		      '1970-01-01 00:00:00'
+		  )
+	), 0) AS unread_count
 `
 
 func scanGroup(scan func(...any) error) (models.Group, error) {
@@ -22,13 +44,17 @@ func scanGroup(scan func(...any) error) (models.Group, error) {
 		&g.ID, &g.CreatorID,
 		&g.CreatorFirstName, &g.CreatorLastName, &g.CreatorNickname,
 		&g.Title, &g.Description, &g.CreatedAt,
-		&g.MembersCount, &myStatus,
+		&g.MembersCount, &myStatus, &g.UnreadCount,
 	)
 	if err != nil {
 		return g, err
 	}
 	g.Joined = myStatus == "member"
 	g.Pending = myStatus == "requested" || myStatus == "invited"
+	// Non-members shouldn't see chat unread counts.
+	if !g.Joined {
+		g.UnreadCount = 0
+	}
 	return g, nil
 }
 
@@ -39,7 +65,9 @@ func ListGroups(callerID int64, search string) ([]models.Group, error) {
 		JOIN users creator ON creator.id = g.creator_id
 		LEFT JOIN group_members gm ON gm.group_id = g.id AND gm.user_id = ?
 	`
-	args := []any{callerID}
+	// callerID consumed three times: twice by groupSelectCols (skip-own-msgs
+	// subquery and group_chat_reads subquery), once by the LEFT JOIN.
+	args := []any{callerID, callerID, callerID}
 	if search != "" {
 		query += ` WHERE LOWER(g.title) LIKE ? ESCAPE '\' OR LOWER(g.description) LIKE ? ESCAPE '\'`
 		pattern := "%" + escapeLike(strings.ToLower(search)) + "%"
@@ -70,12 +98,13 @@ func escapeLike(s string) string {
 }
 
 func GetGroup(id, callerID int64) (*models.Group, error) {
+	// callerID three times for groupSelectCols subqueries + LEFT JOIN, then id.
 	g, err := scanGroup(DB.QueryRow(`
 		SELECT `+groupSelectCols+`
 		FROM groups g
 		JOIN users creator ON creator.id = g.creator_id
 		LEFT JOIN group_members gm ON gm.group_id = g.id AND gm.user_id = ?
-		WHERE g.id = ?`, callerID, id).Scan)
+		WHERE g.id = ?`, callerID, callerID, callerID, id).Scan)
 	if err != nil {
 		return nil, err
 	}
@@ -205,6 +234,67 @@ func DeclineGroupRequest(groupID, requesterID int64) error {
 	n, _ := res.RowsAffected()
 	if n == 0 {
 		return errors.New("no pending request")
+	}
+	return nil
+}
+
+// CancelMyGroupRequest deletes the caller's own pending 'requested' row, so a
+// user can take back a join request they sent by accident or no longer want.
+// Distinct from DeclineGroupRequest which is admin-side decline. Returns an
+// error if there's no pending request to cancel.
+func CancelMyGroupRequest(groupID, userID int64) error {
+	res, err := DB.Exec(
+		`DELETE FROM group_members WHERE group_id = ? AND user_id = ? AND status = 'requested'`,
+		groupID, userID,
+	)
+	if err != nil {
+		return err
+	}
+	n, _ := res.RowsAffected()
+	if n == 0 {
+		return errors.New("no pending request")
+	}
+	return nil
+}
+
+// DeleteGroupRequestNotification removes the "X просится в вашу группу"
+// notification at the creator's side. Called after the requester cancels
+// or after the creator accepts/declines — so the notification doesn't keep
+// haunting the inbox after the request is no longer pending.
+func DeleteGroupRequestNotification(creatorID, requesterID int64, groupID int64) error {
+	_, err := DB.Exec(
+		`DELETE FROM notifications
+		 WHERE receiver_id = ? AND sender_id = ? AND type = 'group_request' AND entity_id = ?`,
+		creatorID, requesterID, groupID,
+	)
+	return err
+}
+
+// LeaveGroup removes the user's membership row. Creator cannot leave their
+// own group (would orphan it). Returns an error if there's nothing to delete
+// (user wasn't a member) or if the user is the creator.
+func LeaveGroup(groupID, userID int64) error {
+	var creatorID int64
+	err := DB.QueryRow(`SELECT creator_id FROM groups WHERE id = ?`, groupID).Scan(&creatorID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return errors.New("group not found")
+		}
+		return err
+	}
+	if creatorID == userID {
+		return errors.New("creator cannot leave their own group")
+	}
+	res, err := DB.Exec(
+		`DELETE FROM group_members WHERE group_id = ? AND user_id = ?`,
+		groupID, userID,
+	)
+	if err != nil {
+		return err
+	}
+	n, _ := res.RowsAffected()
+	if n == 0 {
+		return errors.New("not a member")
 	}
 	return nil
 }
@@ -419,6 +509,17 @@ func VoteGroupEvent(eventID, userID int64, vote string) error {
 		`INSERT INTO event_polls (event_id, user_id, vote) VALUES (?, ?, ?)
 		 ON CONFLICT(event_id, user_id) DO UPDATE SET vote = excluded.vote`,
 		eventID, userID, vote,
+	)
+	return err
+}
+
+// RemoveGroupEventVote deletes the user's vote on the given event. No-op if
+// they hadn't voted yet — the UI uses this to implement "click-the-active-
+// option-again to clear my vote" toggling.
+func RemoveGroupEventVote(eventID, userID int64) error {
+	_, err := DB.Exec(
+		`DELETE FROM event_polls WHERE event_id = ? AND user_id = ?`,
+		eventID, userID,
 	)
 	return err
 }

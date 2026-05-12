@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 import Navbar from "./Navbar";
 import Avatar from "./Avatar";
 import { useUser } from "../hooks/useUser";
+import { followers as followersApi } from "../services/followers";
+import { groups as groupsApi } from "../services/groups";
 
 const SIDE = [
     { href: "/", icon: "home", label: "Лента" },
@@ -13,21 +16,90 @@ const SIDE = [
     { href: "/notifications", icon: "notifications", label: "Уведомления" },
 ];
 
+function RightRail() {
+    const { user } = useUser();
+    const [contacts, setContacts] = useState([]);
+    const [myGroups, setMyGroups] = useState([]);
+
+    useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            if (user?.id) {
+                try {
+                    const list = await followersApi.listFollowing(user.id);
+                    if (!cancelled) setContacts(list || []);
+                } catch (_) {}
+            }
+            try {
+                const list = await groupsApi.list();
+                if (!cancelled) setMyGroups((list || []).filter((g) => g.joined));
+            } catch (_) {}
+        })();
+        return () => { cancelled = true; };
+    }, [user?.id]);
+
+    return (
+        <aside className="right-rail">
+            <section className="rail-section">
+                <h3 className="rail-title">Контакты</h3>
+                <div className="rail-list">
+                    {contacts.length === 0 ? (
+                        <div className="rail-empty">Никого не отслеживаете</div>
+                    ) : (
+                        contacts.slice(0, 8).map((c) => {
+                            const name = c.first_name
+                                ? `${c.first_name} ${c.last_name || ""}`.trim()
+                                : (c.nickname || "user");
+                            return (
+                                <Link key={c.id} href={`/profile/${c.id}`} className="rail-contact">
+                                    <Avatar url={c.avatar} name={c.first_name || name} size={32} />
+                                    <span>{name}</span>
+                                </Link>
+                            );
+                        })
+                    )}
+                </div>
+            </section>
+            <section className="rail-section">
+                <h3 className="rail-title">Мои группы</h3>
+                <div className="rail-list">
+                    {myGroups.length === 0 ? (
+                        <div className="rail-empty">Нет групп</div>
+                    ) : (
+                        myGroups.slice(0, 5).map((g) => (
+                            <Link key={g.id} href={`/groups/${g.id}`} className="rail-group">
+                                <span className="material-symbols-outlined">groups</span>
+                                <span>{g.title}</span>
+                            </Link>
+                        ))
+                    )}
+                </div>
+            </section>
+        </aside>
+    );
+}
+
+// Pages that should NOT show the right rail (chat thread, post detail, new
+// post form — narrow workflows where the rail would just add noise).
+const HIDE_RAIL_ON = ["/chats/[id]", "/post/[id]", "/post/edit/[id]", "/newpost", "/groups/[id]/chat"];
+
 export default function Layout({ children, title, action, mock, right }) {
     const router = useRouter();
     const { user } = useUser();
+    const showRail = !right && user && !HIDE_RAIL_ON.includes(router.pathname);
+    const rightContent = right || (showRail ? <RightRail /> : null);
 
     return (
         <div className="page-shell">
             <Navbar />
-            <div className={`page-grid ${right ? "with-right" : ""}`}>
+            <div className={`page-grid ${rightContent ? "with-right" : ""}`}>
                 <aside className="side">
                     {user && (
-                        <Link href="/profile" className="me-card">
-                            <Avatar url={user.avatar} name={user.first_name} />
+                        <Link href="/profile" className="me-card sidebar-me">
+                            <Avatar url={user.avatar} name={user.first_name} size={44} className="sidebar-me-avatar" />
                             <div className="me-info">
-                                <div className="me-name">{user.first_name} {user.last_name}</div>
-                                <div className="me-handle">@{user.nickname || user.email}</div>
+                                <div className="me-name sidebar-me-name">{user.first_name} {user.last_name}</div>
+                                <div className="me-handle sidebar-me-handle">@{user.nickname || user.email}</div>
                             </div>
                         </Link>
                     )}
@@ -35,7 +107,7 @@ export default function Layout({ children, title, action, mock, right }) {
                         const active = router.pathname === item.href ||
                             (item.href !== "/" && router.pathname.startsWith(item.href));
                         return (
-                            <Link key={item.href} href={item.href} className={`side-link ${active ? "active" : ""}`}>
+                            <Link key={item.href} href={item.href} className={`side-link sidebar-link ${active ? "active is-active" : ""}`}>
                                 <span className="material-symbols-outlined">{item.icon}</span>
                                 <span>{item.label}</span>
                             </Link>
@@ -50,11 +122,11 @@ export default function Layout({ children, title, action, mock, right }) {
                             {action}
                         </div>
                     )}
-                    {mock && <div className="mock-banner">⚡ Demo mode (mock data) — backend not yet implemented</div>}
+                    {mock && <div className="mock-banner"><span className="material-symbols-outlined" style={{ fontSize: 16, verticalAlign: "middle", marginRight: 4 }}>bolt</span>Demo mode (mock data) — backend not yet implemented</div>}
                     {children}
                 </main>
 
-                {right && <aside className="side-right">{right}</aside>}
+                {rightContent && <aside className="side-right">{rightContent}</aside>}
             </div>
 
             <style jsx>{`
