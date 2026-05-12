@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6A1B9A"/>
+      <stop offset="100%" stop-color="#1877F2"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="720" fill="url(#g)"/>
+  <circle cx="440" cy="320" r="100" fill="#F33E58"/>
+  <circle cx="640" cy="320" r="100" fill="#45BD62"/>
+  <circle cx="840" cy="320" r="100" fill="#F7B928"/>
+  <text x="640" y="540" font-family="Plus Jakarta Sans, Arial, sans-serif" font-size="100" font-weight="800" fill="white" text-anchor="middle">👥 Meetup</text>
+</svg>

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#5B3A29"/>
+      <stop offset="100%" stop-color="#C68E5A"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="720" fill="url(#g)"/>
+  <circle cx="1050" cy="200" r="140" fill="rgba(255,255,255,0.12)"/>
+  <circle cx="300" cy="600" r="200" fill="rgba(255,255,255,0.08)"/>
+  <ellipse cx="640" cy="360" rx="180" ry="180" fill="rgba(11,15,21,0.5)"/>
+  <ellipse cx="640" cy="340" rx="140" ry="40" fill="#3B2718"/>
+  <text x="640" y="540" font-family="Plus Jakarta Sans, Arial, sans-serif" font-size="100" font-weight="800" fill="white" text-anchor="middle">☕ Coffee</text>
+</svg>

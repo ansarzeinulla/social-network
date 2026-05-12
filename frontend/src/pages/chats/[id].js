@@ -33,6 +33,11 @@ export default function ThreadPage() {
         })();
     }, [peerId]);
 
+    // No local clear needed: backend's GET /api/chats/messages handler calls
+    // MarkChatRead(userID, peerID), which updates chat_reads.last_read_at. The
+    // /chats list re-queries ListThreadsForUser which uses that timestamp to
+    // compute unread_count — so the badge naturally disappears.
+
     useEffect(() => {
         if (!peerId) return;
         let stop = false;

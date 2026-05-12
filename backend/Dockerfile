@@ -29,6 +29,15 @@ COPY --from=builder /app/main .
 # Copy migrations if they are needed at runtime
 COPY --from=builder /app/pkg/db/migrations/sqlite ./pkg/db/migrations/sqlite
 
+# Pre-seed image files into /app/data/uploads. Docker mounts the
+# `backend_data` named volume here on first run — when the volume is empty,
+# Docker initialises it with whatever the image has at the mount path, so
+# these seed images become available alongside the seeded DB rows that
+# reference them (000999_seed_dev_data references /uploads/seed-*.svg).
+# Existing volume? Files won't be replaced — that's by design; users who
+# want fresh seed media should `docker volume rm social-network_backend_data`.
+COPY --from=builder /app/seed_uploads /app/data/uploads
+
 EXPOSE 8080
 
 CMD ["./main"]

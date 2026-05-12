@@ -105,11 +105,21 @@ func FollowHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		// If pending, fire a follow_request notification over WS.
-		if status == "pending" {
+		// Private profile → pending → "approve me" notification (actionable).
+		// Public profile  → accepted → "X started following you" (info only).
+		// Both push over WS so the target's bell badge bumps without reload.
+		switch status {
+		case "pending":
 			if _, err := sqlite.CreateNotification(targetID, userID, "follow_request", nil); err == nil {
 				ws.PushNotification(targetID, map[string]any{
 					"type": "follow_request",
+					"from": userID,
+				})
+			}
+		case "accepted":
+			if _, err := sqlite.CreateNotification(targetID, userID, "new_follower", nil); err == nil {
+				ws.PushNotification(targetID, map[string]any{
+					"type": "new_follower",
 					"from": userID,
 				})
 			}

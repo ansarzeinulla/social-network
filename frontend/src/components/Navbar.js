@@ -18,25 +18,53 @@ export default function Navbar() {
     const router = useRouter();
     const { user } = useUser();
     const [unread, setUnread] = useState(0);
+    const [chatUnread, setChatUnread] = useState(0);
 
     useEffect(() => {
         if (!user) {
             setUnread(0);
             return;
         }
-        const refreshUnread = () => {
+        const refreshCount = () => {
             notifications.list()
                 .then((items) => setUnread((items || []).filter((n) => !n.is_read && !n.read).length))
                 .catch(() => setUnread(0));
         };
-        refreshUnread();
-        window.addEventListener("notifications:changed", refreshUnread);
-        return () => window.removeEventListener("notifications:changed", refreshUnread);
+        refreshCount();
+        window.addEventListener("notif:changed", refreshCount);
+        window.addEventListener("ws:open", refreshCount);
+        return () => {
+            window.removeEventListener("notif:changed", refreshCount);
+            window.removeEventListener("ws:open", refreshCount);
+        };
     }, [user]);
+
+    // Reset chat badge when the user navigates anywhere chat-related — the
+    // list at /chats, a private thread at /chats/X, or a group chat at
+    // /groups/X/chat. They're "looking at chats", we don't need to nag them.
+    const onChatRoute = (path) => path.startsWith("/chats") || /^\/groups\/[^/]+\/chat$/.test(path);
+    useEffect(() => {
+        if (onChatRoute(router.pathname)) setChatUnread(0);
+    }, [router.pathname]);
 
     useWebSocket((ev) => {
         if (ev.type === "notification.new") {
             setUnread((n) => n + 1);
+            return;
+        }
+        if (ev.type === "chat.new" || ev.type === "group_chat.new") {
+            // Backend echoes chat.new back to sender's other tabs — skip echo.
+            const fromMe = user && ev.payload && ev.payload.from === user.id;
+            if (fromMe) return;
+            // Skip badging if the user is currently viewing the exact chat
+            // this message belongs to (live render handles it).
+            const path = router.asPath || router.pathname;
+            const inThisPrivate = ev.type === "chat.new"
+                && ev.payload && path === `/chats/${ev.payload.from}`;
+            const inThisGroup = ev.type === "group_chat.new"
+                && ev.payload && path === `/groups/${ev.payload.group_id}/chat`;
+            if (inThisPrivate || inThisGroup) return;
+            setChatUnread((n) => n + 1);
         }
     }, { enabled: !!user });
 
@@ -49,9 +77,27 @@ export default function Navbar() {
     return (
         <header className="topnav">
             <div className="topnav-inner">
-                <Link href="/" className="brand">Connect</Link>
+                <div className="topnav-left">
+                    <Link href="/" className="brand brand-wordmark">Connect</Link>
+                    <div className="nav-search">
+                        <span className="material-symbols-outlined nav-search-icon">search</span>
+                        <input
+                            className="nav-search-input"
+                            placeholder="Поиск в Connect"
+                            onKeyDown={(e) => {
+                                if (e.key !== "Enter") return;
+                                e.preventDefault();
+                                const q = e.target.value.trim();
+                                if (!q) return;
+                                router.push({ pathname: "/search", query: { q } });
+                                e.target.value = "";
+                                e.target.blur();
+                            }}
+                        />
+                    </div>
+                </div>
 
-                <nav className="topnav-center">
+                <nav className="topnav-center topnav-tabs">
                     {NAV.map((item) => {
                         const active = router.pathname === item.href ||
                             (item.href !== "/" && router.pathname.startsWith(item.href));
@@ -59,12 +105,15 @@ export default function Navbar() {
                             <Link
                                 key={item.href}
                                 href={item.href}
-                                className={`nav-tab ${active ? "active" : ""}`}
+                                className={`nav-tab topnav-tab ${active ? "active is-active" : ""}`}
                                 title={item.title}
                             >
-                                <span className="material-symbols-outlined">{item.icon}</span>
+                                <span className={`material-symbols-outlined${active ? " icon-fill" : ""}`}>{item.icon}</span>
                                 {item.href === "/notifications" && unread > 0 && (
                                     <span className="notif-badge">{unread > 99 ? "99+" : unread}</span>
+                                )}
+                                {item.href === "/chats" && chatUnread > 0 && (
+                                    <span className="notif-badge">{chatUnread > 99 ? "99+" : chatUnread}</span>
                                 )}
                             </Link>
                         );
@@ -75,7 +124,7 @@ export default function Navbar() {
                     <Link href="/profile" className="profile-btn" title="Мой профиль">
                         <Avatar url={user?.avatar} name={user?.first_name} size={36} />
                     </Link>
-                    <button onClick={handleLogout} className="icon-btn" title="Выход">
+                    <button onClick={handleLogout} className="icon-btn topnav-icon-btn" title="Выход">
                         <span className="material-symbols-outlined">logout</span>
                     </button>
                 </div>
@@ -102,12 +151,19 @@ export default function Navbar() {
                     align-items: center;
                     padding: 0 1rem;
                 }
+                .topnav-left {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    justify-self: start;
+                    min-width: 0;
+                }
                 .brand {
                     color: var(--primary);
                     font-size: 1.75rem;
                     font-weight: 800;
                     letter-spacing: -0.04em;
-                    justify-self: start;
+                    flex-shrink: 0;
                 }
                 .topnav-center {
                     display: flex;
@@ -172,11 +228,21 @@ export default function Navbar() {
                 .profile-btn:hover { box-shadow: 0 0 0 2px var(--primary); }
                 @media (max-width: 1099px) {
                     .nav-tab { width: 60px; }
+                    .topnav-left :global(.nav-search) { display: none; }
                 }
                 @media (max-width: 768px) {
                     .nav-tab { width: 48px; }
                     .nav-tab :global(.material-symbols-outlined) { font-size: 22px; }
                     .notif-badge { right: 6px; }
+                    .topnav-inner { padding: 0 0.5rem; }
+                    .topnav-left { gap: 8px; }
+                }
+                @media (max-width: 540px) {
+                    .brand { font-size: 1.25rem; }
+                    .nav-tab { width: 44px; }
+                    .nav-tab :global(.material-symbols-outlined) { font-size: 20px; }
+                    .topnav-right :global(.icon-btn),
+                    .topnav-right :global(.profile-btn) { width: 36px; height: 36px; }
                 }
             `}</style>
         </header>

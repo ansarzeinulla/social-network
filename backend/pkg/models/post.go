@@ -15,6 +15,11 @@ type Post struct {
 	LastName  string `json:"last_name"`
 	Nickname  string `json:"nickname,omitempty"`
 	Avatar    string `json:"avatar,omitempty"`
+
+	// Like state — populated by handlers after reading the post row.
+	LikesCount    int  `json:"likes_count"`
+	IsLiked       bool `json:"is_liked"`
+	CommentsCount int  `json:"comments_count"`
 }
 
 type PostFeedResponse struct {

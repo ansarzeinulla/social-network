@@ -38,7 +38,7 @@ describe("PostCard", () => {
         fireEvent.click(screen.getByText("Post card test content"));
         expect(push).toHaveBeenCalledWith("/post/42");
 
-        fireEvent.click(screen.getByRole("button"));
+        fireEvent.click(screen.getByRole("button", { name: /Комментарии/i }));
         expect(push).toHaveBeenCalledWith("/post/42");
     });
 });

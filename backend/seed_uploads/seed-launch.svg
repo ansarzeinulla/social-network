@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1A237E"/>
+      <stop offset="100%" stop-color="#F33E58"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="720" fill="url(#g)"/>
+  <circle cx="180" cy="120" r="3" fill="white"/>
+  <circle cx="380" cy="80"  r="2" fill="white"/>
+  <circle cx="600" cy="180" r="2" fill="white"/>
+  <circle cx="900" cy="100" r="3" fill="white"/>
+  <circle cx="1120" cy="200" r="2" fill="white"/>
+  <circle cx="240" cy="240" r="2" fill="white"/>
+  <circle cx="1060" cy="380" r="3" fill="white"/>
+  <text x="640" y="420" font-family="Plus Jakarta Sans, Arial, sans-serif" font-size="110" font-weight="800" fill="white" text-anchor="middle">🚀 Launch</text>
+</svg>

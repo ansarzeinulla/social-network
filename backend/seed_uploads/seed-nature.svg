@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#81D4FA"/>
+      <stop offset="50%" stop-color="#26A69A"/>
+      <stop offset="100%" stop-color="#1B5E20"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="720" fill="url(#g)"/>
+  <polygon points="0,720 320,300 480,500 720,200 980,460 1280,260 1280,720" fill="rgba(27,94,32,0.85)"/>
+  <polygon points="0,720 240,520 460,620 700,500 900,640 1280,540 1280,720" fill="rgba(13,71,32,0.95)"/>
+  <text x="640" y="380" font-family="Plus Jakarta Sans, Arial, sans-serif" font-size="100" font-weight="800" fill="white" text-anchor="middle">🌲 Nature</text>
+</svg>

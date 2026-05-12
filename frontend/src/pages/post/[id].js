@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 import Layout from '../../components/Layout';
 import Avatar from '../../components/Avatar';
+import LikersModal from '../../components/LikersModal';
 import { fetchApi, assetURL, apiJSON } from '../../services/api';
 import { comments as commentsSvc } from '../../services/comments';
 
@@ -18,6 +20,11 @@ export default function PostDetails() {
     const [commentImage, setCommentImage] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [liked, setLiked] = useState(false);
+    const [likesCount, setLikesCount] = useState(0);
+    const [likePending, setLikePending] = useState(false);
+    const [likersOpen, setLikersOpen] = useState(false);
+    const [viewers, setViewers] = useState([]); // populated only for private post + author
 
     const loadComments = async () => {
         if (!id) return;
@@ -34,13 +41,41 @@ export default function PostDetails() {
                 const meRes = await fetchApi('/profile');
                 if (meRes.ok) setMe(await meRes.json());
                 const r = await fetchApi(`/post?id=${id}`);
-                if (r.ok) setPost((await r.json()).post);
+                if (r.ok) {
+                    const data = await r.json();
+                    const p = data.post;
+                    setPost(p);
+                    setLiked(Boolean(p?.is_liked));
+                    setLikesCount(p?.likes_count ?? 0);
+                    setViewers(Array.isArray(data.viewers) ? data.viewers : []);
+                }
                 else setError('Post not found');
                 await loadComments();
             } catch (_) { setError('Failed to fetch post'); }
             finally { setLoading(false); }
         })();
     }, [id]);
+
+    const toggleLike = async () => {
+        if (likePending || !id) return;
+        const prevLiked = liked;
+        const prevCount = likesCount;
+        setLiked(!prevLiked);
+        setLikesCount(prevCount + (prevLiked ? -1 : 1));
+        setLikePending(true);
+        try {
+            const res = await fetchApi(`/posts/${id}/like`, { method: "POST" });
+            if (!res.ok) throw new Error("like failed");
+            const data = await res.json();
+            setLiked(Boolean(data.liked));
+            setLikesCount(data.likes_count ?? 0);
+        } catch (_) {
+            setLiked(prevLiked);
+            setLikesCount(prevCount);
+        } finally {
+            setLikePending(false);
+        }
+    };
 
     const submitComment = async (e) => {
         e.preventDefault();
@@ -64,8 +99,10 @@ export default function PostDetails() {
         <Layout>
             <article className="card post">
                 <div className="post-header">
-                    <Avatar url={post.avatar} name={post.first_name} />
-                    <div className="author-info">
+                    <Link href={`/profile/${post.user_id}`} className="author-link">
+                        <Avatar url={post.avatar} name={post.first_name} />
+                    </Link>
+                    <Link href={`/profile/${post.user_id}`} className="author-link author-info">
                         <div className="author-name">{post.first_name} {post.last_name}</div>
                         <div className="author-meta">
                             <span>{new Date(post.created_at).toLocaleString()}</span>
@@ -75,7 +112,7 @@ export default function PostDetails() {
                             </span>
                             <span>{PRIVACY_LABEL[post.privacy]}</span>
                         </div>
-                    </div>
+                    </Link>
                     {isAuthor && (
                         <button className="btn btn-ghost" onClick={() => router.push(`/post/edit/${id}`)}>
                             <span className="material-symbols-outlined" style={{ fontSize: 18 }}>edit</span>
@@ -90,11 +127,74 @@ export default function PostDetails() {
                     <img className="post-image" src={assetURL(post.image_url)} alt="" />
                 )}
 
-                <div className="comments-count">
-                    <span className="material-symbols-outlined" style={{ fontSize: 18 }}>chat_bubble</span>
-                    {comments.length} комментариев
+                {isAuthor && post.privacy === "private" && viewers.length > 0 && (
+                    <div className="viewers-row">
+                        <span className="viewers-label">Доступ открыт:</span>
+                        <div className="viewers-chips">
+                            {viewers.map((v) => (
+                                <Link key={v.id} href={`/profile/${v.id}`} className="viewer-chip">
+                                    <Avatar url={v.avatar} name={v.first_name} size={24} />
+                                    <span>{v.first_name} {v.last_name}</span>
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {(likesCount > 0 || comments.length > 0) && (
+                    <div className="post-summary">
+                        {likesCount > 0 ? (
+                            <button
+                                type="button"
+                                className="post-summary-likes"
+                                onClick={() => setLikersOpen(true)}
+                                title="Посмотреть кто лайкнул"
+                            >
+                                <span className="post-like-icon">
+                                    <span className="material-symbols-outlined icon-fill">thumb_up</span>
+                                </span>
+                                <span>{likesCount}</span>
+                            </button>
+                        ) : <span />}
+                        {comments.length > 0 && (
+                            <span className="post-summary-comments">{comments.length} комментариев</span>
+                        )}
+                    </div>
+                )}
+
+                <div className="post-actions">
+                    {!isAuthor && (
+                        <button
+                            type="button"
+                            className={`action ${liked ? "is-active" : ""}`}
+                            onClick={toggleLike}
+                        >
+                            <span className={`material-symbols-outlined${liked ? " icon-fill" : ""}`}>thumb_up</span>
+                            <span>Нравится</span>
+                        </button>
+                    )}
+                    <button
+                        type="button"
+                        className="action"
+                        onClick={async () => {
+                            const url = `${window.location.origin}/post/${id}`;
+                            try {
+                                await navigator.clipboard.writeText(url);
+                                window.alert("Ссылка скопирована");
+                            } catch (_) { window.prompt("Скопируйте ссылку:", url); }
+                        }}
+                    >
+                        <span className="material-symbols-outlined">share</span>
+                        <span>Поделиться</span>
+                    </button>
                 </div>
             </article>
+
+            <LikersModal
+                postId={post.id}
+                open={likersOpen}
+                onClose={() => setLikersOpen(false)}
+            />
 
             <div className="card composer">
                 <form onSubmit={submitComment}>
@@ -148,7 +248,13 @@ export default function PostDetails() {
                     gap: 12px;
                     padding: 16px 16px 8px;
                 }
-                .author-info { flex: 1; }
+                .author-link {
+                    color: inherit;
+                    text-decoration: none;
+                    transition: opacity 0.15s;
+                }
+                .author-link:hover { opacity: 0.75; color: inherit; }
+                .author-info { flex: 1; min-width: 0; }
                 .author-name { font-weight: 700; font-size: 15px; }
                 .author-meta {
                     color: var(--text-secondary);
@@ -158,6 +264,40 @@ export default function PostDetails() {
                     gap: 4px;
                     margin-top: 2px;
                 }
+                .viewers-row {
+                    padding: 8px 16px 12px;
+                    display: flex;
+                    flex-wrap: wrap;
+                    align-items: center;
+                    gap: 8px;
+                    border-top: 1px solid var(--border-soft);
+                }
+                .viewers-label {
+                    font-family: var(--font-mono);
+                    font-size: 12px;
+                    color: var(--text-secondary);
+                    text-transform: uppercase;
+                    letter-spacing: 0.04em;
+                }
+                .viewers-chips {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 6px;
+                }
+                .viewer-chip {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                    padding: 4px 10px 4px 4px;
+                    background: var(--bg);
+                    border-radius: 999px;
+                    text-decoration: none;
+                    color: var(--text-main);
+                    font-size: 13px;
+                    font-weight: 600;
+                    transition: background 0.15s;
+                }
+                .viewer-chip:hover { background: var(--bg-hover); color: var(--text-main); }
                 .post-content {
                     padding: 0 16px 12px;
                     font-size: 16px;
@@ -166,15 +306,62 @@ export default function PostDetails() {
                     word-break: break-word;
                 }
                 .post-image { width: 100%; max-height: 500px; object-fit: cover; display: block; }
-                .comments-count {
+                .post-summary {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 8px 16px;
                     border-top: 1px solid var(--border-soft);
-                    padding: 12px 16px;
                     color: var(--text-secondary);
                     font-size: 13px;
+                    font-family: var(--font-mono);
+                }
+                .post-summary-likes {
                     display: flex;
                     align-items: center;
                     gap: 6px;
+                    background: none;
+                    border: none;
+                    padding: 0;
+                    cursor: pointer;
+                    color: inherit;
+                    font: inherit;
+                    font-family: var(--font-mono);
                 }
+                .post-summary-likes:hover { color: var(--text-main); }
+                .post-like-icon {
+                    width: 18px;
+                    height: 18px;
+                    border-radius: 50%;
+                    background: var(--primary);
+                    display: grid;
+                    place-items: center;
+                }
+                .post-like-icon :global(.material-symbols-outlined) {
+                    font-size: 11px;
+                    color: white;
+                }
+                .post-actions {
+                    display: flex;
+                    border-top: 1px solid var(--border-soft);
+                    padding: 4px 8px;
+                }
+                .post-actions .action {
+                    flex: 1;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 6px;
+                    padding: 10px;
+                    background: transparent;
+                    color: var(--text-secondary);
+                    font-weight: 600;
+                    font-size: 14px;
+                    border-radius: var(--radius);
+                    transition: background 0.15s, color 0.15s;
+                }
+                .post-actions .action:hover { background: var(--bg-hover); }
+                .post-actions .action.is-active { color: var(--primary); }
                 .composer { padding: 8px 12px; }
                 .composer form {
                     display: flex;

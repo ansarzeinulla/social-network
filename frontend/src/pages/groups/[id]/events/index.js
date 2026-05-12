@@ -11,6 +11,7 @@ const voteLabel = {
 export default function GroupEvents() {
     const router = useRouter();
     const { id } = router.query;
+    const [g, setG] = useState(null);
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -34,7 +35,15 @@ export default function GroupEvents() {
         }
     };
 
-    useEffect(() => { loadEvents(); }, [id]);
+    useEffect(() => {
+        if (!id) return;
+        // Group info is fetched separately so the title can show the group's
+        // name instead of a raw numeric id ("События группы: Тестовая группа"
+        // rather than "События группы #1"). On error we silently fall back
+        // to the bare title.
+        groups.get(id).then(setG).catch(() => setG(null));
+        loadEvents();
+    }, [id]);
 
     const update = (key) => (e) => setForm({ ...form, [key]: e.target.value });
 
@@ -52,13 +61,20 @@ export default function GroupEvents() {
         await loadEvents();
     };
 
-    const vote = async (eventID, value) => {
-        await groups.voteEvent(id, eventID, value);
-        await loadEvents();
+    const vote = async (eventID, value, currentVote) => {
+        // Click the already-active option to retract the vote, otherwise set
+        // it to the chosen option. Backend handles "" as "remove my vote".
+        const next = currentVote === value ? "" : value;
+        try {
+            await groups.voteEvent(id, eventID, next);
+            await loadEvents();
+        } catch (err) {
+            setError(err?.message || "Не удалось проголосовать");
+        }
     };
 
     return (
-        <Layout title={`События группы #${id || ""}`}>
+        <Layout title={g ? `События группы: ${g.title}` : "События группы"}>
             <form className="card event-form" onSubmit={createEvent}>
                 <input
                     value={form.title}
@@ -108,7 +124,8 @@ export default function GroupEvents() {
                             <button
                                 key={value}
                                 className={`vote ${ev.my_vote === value ? "active" : ""}`}
-                                onClick={() => vote(ev.id, value)}
+                                onClick={() => vote(ev.id, value, ev.my_vote)}
+                                title={ev.my_vote === value ? "Кликните снова, чтобы убрать голос" : ""}
                             >
                                 <span>{voteLabel[value]}</span>
                                 <strong>{value === "going" ? ev.going : ev.not_going}</strong>

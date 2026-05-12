@@ -84,6 +84,10 @@ func ChatHistoryHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "db error", http.StatusInternalServerError)
 		return
 	}
+	// Mark this thread as read on every history fetch — the caller is by
+	// definition "looking at" the conversation right now. Best-effort; failure
+	// shouldn't block the response.
+	_ = sqlite.MarkChatRead(userID, peerID)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(msgs)
 }
@@ -152,6 +156,7 @@ func GroupChatHistoryHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "db error", http.StatusInternalServerError)
 		return
 	}
+	_ = sqlite.MarkGroupChatRead(userID, groupID)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(msgs)
 }

@@ -42,6 +42,9 @@ func NewRouter() http.Handler {
 	mux.HandleFunc("/api/chats/messages", middleware.AuthMiddleware(handlers.ChatHistoryHandler))
 	mux.HandleFunc("/api/groups/chat/history", middleware.AuthMiddleware(handlers.GroupChatHistoryHandler))
 
+	// Search across users / posts / comments / messages
+	mux.HandleFunc("/api/search", middleware.AuthMiddleware(handlers.SearchHandler))
+
 	// Notifications
 	mux.HandleFunc("/api/notifications", middleware.AuthMiddleware(handlers.ListNotificationsHandler))
 	mux.HandleFunc("/api/notifications/read-all", middleware.AuthMiddleware(handlers.MarkAllNotificationsReadHandler))
@@ -51,7 +54,7 @@ func NewRouter() http.Handler {
 	mux.HandleFunc("/api/groups", middleware.AuthMiddleware(handlers.GroupsRootHandler))
 	mux.HandleFunc("/api/groups/", middleware.AuthMiddleware(groupsDispatch))
 
-	// Comments under /api/posts/{id}/comments
+	// Comments and likes under /api/posts/{id}/...
 	mux.HandleFunc("/api/posts/", middleware.AuthMiddleware(postsSubpaths))
 
 	// WebSocket
@@ -96,6 +99,14 @@ func groupsDispatch(w http.ResponseWriter, r *http.Request) {
 func postsSubpaths(w http.ResponseWriter, r *http.Request) {
 	if endsWith(r.URL.Path, "/comments") {
 		handlers.PostCommentsHandler(w, r)
+		return
+	}
+	if endsWith(r.URL.Path, "/likes") {
+		handlers.PostLikersHandler(w, r)
+		return
+	}
+	if endsWith(r.URL.Path, "/like") {
+		handlers.PostLikeHandler(w, r)
 		return
 	}
 	http.NotFound(w, r)

@@ -114,9 +114,14 @@ func mustJSON(v any) json.RawMessage {
 
 // PushNotification — convenience for REST handlers that want to fire a
 // websocket notification synchronously (e.g. POST /api/follow).
+// Logs delivery status so flaky-connection situations are diagnosable:
+// if delivered=false, the user wasn't currently connected and the live UI
+// won't see this push (they'll only learn about it on next refresh / WS
+// reconnect → that's why the frontend refetches on ws:open).
 func PushNotification(receiverID int64, payload any) {
-	HubInstance.SendToUser(receiverID, Event{
+	delivered := HubInstance.SendToUser(receiverID, Event{
 		Type:    "notification.new",
 		Payload: mustJSON(payload),
 	})
+	log.Printf("[ws] push notification.new to user=%d delivered=%v", receiverID, delivered)
 }

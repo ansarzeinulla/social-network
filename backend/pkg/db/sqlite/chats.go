@@ -74,12 +74,29 @@ func ListGroupMemberIDs(groupID int64) ([]int64, error) {
 }
 
 // ListThreadsForUser returns one row per peer the user has chatted with,
-// most-recent first.
+// most-recent first. Each row includes how many messages from that peer
+// arrived after the user's last read of that thread (chat_reads table).
+//
+// Note the COALESCE(..., '1970-01-01'): if chat_reads has NO row yet for the
+// (user, peer) pair (e.g. someone messaged the user for the first time), the
+// inner SELECT returns NULL and `created_at > NULL` evaluates to NULL, which
+// would make the COUNT return 0 — silently hiding genuinely-unread messages.
+// Falling back to epoch ensures every message from the peer counts until the
+// user actually opens the thread (which writes the chat_reads row).
 func ListThreadsForUser(userID int64) ([]models.ChatThread, error) {
 	rows, err := DB.Query(`
 		SELECT
 			peer.id, peer.first_name, peer.last_name, COALESCE(peer.nickname, ''), COALESCE(peer.avatar, ''),
-			c.content, c.created_at
+			c.content, c.created_at,
+			COALESCE((
+				SELECT COUNT(*) FROM chats m
+				WHERE m.sender_id = peer.id AND m.receiver_id = ?1
+				  AND m.created_at > COALESCE(
+				      (SELECT last_read_at FROM chat_reads cr
+				       WHERE cr.user_id = ?1 AND cr.peer_id = peer.id),
+				      '1970-01-01 00:00:00'
+				  )
+			), 0) AS unread_count
 		FROM (
 			SELECT
 				CASE WHEN sender_id = ?1 THEN receiver_id ELSE sender_id END AS peer_id,
@@ -99,12 +116,35 @@ func ListThreadsForUser(userID int64) ([]models.ChatThread, error) {
 	var threads []models.ChatThread
 	for rows.Next() {
 		var t models.ChatThread
-		if err := rows.Scan(&t.PeerID, &t.FirstName, &t.LastName, &t.Nickname, &t.Avatar, &t.LastMessage, &t.LastAt); err != nil {
+		if err := rows.Scan(&t.PeerID, &t.FirstName, &t.LastName, &t.Nickname, &t.Avatar,
+			&t.LastMessage, &t.LastAt, &t.UnreadCount); err != nil {
 			return nil, err
 		}
 		threads = append(threads, t)
 	}
 	return threads, nil
+}
+
+// MarkChatRead upserts chat_reads.last_read_at = CURRENT_TIMESTAMP for the
+// (user, peer) pair. Called when the user fetches the conversation history,
+// which is our proxy for "the user just looked at this thread".
+func MarkChatRead(userID, peerID int64) error {
+	_, err := DB.Exec(
+		`INSERT INTO chat_reads (user_id, peer_id, last_read_at) VALUES (?, ?, CURRENT_TIMESTAMP)
+		 ON CONFLICT(user_id, peer_id) DO UPDATE SET last_read_at = CURRENT_TIMESTAMP`,
+		userID, peerID,
+	)
+	return err
+}
+
+// MarkGroupChatRead — same idea for group chats.
+func MarkGroupChatRead(userID, groupID int64) error {
+	_, err := DB.Exec(
+		`INSERT INTO group_chat_reads (user_id, group_id, last_read_at) VALUES (?, ?, CURRENT_TIMESTAMP)
+		 ON CONFLICT(user_id, group_id) DO UPDATE SET last_read_at = CURRENT_TIMESTAMP`,
+		userID, groupID,
+	)
+	return err
 }
 
 // ListMessagesBetween returns the full conversation between two users in chrono order.

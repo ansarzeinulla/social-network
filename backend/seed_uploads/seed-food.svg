@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720">
+  <defs>
+    <radialGradient id="g" cx="50%" cy="50%" r="65%">
+      <stop offset="0%" stop-color="#FFB347"/>
+      <stop offset="100%" stop-color="#C84B30"/>
+    </radialGradient>
+  </defs>
+  <rect width="1280" height="720" fill="url(#g)"/>
+  <circle cx="640" cy="360" r="220" fill="#FFF8E1"/>
+  <circle cx="640" cy="360" r="200" fill="#FFCC80"/>
+  <circle cx="560" cy="320" r="30" fill="#D32F2F"/>
+  <circle cx="720" cy="340" r="28" fill="#388E3C"/>
+  <circle cx="660" cy="420" r="32" fill="#D32F2F"/>
+  <text x="640" y="640" font-family="Plus Jakarta Sans, Arial, sans-serif" font-size="90" font-weight="800" fill="white" text-anchor="middle">🍕 Food</text>
+</svg>

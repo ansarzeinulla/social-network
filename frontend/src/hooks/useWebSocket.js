@@ -40,6 +40,15 @@ export function useWebSocket(onEvent, options = {}) {
         ws.onopen = () => {
             attemptRef.current = 0;
             setStatus("open");
+            // Broadcast a "ws:open" window event so any subscriber can refetch
+            // server state to recover anything that may have been pushed while
+            // the socket was momentarily disconnected (frequent in dev with
+            // StrictMode + page transitions). The connection can churn —
+            // backend pushes silently drop when nobody's connected; this is
+            // the safety net.
+            if (typeof window !== "undefined") {
+                window.dispatchEvent(new Event("ws:open"));
+            }
         };
         ws.onclose = () => {
             if (isUnmountedRef.current) return;
@@ -54,6 +63,12 @@ export function useWebSocket(onEvent, options = {}) {
         ws.onmessage = (e) => {
             try {
                 const ev = JSON.parse(e.data);
+                // Dev-time visibility: print every received event so you can
+                // see in Console whether/what arrives. Remove or gate behind
+                // a debug flag for production if you want it quieter.
+                if (typeof window !== "undefined" && window.console) {
+                    console.log("[ws ←]", ev);
+                }
                 setLastEvent(ev);
                 const fn = onEventRef.current;
                 if (fn) fn(ev);

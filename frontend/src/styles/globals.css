@@ -1,44 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
-
-:root {
-  /* Brand */
-  --primary: #1877F2;
-  --primary-rgb: 24, 119, 242;
-  --primary-hover: #166FE5;
-
-  /* Surfaces (light) */
-  --bg: #F0F2F5;
-  --bg-main: #F0F2F5;
-  --bg-hover: #E4E6EB;
-  --card-bg: #FFFFFF;
-  --surface-alt: #F0F2F5;
-
-  /* Text */
-  --text-main: #050505;
-  --text-secondary: #65676B;
-  --text-muted: #8A8D91;
-
-  /* Borders */
-  --border: #DADDE1;
-  --border-soft: #E4E6EB;
-
-  /* Accents */
-  --accent: #45BD62;          /* green: photo button */
-  --warning: #F7B928;          /* yellow: feeling */
-  --error: #F02849;            /* red: live, dislike */
-  --like: #1877F2;
-  --love: #F33E58;
-
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
-  --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
-
-  --radius-sm: 6px;
-  --radius: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
-}
+@import './design-tokens.css';
 
 * {
   box-sizing: border-box;
@@ -214,7 +174,9 @@ input, textarea, select {
 }
 
 @media (min-width: 1100px) {
-  .page-grid { grid-template-columns: 320px 680px; }
+  /* Always reserve the right rail column so feed stays in the same visual
+     position across pages, even when there's no right-rail content. */
+  .page-grid,
   .page-grid.with-right { grid-template-columns: 320px 680px 320px; }
 }
 
@@ -342,3 +304,247 @@ input, textarea, select {
   to { opacity: 1; transform: translateY(0); }
 }
 .fade-in { animation: fadeIn 0.25s ease-out forwards; }
+
+/* ---------- Right rail: Contacts + Groups ---------- */
+.right-rail { display: flex; flex-direction: column; gap: 20px; width: 100%; }
+.rail-section { display: flex; flex-direction: column; gap: 10px; }
+.rail-title {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0 0 4px;
+}
+.rail-list { display: flex; flex-direction: column; gap: 2px; }
+.rail-contact, .rail-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  border-radius: var(--radius);
+  text-decoration: none;
+  color: var(--text-main);
+  font-weight: 600;
+  font-size: 14px;
+}
+.rail-contact:hover, .rail-group:hover { background: var(--bg-hover); color: var(--text-main); }
+.rail-group .material-symbols-outlined { color: var(--primary); }
+.rail-empty { color: var(--text-muted); font-size: 13px; padding: 4px 8px; }
+@media (max-width: 1100px) { .right-rail { display: none; } }
+
+/* ---------- Composer action row (Live / Photo / Feeling) ---------- */
+.composer-actions {
+  display: flex;
+  padding: 4px 8px 4px;
+  margin: 0 -8px;
+  border-top: 1px solid var(--border-soft);
+}
+.composer-action {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 10px; background: none; border: none; border-radius: var(--radius);
+  color: var(--text-secondary); font-weight: 600; font-size: 14px;
+  cursor: pointer; font-family: inherit;
+  transition: background 0.15s;
+}
+.composer-action:hover { background: var(--bg-hover); }
+
+/* ---------- Navbar search ---------- */
+.nav-search { position: relative; display: flex; align-items: center; }
+.nav-search-icon { position: absolute; left: 12px; font-size: 20px; color: var(--text-secondary); pointer-events: none; }
+.nav-search-input {
+  background: var(--bg); border: none; border-radius: var(--radius-pill);
+  padding: 8px 16px 8px 40px; width: 240px;
+  font-family: inherit; font-size: 14px; outline: none;
+  color: var(--text-main);
+}
+.nav-search-input:focus { box-shadow: 0 0 0 2px var(--primary-tint); }
+
+/* ---------- Mono accent: post/comment meta · handles · presence · badges ---------- */
+.author-meta,
+.post-time,
+.comment-meta,
+.comment-time,
+.me-handle,
+.profile-handle,
+.profile-meta,
+.user-handle,
+.member-handle,
+.presence,
+.last-seen,
+.badge,
+.label,
+.tag,
+.notif-badge,
+.creator-badge {
+  font-family: var(--font-mono);
+}
+
+/* ============================================================
+   Phase 3 — Visual lift (additive overrides; specificity-boosted
+   selectors so we beat styled-jsx scoped rules of same priority).
+   Keep at the END of this file.
+   ============================================================ */
+
+/* 1. Top nav tabs — bigger icons, active fill, active underline */
+.topnav .topnav-tabs .material-symbols-outlined {
+  font-size: 28px;
+  transition: color .15s;
+}
+.topnav .topnav-tab {
+  position: relative;
+  width: 80px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  border-bottom: 3px solid transparent;
+  transition: border-color .15s, background .15s, color .15s;
+}
+.topnav .topnav-tab:hover { background: var(--bg-hover); }
+.topnav .topnav-tab.is-active {
+  border-bottom-color: var(--primary);
+  color: var(--primary);
+}
+.topnav .topnav-tab.is-active .material-symbols-outlined {
+  color: var(--primary);
+}
+
+/* 2. Brand wordmark */
+.brand-wordmark {
+  font-family: var(--font-body);
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--primary);
+  text-decoration: none;
+  line-height: 1;
+}
+.brand-wordmark:hover { opacity: 0.85; color: var(--primary); }
+@media (max-width: 768px) {
+  .brand-wordmark { font-size: 22px; }
+}
+@media (max-width: 540px) {
+  .brand-wordmark { font-size: 18px; }
+}
+
+/* 3. Sidebar links — colored filled icons + active tint */
+.side .sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--text-main);
+  text-decoration: none;
+  transition: background .15s, color .15s;
+}
+.side .sidebar-link:hover { background: var(--bg-hover); color: var(--text-main); }
+.side .sidebar-link.is-active {
+  background: var(--primary-tint);
+  color: var(--primary);
+}
+.side .sidebar-link .material-symbols-outlined {
+  font-size: 24px;
+  color: var(--primary);
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+.side .sidebar-link.is-active .material-symbols-outlined { color: var(--primary); }
+
+/* 4. "Me" card in sidebar */
+.side .sidebar-me {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 14px 18px;
+  border-bottom: 1px solid var(--border-soft);
+  margin-bottom: 8px;
+  border-radius: 0;
+}
+.side .sidebar-me:hover { background: transparent; }
+.sidebar-me-avatar { width: 44px; height: 44px; flex-shrink: 0; }
+.sidebar-me-name {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text-main);
+}
+.sidebar-me-handle {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+/* 5. Right rail headings + items */
+.right-rail .rail-title {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0 0 10px;
+  padding: 0 4px;
+}
+.right-rail .rail-section + .rail-section { margin-top: 24px; }
+.right-rail .rail-contact,
+.right-rail .rail-group {
+  padding: 8px 10px;
+  border-radius: var(--radius);
+  transition: background .15s;
+}
+.right-rail .rail-contact:hover,
+.right-rail .rail-group:hover { background: var(--bg-hover); }
+.right-rail .rail-group .material-symbols-outlined {
+  color: var(--primary);
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 22;
+  font-size: 22px;
+}
+
+/* 6. Cards — soft shadow, clean radius, no border */
+.card,
+.post-card,
+.composer {
+  background: var(--card-bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: none;
+}
+
+/* 7. Top-nav right cluster — circular ghost buttons */
+.topnav .topnav-right { display: flex; align-items: center; gap: 8px; }
+.topnav .topnav-icon-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: none;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  color: var(--text-main);
+  transition: background .15s;
+}
+.topnav .topnav-icon-btn:hover { background: var(--bg-hover); }
+.topnav .topnav-icon-btn .material-symbols-outlined { font-size: 22px; }
+
+/* 8. Post action bar — active "Нравится" turns primary + filled */
+.action.is-active { color: var(--primary); }
+.action.is-active .material-symbols-outlined {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* Profile avatar — white halo between blue avatar and gradient cover.
+   styled-jsx in `pages/profile/[id].js` doesn't actually forward its scope
+   hash to the className of the imported <Avatar /> component, so the
+   in-file `.profile-avatar { border: 4px solid ... }` scoped rule never
+   matches that page's Avatar div. We force the halo here at the global
+   layer with !important to avoid any cascade fights — box-shadow with
+   spread renders OUTSIDE the element box, so it survives `overflow: hidden`
+   on `.avatar` and `box-sizing: border-box` clipping. */
+.avatar.profile-avatar,
+[class~="profile-avatar"] {
+  box-shadow: 0 0 0 4px var(--card-bg) !important;
+}
