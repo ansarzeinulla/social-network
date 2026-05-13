@@ -74,6 +74,7 @@ export default function NewPost() {
                 <div className="privacy-row">
                     {[
                         { v: 'public', icon: 'public', label: 'Public' },
+                        { v: 'almost_private', icon: 'group', label: 'Followers' },
                         { v: 'private', icon: 'lock', label: 'Private' },
                     ].map(({ v, icon, label }) => (
                         <button
